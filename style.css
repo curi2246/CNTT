@@ -117,8 +117,17 @@ body {
 .screen.active {
   opacity: 1;
 }
+
 .hidden {
   display: none;
+}
+
+.screen {
+  opacity: 0;
+}
+
+.screen.show {
+  opacity: 1;
 }
 
 /* 로딩 화면 */

@@ -1,40 +1,43 @@
-const lines = [
-  "> 접속 승인. 환영합니다, 계약자님.",
-  "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
-];
+document.addEventListener("DOMContentLoaded", () => {
+  const terminal = document.getElementById("terminal-text");
 
-const terminal = document.getElementById("terminal-text");
+  const lines = [
+    "> 접속 승인. 환영합니다, 계약자님.",
+    "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
+  ];
 
-let lineIndex = 0;
-let charIndex = 0;
-let currentP = null;
-let typingRunning = false;
+  let lineIndex = 0;
+  let charIndex = 0;
 
-function startTyping() {
-  if (typingRunning) return;
-  typingRunning = true;
-  typeNextChar();
-}
+  function typeLine() {
+    if (lineIndex >= lines.length) return;
 
-function typeNextChar() {
-  if (lineIndex >= lines.length) return;
+    if (!terminal.children[lineIndex]) {
+      const p = document.createElement("p");
+      terminal.appendChild(p);
+    }
 
-  if (charIndex === 0) {
-    currentP = document.createElement("p");
-    terminal.appendChild(currentP);
+    const currentLine = lines[lineIndex];
+    terminal.children[lineIndex].textContent =
+      currentLine.slice(0, charIndex + 1);
+
+    charIndex++;
+
+    if (charIndex === currentLine.length) {
+      charIndex = 0;
+      lineIndex++;
+      setTimeout(typeLine, 600);
+    } else {
+      setTimeout(typeLine, 40);
+    }
   }
 
-  currentP.textContent += lines[lineIndex][charIndex];
-  charIndex++;
-
-  if (charIndex >= lines[lineIndex].length) {
-    charIndex = 0;
-    lineIndex++;
-    setTimeout(typeNextChar, 600);
-  } else {
-    setTimeout(typeNextChar, 40);
-  }
-}
+  setTimeout(() => {
+    document.getElementById("loading-screen").classList.add("hidden");
+    document.getElementById("main-screen").classList.remove("hidden");
+    typeLine();
+  }, 2000);
+});
 
 typeLine();
 

@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loading.style.display = "none";
     mainScreen.classList.remove("hidden");
 
-    alert("loading.done");
+    alert("로딩 타임아웃 도착");
     startTyping(); // ✅ 여기서 시작
   }, 2200);
 });
@@ -120,4 +120,3 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 2000);
 });
 
-main.classList.remove("hidden");

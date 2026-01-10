@@ -43,3 +43,14 @@ const sigil = document.querySelector(".sigil");
 sigil.addEventListener("click", () => {
   sigil.style.textShadow = "0 0 30px red";
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading-screen");
+  const mainScreen = document.querySelector(".screen");
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    mainScreen.classList.remove("hidden");
+  }, 2200);
+});

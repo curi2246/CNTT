@@ -1,3 +1,8 @@
+startTyping(); // ❌ 아직 함수 없음
+
+function startTyping() {
+  ...
+}
 function startTyping()
 const lines = [
   "> 접속 승인. 환영합니다, 계약자님.",
@@ -93,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loading.style.display = "none";
     mainScreen.classList.remove("hidden");
 
+    alert("loading.done");
     startTyping(); // ✅ 여기서 시작
   }, 2200);
 });

@@ -7,10 +7,6 @@ const terminal = document.getElementById("terminal-text");
 let lineIndex = 0;
 let charIndex = 0;
 
-function startTyping() {
-  typeLine();
-}
-
 function typeLine() {
   if (lineIndex >= lines.length) return;
 
@@ -34,20 +30,4 @@ function typeLine() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const loading = document.getElementById("loading-screen");
-  const main = document.getElementById("main-screen");
-
-  setTimeout(() => {
-    loading.classList.add("hidden");
-    main.classList.remove("hidden");
-    startTyping();
-  }, 2000);
-});
-
-const sigil = document.querySelector(".sigil");
-if (sigil) {
-  sigil.addEventListener("click", () => {
-    sigil.style.textShadow = "0 0 30px red";
-  });
-}
+typeLine();

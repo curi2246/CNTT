@@ -35,35 +35,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  setTimeout(() => {
-    document.getElementById("loading-screen").classList.add("hidden");
-    document.getElementById("main-screen").classList.remove("hidden");
-    typeLine();
-  }, 2000);
-});
-
-
- const cursor = document.createElement("span");
+  // cursor 생성
+  const cursor = document.createElement("span");
   cursor.className = "cursor";
   terminal.appendChild(cursor);
 
-if (sigil) {
+  // 시그일 클릭 이벤트
+  if (sigil) {
     sigil.addEventListener("click", () => {
       sigil.style.textShadow = "0 0 30px red";
     });
-}
+  }
 
-const sigil = document.querySelector(".sigil");
-
-sigil.addEventListener("click", () => {
-  sigil.style.textShadow = "0 0 30px red";
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const loading = document.getElementById("loading-screen");
-  const mainScreen = document.querySelector(".screen");
-
+  // 2초 로딩 후 메인 화면 + 타이핑 시작
   setTimeout(() => {
     loading.classList.add("hidden");
     main.classList.remove("hidden");

@@ -11,6 +11,8 @@ body {
 
 .screen {
   padding: 16px;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .header h1 {

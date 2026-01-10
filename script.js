@@ -1,5 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   const terminal = document.getElementById("terminal-text");
+  const loading = document.getElementById("loading-screen");
+  const main = document.getElementById("main-screen");
+  const sigil = document.querySelector(".sigil");
 
   const lines = [
     "> 접속 승인. 환영합니다, 계약자님.",
@@ -39,11 +42,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 2000);
 });
 
-typeLine();
 
-const cursor = document.createElement("span");
-cursor.className = "cursor";
-terminal.appendChild(cursor);
+ const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  terminal.appendChild(cursor);
+
+if (sigil) {
+    sigil.addEventListener("click", () => {
+      sigil.style.textShadow = "0 0 30px red";
+    });
+}
 
 const sigil = document.querySelector(".sigil");
 
@@ -57,7 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainScreen = document.querySelector(".screen");
 
   setTimeout(() => {
-    loading.style.display = "none";
-    mainScreen.classList.remove("hidden");
-  }, 2200);
+    loading.classList.add("hidden");
+    main.classList.remove("hidden");
+    typeLine();
+  }, 2000);
 });

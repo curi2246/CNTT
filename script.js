@@ -64,3 +64,13 @@ function typeLine() {
     setTimeout(typeLine, 40);
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading-screen");
+  const mainScreen = document.querySelector(".screen");
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    mainScreen.classList.remove("hidden");
+  }, 2200);
+});

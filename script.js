@@ -11,7 +11,7 @@ let currentP = null;
 let typingRunning = false;
 
 function startTyping() {
-  if (typingRunning) return; // 중복 방지
+  if (typingRunning) return;
   typingRunning = true;
   typeNextChar();
 }

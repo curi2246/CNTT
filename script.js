@@ -10,8 +10,7 @@ let charIndex = 0;
 function typeLine() {
   if (lineIndex >= lines.length) return;
 
-  terminal.innerHTML = "
-    ";
+  terminal.innerHTML = "";
 
   if (!terminal.children[lineIndex]) {
     const p = document.createElement("p");

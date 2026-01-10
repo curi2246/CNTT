@@ -7,13 +7,16 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <div id="loading-screen">
-  <div class="loading-sigil">⟡</div>
-  <p class="loading-text">CONTRACT SYSTEM LOADING</p>
+    <div class="loading-sigil">⟡</div>
+    <p class="loading-text">CONTRACT SYSTEM LOADING</p>
   </div>
-  <div class="screen hidden">
-  <!-- 기존 내용 그대로 -->
+
+  <div id="dummy-screen" class="screen hidden">
+    <!-- 기존 내용 그대로 -->
   </div>
+
   <div id="main-screen" class="screen hidden">
 
     <div class="header">
@@ -26,8 +29,8 @@
     </div>
 
     <div class="terminal">
-      <div class="terminal">
-  <div id="terminal-text"></div>
+      <div class="terminal-inner">
+        <div id="terminal-text"></div>
       </div>
     </div>
 
@@ -37,7 +40,8 @@
     </div>
 
   </div>
+
+  <script src="script.js" defer></script>
+
 </body>
 </html>
-
-<script src="script.js" defer></script>

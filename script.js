@@ -1,6 +1,5 @@
 const lines = [
-  "> 접속 승인. 환영합니다, 계약자님."
-];
+  "> 접속 승인. 환영합니다, 계약자님."];
 
 const terminal = document.getElementById("terminal-text");
 let lineIndex = 0;

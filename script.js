@@ -1,6 +1,5 @@
 const lines = [
-  "> 접속 승인. 환영합니다, 계약자님.",
-  "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
+  "> 접속 승인. 환영합니다, 계약자님."
 ];
 
 const terminal = document.getElementById("terminal-text");

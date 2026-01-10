@@ -6,7 +6,7 @@
 body {
   margin: 0;
   background: #000;
-  color: ##ff6b6b;
+  color: #ff6b6b;
 }
 
 .screen {
@@ -14,7 +14,7 @@ body {
 }
 
 .header h1 {
-  text-shadow: 0 0 10px #ff6b6b;
+  text-shadow: 0 0 10px #00ff9c;
 }
 
 .status {

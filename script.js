@@ -1,4 +1,4 @@
-alert("JS 시작됨");
+alert("JS 파일 실행됨");
 startTyping(); // ❌ 아직 함수 없음
 
 function startTyping() {

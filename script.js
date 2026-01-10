@@ -4,6 +4,7 @@ const lines = [
 ];
 
 const terminal = document.getElementById("terminal-text");
+
 let lineIndex = 0;
 let charIndex = 0;
 let currentP = null;
@@ -11,23 +12,22 @@ let currentP = null;
 function typeLine() {
   if (lineIndex >= lines.length) return;
 
-  if (!terminal.children[lineIndex]) {
-    const p = document.createElement("p");
-    terminal.appendChild(p);
+  // 줄이 시작될 때만 p 생성
+  if (charIndex === 0) {
+    currentP = document.createElement("p");
+    terminal.appendChild(currentP);
   }
 
   const currentLine = lines[lineIndex];
-  terminal.children[lineIndex].textContent =
-    currentLine.slice(0, charIndex + 1);
-
+  currentP.textContent += currentLine[charIndex];
   charIndex++;
 
-  if (charIndex === currentLine.length) {
+  if (charIndex >= currentLine.length) {
     charIndex = 0;
     lineIndex++;
-    setTimeout(typeLine, 600);
+    setTimeout(typeLine, 600); // 다음 줄로
   } else {
-    setTimeout(typeLine, 40);
+    setTimeout(typeLine, 40); // 다음 글자
   }
 }
 

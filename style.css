@@ -130,6 +130,15 @@ body {
   opacity: 1;
 }
 
+.hidden {
+  display: none;
+}
+
+.screen {
+  display: flex;
+  opacity: 1;
+}
+
 /* 로딩 화면 */
 #loading-screen {
   position: fixed;

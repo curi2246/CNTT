@@ -51,3 +51,8 @@ body {
     0 0 6px #5fd3ff,
     0 0 16px rgba(185, 166, 255, 0.6);
 }
+
+.status {
+  color: #8fbaff;
+  opacity: 0.75;
+}

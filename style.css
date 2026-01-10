@@ -93,3 +93,14 @@ body {
 .sigil {
   animation: sigilPulse 4s ease-in-out infinite;
 }
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  background: currentColor;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}

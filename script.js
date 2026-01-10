@@ -31,3 +31,13 @@ function typeLine() {
 }
 
 typeLine();
+
+const cursor = document.createElement("span");
+cursor.className = "cursor";
+terminal.appendChild(cursor);
+
+const sigil = document.querySelector(".sigil");
+
+sigil.addEventListener("click", () => {
+  sigil.style.textShadow = "0 0 30px red";
+});

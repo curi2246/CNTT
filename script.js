@@ -119,3 +119,5 @@ document.addEventListener("DOMContentLoaded", () => {
     startTyping();
   }, 2000);
 });
+
+main.classList.remove("hidden");

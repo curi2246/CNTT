@@ -12,6 +12,8 @@ body {
 
 .screen {
   padding: 16px;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 
@@ -27,6 +29,8 @@ body {
 }
 
 .terminal {
+
+  width: 100%;
   border: 1px solid #ff6b6b;
   box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
 }

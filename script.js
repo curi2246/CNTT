@@ -1,3 +1,4 @@
+function startTyping()
 const lines = [
   "> 접속 승인. 환영합니다, 계약자님.",
   "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
@@ -72,5 +73,26 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     loading.style.display = "none";
     mainScreen.classList.remove("hidden");
+  }, 2200);
+});
+
+.screen {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading-screen");
+  const mainScreen = document.querySelector(".screen");
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    mainScreen.classList.remove("hidden");
+
+    startTyping(); // ✅ 여기서 시작
   }, 2200);
 });

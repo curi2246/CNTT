@@ -109,6 +109,14 @@ body {
   50% { opacity: 0; }
 }
 
+.screen {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.screen.active {
+  opacity: 1;
+}
 .hidden {
   display: none;
 }

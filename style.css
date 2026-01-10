@@ -6,7 +6,7 @@
 body {
   margin: 0;
   background: #05060a;
-  color: #b9a6ff;
+  color: #ff6b6b;
 }
 
 
@@ -48,9 +48,9 @@ body {
   text-align: center;
   font-size: 48px;
   margin-bottom: 8px;
-  color: #5fd3ff;
+  color: #ff6b6b;
   text-shadow:
-    0 0 6px #5fd3ff,
+    0 0 6px #ff6b6b,
     0 0 16px rgba(185, 166, 255, 0.6);
 }
 
@@ -58,4 +58,14 @@ body {
 .status {
   color: #8fbaff;
   opacity: 0.75;
+}
+
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
+  50% { box-shadow: 0 0 12px rgba(255,59,59,0.6); }
+  100% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
+}
+
+.terminal, .folder {
+  animation: pulseRed 3s infinite;
 }

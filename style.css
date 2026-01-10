@@ -1,142 +1,11 @@
-* {
-  box-sizing: border-box;
-  font-family: 'Courier New', monospace;
-}
-
-body {
-  margin: 0;
-  background: #05060a;
-  color: #ff6b6b;
-}
-
-
-.screen {
-  padding: 16px;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-
-.header h1 {
-  text-shadow: 0 0 10px #ff6b6b;
-}
-
-.status {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.terminal {
-
-  width: 100%;
-  border: 1px solid #ff6b6b;
-  box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
-}
-
-.terminal p {
-  margin: 6px 0;
-}
-
-.directory {
-  margin-top: 24px;
-}
-
-.folder {
-  border: 1px solid #5fd3ff;
-  box-shadow: 0 0 10px rgba(95, 211, 255, 0.25);
-}
-
-.sigil {
-  text-align: center;
-  font-size: 48px;
-  margin-bottom: 8px;
-  color: #ff6b6b;
-  text-shadow:
-    0 0 6px #ff6b6b,
-    0 0 16px rgba(185, 166, 255, 0.6);
-}
-
-
-.status {
-  color: #8fbaff;
-  opacity: 0.75;
-}
-
-@keyframes pulseRed {
-  0% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-  50% { box-shadow: 0 0 12px rgba(255,59,59,0.6); }
-  100% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-}
-
-.terminal, .folder {
-  animation: pulseRed 3s infinite;
-}
-
-@keyframes sigilPulse {
-  0% {
-    transform: scale(1) rotate(0deg);
-    text-shadow: 0 0 6px #5fd3ff;
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.08) rotate(10deg);
-    text-shadow:
-      0 0 10px #5fd3ff,
-      0 0 20px rgba(255,59,59,0.6);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    text-shadow: 0 0 6px #5fd3ff;
-    opacity: 0.7;
-  }
-}
-
-.sigil {
-  animation: sigilPulse 4s ease-in-out infinite;
-}
-
-.cursor {
-  display: inline-block;
-  width: 8px;
-  background: currentColor;
-  animation: blink 1s steps(1) infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-.screen {
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-
-.screen.active {
-  opacity: 1;
-}
-
-.hidden {
-  display: none;
-}
-
-.screen {
-  opacity: 0;
-}
-
-.screen.show {
-  opacity: 1;
-}
-
 .hidden {
   display: none;
 }
 
 .screen {
   display: flex;
-  opacity: 1;
+  opacity: 0; /* ← 수정: 페이드인 시작값 */
+  animation: fadeIn 0.8s ease forwards; /* ← 수정 */
 }
 
 /* 로딩 화면 */
@@ -172,4 +41,10 @@ body {
   0% { transform: scale(1); opacity: 0.6; }
   50% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 0.6; }
+}
+
+/* ← 추가된 부분 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

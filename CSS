@@ -14,6 +14,7 @@ body {
   padding: 16px;
 }
 
+
 .header h1 {
   text-shadow: 0 0 10px #5fd3ff;
 }
@@ -41,4 +42,14 @@ body {
 .folder {
   border: 1px solid #5fd3ff;
   box-shadow: 0 0 10px rgba(95, 211, 255, 0.25);
+}
+
+.sigil {
+  text-align: center;
+  font-size: 48px;
+  margin-bottom: 8px;
+  color: #5fd3ff;
+  text-shadow:
+    0 0 6px #5fd3ff,
+    0 0 16px rgba(185, 166, 255, 0.6);
 }

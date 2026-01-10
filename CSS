@@ -16,7 +16,7 @@ body {
 
 
 .header h1 {
-  text-shadow: 0 0 10px #5fd3ff;
+  text-shadow: 0 0 10px #ff6b6b;
 }
 
 .status {
@@ -27,7 +27,7 @@ body {
 }
 
 .terminal {
-  border: 1px solid #5fd3ff;
+  border: 1px solid #ff6b6b;
   box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
 }
 
@@ -52,4 +52,10 @@ body {
   text-shadow:
     0 0 6px #5fd3ff,
     0 0 16px rgba(185, 166, 255, 0.6);
+}
+
+
+.status {
+  color: #8fbaff;
+  opacity: 0.75;
 }

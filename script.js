@@ -104,3 +104,18 @@ document.addEventListener("DOMContentLoaded", () => {
     startTyping(); // ✅ 여기서 시작
   }, 2200);
 });
+
+function startTyping() {
+  console.log("타이핑 시작");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading-screen");
+  const main = document.getElementById("main-screen");
+
+  setTimeout(() => {
+    loading.style.display = "none";
+    main.classList.remove("hidden");
+    startTyping();
+  }, 2000);
+});

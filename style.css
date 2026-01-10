@@ -105,7 +105,3 @@ body {
   50% { opacity: 0; }
 }
 
-.terminal {
-  max-height: 120px;
-  overflow: hidden;
-}

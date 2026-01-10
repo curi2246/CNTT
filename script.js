@@ -6,6 +6,7 @@ const lines = [
 const terminal = document.getElementById("terminal-text");
 let lineIndex = 0;
 let charIndex = 0;
+let currentP = null;
 
 function typeLine() {
   if (lineIndex >= lines.length) return;

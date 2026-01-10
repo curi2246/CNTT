@@ -1,3 +1,16 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const loading = document.getElementById("loading-screen");
+  const main = document.getElementById("main-screen");
+
+  setTimeout(() => {
+    loading.classList.add("hidden");
+    main.classList.remove("hidden");
+
+    // ⏱ 여기서부터 텍스트 출력 시작
+    startTyping();
+  }, 2000);
+});
+
 const lines = [
   "> 접속 승인. 환영합니다, 계약자님."];
 

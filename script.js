@@ -105,5 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const loading = document.getElementById("loading-screen");
   const main = document.getElementById("main-screen");
   
-main.classList.remove("hidden");
-main.classList.add("show");
+
+                          setTimeout(() => {
+  document.getElementById("loading-screen").classList.add("hidden");
+  document.getElementById("main-screen").classList.remove("hidden");
+}, 2000);

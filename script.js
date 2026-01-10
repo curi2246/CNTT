@@ -8,26 +8,31 @@ const terminal = document.getElementById("terminal-text");
 let lineIndex = 0;
 let charIndex = 0;
 let currentP = null;
+let typingRunning = false;
 
-function typeLine() {
+function startTyping() {
+  if (typingRunning) return; // 중복 방지
+  typingRunning = true;
+  typeNextChar();
+}
+
+function typeNextChar() {
   if (lineIndex >= lines.length) return;
 
-  // 줄이 시작될 때만 p 생성
   if (charIndex === 0) {
     currentP = document.createElement("p");
     terminal.appendChild(currentP);
   }
 
-  const currentLine = lines[lineIndex];
-  currentP.textContent += currentLine[charIndex];
+  currentP.textContent += lines[lineIndex][charIndex];
   charIndex++;
 
-  if (charIndex >= currentLine.length) {
+  if (charIndex >= lines[lineIndex].length) {
     charIndex = 0;
     lineIndex++;
-    setTimeout(typeLine, 600); // 다음 줄로
+    setTimeout(typeNextChar, 600);
   } else {
-    setTimeout(typeLine, 40); // 다음 글자
+    setTimeout(typeNextChar, 40);
   }
 }
 

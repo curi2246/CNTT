@@ -105,3 +105,5 @@ document.addEventListener("DOMContentLoaded", () => {
   const loading = document.getElementById("loading-screen");
   const main = document.getElementById("main-screen");
   
+main.classList.remove("hidden");
+main.classList.add("show");

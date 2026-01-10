@@ -1,3 +1,4 @@
+alert("JS 시작됨");
 startTyping(); // ❌ 아직 함수 없음
 
 function startTyping() {
@@ -76,6 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainScreen = document.querySelector(".screen");
 
   setTimeout(() => {
+    alert("로딩 타임아웃 도착");
     loading.style.display = "none";
     mainScreen.classList.remove("hidden");
   }, 2200);

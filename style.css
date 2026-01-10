@@ -108,3 +108,13 @@ body {
   max-height: 120px;
   overflow: hidden;
 }
+
+.terminal {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .screen {
+    max-width: 480px;
+  }
+}

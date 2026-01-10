@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  margin: 0;
+  background: #05060a;
+  color: #b9a6ff;
+}
+
+
+.screen {
+  padding: 16px;
+}
+
+.header h1 {
+  text-shadow: 0 0 10px #5fd3ff;
+}
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.terminal {
+  border: 1px solid #5fd3ff;
+  box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
+}
+
+.terminal p {
+  margin: 6px 0;
+}
+
+.directory {
+  margin-top: 24px;
+}
+
+.folder {
+  border: 1px solid #5fd3ff;
+  box-shadow: 0 0 10px rgba(95, 211, 255, 0.25);
+}

@@ -55,3 +55,19 @@ cursor.className = "cursor";
     typeLine();
   }, 2000);
 });
+
+const folders = document.querySelectorAll(".folder");
+
+folders.forEach(folder => {
+  folder.addEventListener("click", () => {
+    const key = folder.dataset.folder;
+    const files = fileSystem[key];
+
+    printToTerminal(`> ${folder.textContent} OPENED`);
+    printToTerminal("> FILE LIST:");
+
+    Object.keys(files).forEach(name => {
+      printToTerminal(" - " + name);
+    });
+  });
+});

@@ -13,27 +13,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let charIndex = 0;
 
   function typeLine() {
-    if (lineIndex >= lines.length) return;
+  if (lineIndex >= lines.length) return;
 
-    if (!terminal.children[lineIndex]) {
-      const p = document.createElement("p");
-      terminal.appendChild(p);
-    }
-
-    const currentLine = lines[lineIndex];
-    terminal.children[lineIndex].textContent =
-      currentLine.slice(0, charIndex + 1);
-
-    charIndex++;
-
-    if (charIndex === currentLine.length) {
-      charIndex = 0;
-      lineIndex++;
-      setTimeout(typeLine, 600);
-    } else {
-      setTimeout(typeLine, 40);
-    }
+  let p = terminal.children[lineIndex];
+  if (!p) {
+    p = document.createElement("p");
+    terminal.appendChild(p);
   }
+
+  const currentLine = lines[lineIndex];
+  p.textContent = currentLine.slice(0, charIndex + 1);
+
+  charIndex++;
+
+  if (charIndex === currentLine.length) {
+    charIndex = 0;
+    lineIndex++;
+    setTimeout(typeLine, 600);
+  } else {
+    setTimeout(typeLine, 40);
+  }
+}
 
   // cursor 생성
   const cursor = document.createElement("span");

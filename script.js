@@ -83,3 +83,9 @@ folders.forEach(folder => {
     });
   });
 });
+
+function printToTerminal(text) {
+  const p = document.createElement("p");
+  p.textContent = text;
+  terminal.appendChild(p);
+}

@@ -56,6 +56,18 @@ cursor.className = "cursor";
   }, 2000);
 });
 
+const fileSystem = {
+  world: {
+    "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다...",
+    "contracts.log": "기록된 계약자 수: nnnnn41423위험도: HIGH"
+  },
+  yokai: {
+    "kitsune.txt": "어느 구슬을 지키기 위한 존재.",
+    "sealed.txt": "[접근 거부] 권한이 부족한 정보입니다."
+  }
+};
+
+
 const folders = document.querySelectorAll(".folder");
 
 folders.forEach(folder => {

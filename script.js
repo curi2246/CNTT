@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!p) {
     p = document.createElement("p");
     terminal.appendChild(p);
+    p.appendChild(cursor);
   }
 
   const currentLine = lines[lineIndex];
@@ -37,8 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // cursor 생성
   const cursor = document.createElement("span");
-  cursor.className = "cursor";
-  terminal.appendChild(cursor);
+cursor.className = "cursor";
+
 
   // 시그일 클릭 이벤트
   if (sigil) {

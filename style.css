@@ -168,3 +168,13 @@ body {
 #terminal-text {
   white-space: pre-wrap;
 }
+
+.file-list {
+  margin-left: 20px;
+  font-size: 14px;
+}
+
+.file {
+  cursor: pointer;
+  margin: 4px 0;
+}

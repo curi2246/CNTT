@@ -68,24 +68,40 @@ const fileSystem = {
 };
 
 
-const folders = document.querySelectorAll(".folder");
+const fileSystem = {
+  world: {
+    "timeline.txt": "세계의 시간선은 분기된다.",
+    "contracts.log": "계약 기록 로드 완료."
+  },
+  yokai: {
+    "kitsune.txt": "구미호 데이터.",
+    "sealed.txt": "[ACCESS DENIED]"
+  }
+};
 
-folders.forEach(folder => {
+document.querySelectorAll(".folder").forEach(folder => {
   folder.addEventListener("click", () => {
     const key = folder.dataset.folder;
-    const files = fileSystem[key];
+    const list = document.querySelector(`.file-list[data-files="${key}"]`);
 
-    printToTerminal(`> ${folder.textContent} OPENED`);
-    printToTerminal("> FILE LIST:");
+    // 토글 (열고 닫기)
+    if (list.childElementCount > 0) {
+      list.innerHTML = "";
+      return;
+    }
 
-    Object.keys(files).forEach(name => {
-      printToTerminal(" - " + name);
+    Object.keys(fileSystem[key]).forEach(name => {
+      const file = document.createElement("div");
+      file.className = "file";
+      file.textContent = "📄 " + name;
+
+      file.addEventListener("click", () => {
+        printToTerminal("> OPEN FILE: " + name);
+        printToTerminal(fileSystem[key][name]);
+      });
+
+      list.appendChild(file);
     });
   });
 });
 
-function printToTerminal(text) {
-  const p = document.createElement("p");
-  p.textContent = text;
-  terminal.appendChild(p);
-}

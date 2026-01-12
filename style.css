@@ -160,3 +160,11 @@ body {
     max-width: 480px;
   }
 }
+
+.terminal-inner {
+  width: 100%;
+}
+
+#terminal-text {
+  white-space: pre-wrap;
+}

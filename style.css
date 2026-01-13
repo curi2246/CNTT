@@ -188,3 +188,16 @@ body {
   padding: 6px 12px;
   cursor: pointer;
 }
+
+.terminal,
+.directory,
+.header {
+  max-width: 100%;
+}
+
+#file-screen,
+#file-screen * {
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}

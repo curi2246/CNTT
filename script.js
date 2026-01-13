@@ -89,9 +89,9 @@ document.querySelectorAll(".folder").forEach(folder => {
       file.textContent = "📄 " + name;
 
       file.addEventListener("click", () => {
-        printToTerminal("> OPEN FILE: " + name);
-        printToTerminal(fileSystem[key][name]);
-      });
+  openFileScreen(name, fileSystem[key][name]);
+});
+
 
       list.appendChild(file);
     });
@@ -118,3 +118,8 @@ function openFileScreen(fileName, content) {
   body.textContent = content;
   text.appendChild(body);
 }
+
+document.getElementById("back-btn").addEventListener("click", () => {
+  document.getElementById("file-screen").classList.add("hidden");
+  document.getElementById("main-screen").classList.remove("hidden");
+});

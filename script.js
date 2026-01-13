@@ -97,3 +97,24 @@ document.querySelectorAll(".folder").forEach(folder => {
     });
   });
 });
+
+function openFileScreen(fileName, content) {
+  document.getElementById("main-screen").classList.add("hidden");
+  document.getElementById("file-screen").classList.remove("hidden");
+
+  const title = document.getElementById("file-title");
+  const text = document.getElementById("file-text");
+
+  title.textContent = "FILE: " + fileName;
+  text.innerHTML = "";
+
+  // 환영 문구 먼저
+  const welcome = document.createElement("p");
+  welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
+  text.appendChild(welcome);
+
+  // 파일 내용
+  const body = document.createElement("p");
+  body.textContent = content;
+  text.appendChild(body);
+}

@@ -12,49 +12,46 @@ document.addEventListener("DOMContentLoaded", () => {
   let lineIndex = 0;
   let charIndex = 0;
 
-  function typeLine() {
-  if (lineIndex >= lines.length) return;
-
-  let p = terminal.children[lineIndex];
-  if (!p) {
-    p = document.createElement("p");
-    terminal.appendChild(p);
-    p.appendChild(cursor);
-  }
-
-  const currentLine = lines[lineIndex];
-  p.textContent = currentLine.slice(0, charIndex + 1);
-
-  charIndex++;
-
-  if (charIndex === currentLine.length) {
-    charIndex = 0;
-    lineIndex++;
-    setTimeout(typeLine, 600);
-  } else {
-    setTimeout(typeLine, 40);
-  }
-}
-
-  // cursor 생성
   const cursor = document.createElement("span");
-cursor.className = "cursor";
+  cursor.className = "cursor";
 
+  function typeLine() {
+    if (lineIndex >= lines.length) return;
 
-  // 시그일 클릭 이벤트
+    let p = terminal.children[lineIndex];
+    if (!p) {
+      p = document.createElement("p");
+      terminal.appendChild(p);
+      p.appendChild(cursor);
+    }
+
+    const currentLine = lines[lineIndex];
+    p.textContent = currentLine.slice(0, charIndex + 1);
+
+    charIndex++;
+
+    if (charIndex === currentLine.length) {
+      charIndex = 0;
+      lineIndex++;
+      setTimeout(typeLine, 600);
+    } else {
+      setTimeout(typeLine, 40);
+    }
+  }
+
   if (sigil) {
     sigil.addEventListener("click", () => {
       sigil.style.textShadow = "0 0 30px red";
     });
   }
 
-  // 2초 로딩 후 메인 화면 + 타이핑 시작
   setTimeout(() => {
     loading.classList.add("hidden");
     main.classList.remove("hidden");
     typeLine();
   }, 2000);
 });
+
 
 const fileSystem = {
   world: {
@@ -68,23 +65,19 @@ const fileSystem = {
 };
 
 
-const fileSystem = {
-  world: {
-    "timeline.txt": "세계의 시간선은 분기된다.",
-    "contracts.log": "계약 기록 로드 완료."
-  },
-  yokai: {
-    "kitsune.txt": "구미호 데이터.",
-    "sealed.txt": "[ACCESS DENIED]"
-  }
-};
+function printToTerminal(text) {
+  const terminal = document.getElementById("terminal-text");
+  const p = document.createElement("p");
+  p.textContent = text;
+  terminal.appendChild(p);
+}
+
 
 document.querySelectorAll(".folder").forEach(folder => {
   folder.addEventListener("click", () => {
     const key = folder.dataset.folder;
     const list = document.querySelector(`.file-list[data-files="${key}"]`);
 
-    // 토글 (열고 닫기)
     if (list.childElementCount > 0) {
       list.innerHTML = "";
       return;
@@ -104,4 +97,3 @@ document.querySelectorAll(".folder").forEach(folder => {
     });
   });
 });
-

@@ -13,25 +13,9 @@
     <p class="loading-text">CONTRACT SYSTEM LOADING</p>
   </div>
 
-  <div id="dummy-screen" class="screen hidden">
-    <!-- 기존 내용 그대로 -->
-  </div>
+  <div id="dummy-screen" class="screen hidden"></div>
 
   <div id="main-screen" class="screen hidden">
-
-    <div class="header">
-    <div class="sigil">⟡</div>
-    <h1 id="file-title">ACCESSING FILE</h1>
-  </div>
-
-  <div class="terminal">
-    <div class="terminal-inner">
-      <div id="file-text"></div>
-    </div>
-  </div>
-
-  <button id="back-btn">← BACK</button>
-</div>
 
     <div class="header">
       <div class="sigil">⟡</div>
@@ -49,17 +33,32 @@
     </div>
 
     <div class="directory">
-  <div class="folder" data-folder="world">📁 WORLD_DATA</div>
-<div class="file-list" data-files="world"></div>
+      <div class="folder" data-folder="world">📁 WORLD_DATA</div>
+      <div class="file-list" data-files="world"></div>
 
-<div class="folder" data-folder="yokai">📁 Yokai_DATA</div>
-<div class="file-list" data-files="yokai"></div>
+      <div class="folder" data-folder="yokai">📁 Yokai_DATA</div>
+      <div class="file-list" data-files="yokai"></div>
+    </div>
 
-</div>
+  </div>
+
+  <div id="file-screen" class="screen hidden">
+
+    <div class="header">
+      <div class="sigil">⟡</div>
+      <h1 id="file-title">ACCESSING FILE</h1>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-inner">
+        <div id="file-text"></div>
+      </div>
+    </div>
+
+    <button id="back-btn">← BACK</button>
 
   </div>
 
   <script src="script.js" defer></script>
-
 </body>
 </html>

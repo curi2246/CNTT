@@ -9,12 +9,15 @@ body {
   color: #ff6b6b;
 }
 
-/* 🔧 screen이 실제로 보이도록 명시 */
 .screen {
   padding: 16px;
   max-width: 420px;
   margin: 0 auto;
   display: block;
+}
+
+#file-screen {
+  max-width: none;
 }
 
 .header h1 {
@@ -31,6 +34,11 @@ body {
 .terminal {
   border: 1px solid #ff6b6b;
   box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
+}
+
+.terminal {
+  max-height: none;        
+  overflow-y: auto;       
 }
 
 .terminal p {
@@ -106,17 +114,10 @@ body {
   50% { opacity: 0; }
 }
 
-.terminal {
-  max-height: 120px;
-  overflow: hidden;
-}
-
-/* 🔧 hidden이 loading에도 확실히 적용되도록 */
 .hidden {
   display: none !important;
 }
 
-/* 로딩 화면 */
 #loading-screen {
   position: fixed;
   inset: 0;

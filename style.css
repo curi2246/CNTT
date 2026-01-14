@@ -17,8 +17,11 @@ body {
 }
 
 #file-screen {
-  max-width: none;
+  padding: 16px;
+  max-width: 420px;
+  margin: 0 auto;
 }
+
 
 .header h1 {
   text-shadow: 0 0 10px #00ff9c;
@@ -28,31 +31,54 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  opacity: 0.8;
+  color: #8fbaff;
+  opacity: 0.75;
 }
 
+
 .terminal {
+  width: 100%;
   border: 1px solid #ff6b6b;
   box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
+  animation: pulseRed 3s infinite;
+  overflow-y: auto;
 }
 
-.terminal {
-  max-height: none;        
-  overflow-y: auto;       
+.terminal-inner {
+  width: 100%;
 }
 
 .terminal p {
   margin: 6px 0;
 }
 
+#terminal-text,
+#file-text {
+  white-space: pre-wrap;
+}
+
+
 .directory {
   margin-top: 24px;
+  width: 100%;
 }
 
 .folder {
   border: 1px solid #5fd3ff;
   box-shadow: 0 0 10px rgba(95, 211, 255, 0.25);
+  animation: pulseRed 3s infinite;
 }
+
+.file-list {
+  margin-left: 20px;
+  font-size: 14px;
+}
+
+.file {
+  cursor: pointer;
+  margin: 4px 0;
+}
+
 
 .sigil {
   text-align: center;
@@ -62,46 +88,9 @@ body {
   text-shadow:
     0 0 6px #5fd3ff,
     0 0 16px rgba(185, 166, 255, 0.6);
-}
-
-.status {
-  color: #8fbaff;
-  opacity: 0.75;
-}
-
-@keyframes pulseRed {
-  0% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-  50% { box-shadow: 0 0 12px rgba(255,59,59,0.6); }
-  100% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-}
-
-.terminal, .folder {
-  animation: pulseRed 3s infinite;
-}
-
-@keyframes sigilPulse {
-  0% {
-    transform: scale(1) rotate(0deg);
-    text-shadow: 0 0 6px #5fd3ff;
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.08) rotate(10deg);
-    text-shadow:
-      0 0 10px #5fd3ff,
-      0 0 20px rgba(255,59,59,0.6);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    text-shadow: 0 0 6px #5fd3ff;
-    opacity: 0.7;
-  }
-}
-
-.sigil {
   animation: sigilPulse 4s ease-in-out infinite;
 }
+
 
 .cursor {
   display: inline-block;
@@ -110,9 +99,27 @@ body {
   animation: blink 1s steps(1) infinite;
 }
 
-@keyframes blink {
-  50% { opacity: 0; }
+
+#back-btn {
+  margin-top: 16px;
+  background: none;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 6px 12px;
+  cursor: pointer;
 }
+
+
+#password-input {
+  width: 100%;
+  margin-top: 8px;
+  background: black;
+  border: 1px solid currentColor;
+  color: inherit;
+  font-family: inherit;
+  padding: 6px;
+}
+
 
 .hidden {
   display: none !important;
@@ -146,68 +153,42 @@ body {
   opacity: 0.8;
 }
 
+
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
+  50% { box-shadow: 0 0 12px rgba(255,59,59,0.6); }
+  100% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
+}
+
+@keyframes sigilPulse {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.7;
+  }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 @keyframes loadingPulse {
   0% { transform: scale(1); opacity: 0.6; }
   50% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 0.6; }
 }
 
-.terminal {
-  width: 100%;
-}
 
 @media (min-width: 600px) {
-  .screen {
+  .screen,
+  #file-screen {
     max-width: 480px;
   }
-}
-
-.terminal-inner {
-  width: 100%;
-}
-
-#terminal-text {
-  white-space: pre-wrap;
-}
-
-.file-list {
-  margin-left: 20px;
-  font-size: 14px;
-}
-
-.file {
-  cursor: pointer;
-  margin: 4px 0;
-}
-
-#back-btn {
-  margin-top: 16px;
-  background: none;
-  border: 1px solid currentColor;
-  color: inherit;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.terminal,
-.directory,
-.header {
-  max-width: 100%;
-}
-
-#file-screen,
-#file-screen * {
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#password-input {
-  width: 100%;
-  margin-top: 8px;
-  background: black;
-  border: 1px solid currentColor;
-  color: inherit;
-  font-family: inherit;
-  padding: 6px;
 }

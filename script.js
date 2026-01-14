@@ -123,3 +123,27 @@ document.getElementById("back-btn").addEventListener("click", () => {
   document.getElementById("file-screen").classList.add("hidden");
   document.getElementById("main-screen").classList.remove("hidden");
 });
+
+const PASSWORD = "1234"; // 원하는 비밀번호로 변경 가능
+
+const authScreen = document.getElementById("auth-screen");
+const mainScreen = document.getElementById("main-screen");
+const passwordInput = document.getElementById("password-input");
+const authMessage = document.getElementById("auth-message");
+
+passwordInput.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+
+  if (passwordInput.value === PASSWORD) {
+    authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
+    
+    setTimeout(() => {
+      authScreen.classList.add("hidden");
+      mainScreen.classList.remove("hidden");
+    }, 1000);
+
+  } else {
+    authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
+    passwordInput.value = "";
+  }
+});

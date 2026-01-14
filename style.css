@@ -201,3 +201,13 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+#password-input {
+  width: 100%;
+  margin-top: 8px;
+  background: black;
+  border: 1px solid currentColor;
+  color: inherit;
+  font-family: inherit;
+  padding: 6px;
+}

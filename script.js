@@ -115,8 +115,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openFileScreen(fileName, content) {
+  // 메인 DB 화면 숨기기
   document.getElementById("database-view").classList.add("hidden");
+
+  // 파일 화면 보이기
   document.getElementById("file-screen").classList.remove("hidden");
+
+  // 🔥 중요: 기존 터미널 출력 제거 (인증/로그 흔적 제거)
+  const terminal = document.getElementById("terminal-text");
+  if (terminal) terminal.innerHTML = "";
 
   const title = document.getElementById("file-title");
   const text = document.getElementById("file-text");

@@ -192,3 +192,7 @@ body {
     max-width: 480px;
   }
 }
+
+#file-view {
+  padding: 16px;
+}

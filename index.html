@@ -1,76 +1,243 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CENTRAL DATABASE</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CENTRAL DATABASE</title>
+    <style>
+        /* CSS: 디자인 부분 */
+        :root {
+            --main-color: #ff5e5e; /* 핑크/레드 */
+            --sub-color: #5effeb;  /* 민트/블루 */
+            --bg-color: #000000;
+        }
 
+        body {
+            background-color: var(--bg-color);
+            color: var(--main-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .screen { width: 80%; max-width: 800px; }
+        .hidden { display: none !important; }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .sigil { font-size: 3rem; color: var(--sub-color); text-shadow: 0 0 10px var(--sub-color); cursor: pointer; transition: 0.3s; }
+        h1 { font-size: 2rem; border-bottom: 2px solid var(--main-color); padding-bottom: 10px; margin-top: 10px; }
+
+        .status { display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 5px; color: var(--main-color); opacity: 0.8; }
+
+        .terminal { background: rgba(20, 20, 20, 0.9); border: 1px solid var(--main-color); padding: 20px; margin: 20px 0; min-height: 100px; box-shadow: 0 0 15px rgba(255, 94, 94, 0.2); }
+        .terminal-inner p { margin: 5px 0; line-height: 1.5; }
+
+        #password-input { background: transparent; border: none; border-bottom: 2px solid var(--sub-color); color: var(--sub-color); font-size: 1.2rem; outline: none; width: 100%; }
+
+        .directory { margin-top: 20px; }
+        .folder { color: #ffca28; cursor: pointer; padding: 10px; border: 1px solid transparent; font-weight: bold; }
+        .folder:hover { border: 1px solid #ffca28; }
+        
+        .file-list { margin-left: 20px; }
+        .file { color: var(--sub-color); cursor: pointer; padding: 5px; transition: 0.2s; }
+        .file:hover { background: rgba(94, 255, 235, 0.1); padding-left: 15px; }
+
+        #back-btn { background: transparent; border: 1px solid var(--sub-color); color: var(--sub-color); padding: 10px 20px; cursor: pointer; margin-top: 20px; font-family: inherit; }
+        #back-btn:hover { background: var(--sub-color); color: black; }
+
+        .cursor { display: inline-block; width: 10px; height: 1.2rem; background: var(--main-color); margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
+</head>
 <body>
 
-  <div id="auth-screen" class="screen">
-    <div class="header">
-      <div class="sigil">⟡</div>
-      <h1>SECURITY CHECK</h1>
-    </div>
-
-    <div class="terminal">
-      <div class="terminal-inner">
-        <p>> 접근하려면 인증이 필요합니다.</p>
-        <p>> 비밀번호를 입력하십시오.</p>
-        <input id="password-input" type="password" />
-        <div id="auth-message"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="main-screen" class="screen hidden">
-
-    <!-- 🔧 여기 수정됨: file-view → file-screen -->
-    <div id="file-screen" class="hidden">
-      <div class="header">
-        <div class="sigil">⟡</div>
-        <h1 id="file-title">ACCESSING FILE</h1>
-      </div>
-
-      <div class="terminal">
-        <div class="terminal-inner">
-          <div id="file-text"></div>
+    <div id="auth-screen" class="screen">
+        <div class="header">
+            <div class="sigil">⟡</div>
+            <h1>SECURITY CHECK</h1>
         </div>
-      </div>
-
-      <button id="back-btn">← BACK</button>
+        <div class="terminal">
+            <div class="terminal-inner">
+                <p>> 접근하려면 인증이 필요합니다.</p>
+                <p>> 비밀번호를 입력하십시오. (기본: 1234)</p>
+                <input id="password-input" type="password" autofocus />
+                <div id="auth-message" style="margin-top:10px; color: var(--sub-color);"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="database-view">
-
-      <div class="header">
-        <div class="sigil">⟡</div>
-        <h1>CONTRACT DATABASE</h1>
-        <div class="status">
-          <span>C.N.T.T SYSTEM v4.0.2</span>
-          <span>CONTRACT NUMBER: KSN00916</span>
+    <div id="main-screen" class="screen hidden">
+        
+        <div id="file-screen" class="hidden">
+            <div class="header">
+                <div class="sigil">⟡</div>
+                <h1 id="file-title">ACCESSING FILE</h1>
+            </div>
+            <div class="terminal">
+                <div class="terminal-inner" id="file-text">
+                    </div>
+            </div>
+            <button id="back-btn">← BACK</button>
         </div>
-      </div>
 
-      <div class="terminal">
-        <div class="terminal-inner">
-          <div id="terminal-text"></div>
+        <div id="database-view">
+            <div class="header">
+                <div class="sigil">⟡</div>
+                <h1>CONTRACT DATABASE</h1>
+                <div class="status">
+                    <span>C.N.T.T SYSTEM v4.0.2</span>
+                    <span>CONTRACT NUMBER: KSN00916</span>
+                </div>
+            </div>
+
+            <div class="terminal">
+                <div class="terminal-inner" id="terminal-text"></div>
+            </div>
+
+            <div class="directory">
+                <div class="folder" data-folder="world">📁 WORLD_DATA</div>
+                <div class="file-list" data-files="world"></div>
+
+                <div class="folder" data-folder="yokai">📁 Yokai_DATA</div>
+                <div class="file-list" data-files="yokai"></div>
+            </div>
         </div>
-      </div>
-
-      <div class="directory">
-        <div class="folder" data-folder="world">📁 WORLD_DATA</div>
-        <div class="file-list" data-files="world"></div>
-
-        <div class="folder" data-folder="yokai">📁 Yokai_DATA</div>
-        <div class="file-list" data-files="yokai"></div>
-      </div>
-
     </div>
-  </div>
 
-  <script src="script.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const terminal = document.getElementById("terminal-text");
+            const main = document.getElementById("main-screen");
+            const sigil = document.querySelectorAll(".sigil");
+            const authScreen = document.getElementById("auth-screen");
+            const passwordInput = document.getElementById("password-input");
+            const authMessage = document.getElementById("auth-message");
+
+            const lines = [
+                "> 접속 승인. 환영합니다, 계약자님.",
+                "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
+            ];
+
+            let lineIndex = 0;
+            let charIndex = 0;
+            const cursor = document.createElement("span");
+            cursor.className = "cursor";
+
+            // 타이핑 효과 함수
+            function typeLine() {
+                if (lineIndex >= lines.length) return;
+                let p = terminal.children[lineIndex];
+                if (!p) {
+                    p = document.createElement("p");
+                    terminal.appendChild(p);
+                }
+                p.textContent = lines[lineIndex].slice(0, charIndex + 1);
+                p.appendChild(cursor);
+                charIndex++;
+                if (charIndex === lines[lineIndex].length) {
+                    charIndex = 0;
+                    lineIndex++;
+                    setTimeout(typeLine, 600);
+                } else {
+                    setTimeout(typeLine, 40);
+                }
+            }
+
+            // 시길 클릭 효과
+            sigil.forEach(s => {
+                s.addEventListener("click", () => {
+                    s.style.textShadow = "0 0 30px red";
+                    s.style.color = "red";
+                });
+            });
+
+            // 🔐 비밀번호 인증
+            const PASSWORD = "1234";
+            passwordInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    if (passwordInput.value === PASSWORD) {
+                        authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
+                        setTimeout(() => {
+                            authScreen.classList.add("hidden");
+                            main.classList.remove("hidden");
+                            typeLine();
+                        }, 800);
+                    } else {
+                        authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
+                        passwordInput.value = "";
+                    }
+                }
+            });
+
+            // 📁 파일 데이터
+            const fileSystem = {
+                world: {
+                    "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다...",
+                    "contracts.log": "기록된 계약자 수: nnnnn41423\n위험도: HIGH"
+                },
+                yokai: {
+                    "kitsune.txt": "어느 구슬을 지키기 위한 존재.",
+                    "sealed.txt": "[접근 거부] 권한이 부족한 정보입니다."
+                }
+            };
+
+            // 폴더 클릭 이벤트
+            document.querySelectorAll(".folder").forEach(folder => {
+                folder.addEventListener("click", () => {
+                    const key = folder.dataset.folder;
+                    const list = document.querySelector(`.file-list[data-files="${key}"]`);
+                    if (!list) return;
+
+                    if (list.childElementCount > 0) {
+                        list.innerHTML = "";
+                        return;
+                    }
+
+                    Object.keys(fileSystem[key]).forEach(name => {
+                        const file = document.createElement("div");
+                        file.className = "file";
+                        file.textContent = "📄 " + name;
+                        file.addEventListener("click", () => {
+                            openFileScreen(name, fileSystem[key][name]);
+                        });
+                        list.appendChild(file);
+                    });
+                });
+            });
+
+            // 파일 열기 함수
+            function openFileScreen(fileName, content) {
+                document.getElementById("database-view").classList.add("hidden");
+                document.getElementById("file-screen").classList.remove("hidden");
+
+                const title = document.getElementById("file-title");
+                const text = document.getElementById("file-text");
+
+                title.textContent = "FILE: " + fileName;
+                text.innerHTML = ""; // 초기화
+
+                const welcome = document.createElement("p");
+                welcome.style.color = "var(--sub-color)";
+                welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
+                text.appendChild(welcome);
+
+                const body = document.createElement("p");
+                body.textContent = content;
+                text.appendChild(body);
+            }
+
+            // 뒤로가기 버튼 (안전하게 DOMContentLoaded 안에 배치)
+            document.getElementById("back-btn").addEventListener("click", () => {
+                document.getElementById("file-screen").classList.add("hidden");
+                document.getElementById("database-view").classList.remove("hidden");
+                document.getElementById("file-text").innerHTML = "";
+                document.getElementById("file-title").textContent = "ACCESSING FILE";
+            });
+        });
+    </script>
 </body>
 </html>

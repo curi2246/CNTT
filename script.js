@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const terminal = document.getElementById("terminal-text");
   const loading = document.getElementById("loading-screen");
   const main = document.getElementById("main-screen");
-  const fileScreen = document.getElementById("file-screen");
   const sigil = document.querySelector(".sigil");
 
   const authScreen = document.getElementById("auth-screen");
@@ -52,36 +51,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // 로딩 → 인증 화면
   setTimeout(() => {
     loading.classList.add("hidden");
-    if (authScreen) authScreen.classList.remove("hidden");
+    authScreen.classList.remove("hidden");
+    passwordInput.focus();
   }, 2000);
 
   // 🔐 비밀번호 인증
   const PASSWORD = "1234";
 
-const authScreen = document.getElementById("auth-screen");
-const mainScreen = document.getElementById("main-screen");
-const passwordInput = document.getElementById("password-input");
-const authMessage = document.getElementById("auth-message");
+  document.addEventListener("keydown", (e) => {
+    if (authScreen.classList.contains("hidden")) return;
+    if (e.key !== "Enter") return;
 
-// 화면 뜰 때 자동 포커스
-passwordInput.focus();
+    if (passwordInput.value === PASSWORD) {
+      authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
 
-document.addEventListener("keydown", (e) => {
-  if (authScreen.classList.contains("hidden")) return;
-  if (e.key !== "Enter") return;
-
-  if (passwordInput.value === PASSWORD) {
-    authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
-
-    setTimeout(() => {
-      authScreen.classList.add("hidden");
-      mainScreen.classList.remove("hidden");
-    }, 800);
-  } else {
-    authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
-    passwordInput.value = "";
-  }
-});
+      setTimeout(() => {
+        authScreen.classList.add("hidden");
+        main.classList.remove("hidden");
+        typeLine();
+      }, 800);
+    } else {
+      authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
+      passwordInput.value = "";
+    }
+  });
 
   // 📁 파일 시스템
   const fileSystem = {
@@ -99,7 +92,6 @@ document.addEventListener("keydown", (e) => {
     folder.addEventListener("click", () => {
       const key = folder.dataset.folder;
       const list = document.querySelector(`.file-list[data-files="${key}"]`);
-
       if (!list) return;
 
       if (list.childElementCount > 0) {
@@ -120,11 +112,11 @@ document.addEventListener("keydown", (e) => {
       });
     });
   });
+});
 
 function openFileScreen(fileName, content) {
   document.getElementById("database-view").classList.add("hidden");
-
-  document.getElementById("file-screen").classList.remove("hidden");
+  document.getElementById("file-view").classList.remove("hidden");
 
   const title = document.getElementById("file-title");
   const text = document.getElementById("file-text");
@@ -141,8 +133,7 @@ function openFileScreen(fileName, content) {
   text.appendChild(body);
 }
 
-
-  document.getElementById("back-btn").addEventListener("click", () => {
-  document.getElementById("file-screen").classList.add("hidden");
+document.getElementById("back-btn").addEventListener("click", () => {
+  document.getElementById("file-view").classList.add("hidden");
   document.getElementById("database-view").classList.remove("hidden");
 });

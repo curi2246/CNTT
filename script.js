@@ -58,24 +58,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🔐 비밀번호 인증
   const PASSWORD = "1234";
 
-  if (passwordInput) {
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
+const authScreen = document.getElementById("auth-screen");
+const mainScreen = document.getElementById("main-screen");
+const passwordInput = document.getElementById("password-input");
+const authMessage = document.getElementById("auth-message");
 
-      if (passwordInput.value === PASSWORD) {
-        authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
+passwordInput.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
 
-        setTimeout(() => {
-          authScreen.classList.add("hidden");
-          main.classList.remove("hidden");
-          typeLine();
-        }, 1000);
-      } else {
-        authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
-        passwordInput.value = "";
-      }
-    });
+  if (passwordInput.value === PASSWORD) {
+    authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
+
+    setTimeout(() => {
+      authScreen.classList.add("hidden");
+      mainScreen.classList.remove("hidden");
+    }, 800);
+  } else {
+    authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
+    passwordInput.value = "";
   }
+});
 
   // 📁 파일 시스템
   const fileSystem = {

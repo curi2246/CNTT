@@ -51,15 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // 로딩 → 인증 화면
   setTimeout(() => {
     if (loading) loading.classList.add("hidden");
-    authScreen.classList.remove("hidden");
-    passwordInput.focus();
+    if (authScreen) {
+      authScreen.classList.remove("hidden");
+      passwordInput.focus();
+    }
   }, 2000);
 
   // 🔐 비밀번호 인증
   const PASSWORD = "1234";
 
   document.addEventListener("keydown", (e) => {
-    if (authScreen.classList.contains("hidden")) return;
+    if (!authScreen || authScreen.classList.contains("hidden")) return;
     if (e.key !== "Enter") return;
 
     if (passwordInput.value === PASSWORD) {
@@ -76,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 📁 파일 시스템
+  // 📁 파일 시스템 데이터
   const fileSystem = {
     world: {
       "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다...",
@@ -88,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // 폴더 클릭 이벤트 설정
   document.querySelectorAll(".folder").forEach(folder => {
     folder.addEventListener("click", () => {
       const key = folder.dataset.folder;
@@ -112,42 +115,41 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
+
+  // ✅ 중요: back-btn 리스너를 DOMContentLoaded 내부로 이동
+  const backBtn = document.getElementById("back-btn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      document.getElementById("file-screen").classList.add("hidden");
+      document.getElementById("database-view").classList.remove("hidden");
+      document.getElementById("file-text").innerHTML = "";
+      document.getElementById("file-title").textContent = "ACCESSING FILE";
+    });
+  }
 });
 
+// ✅ openFileScreen 함수 (파일 열기)
 function openFileScreen(fileName, content) {
-  // 메인 DB 화면 숨기기
-  document.getElementById("database-view").classList.add("hidden");
-
-  // 파일 화면 보이기
-  document.getElementById("file-screen").classList.remove("hidden");
-
-  // 🔥 중요: 기존 터미널 출력 제거 (인증/로그 흔적 제거)
-  const terminal = document.getElementById("terminal-text");
-  if (terminal) terminal.innerHTML = "";
-
+  const dbView = document.getElementById("database-view");
+  const fileScreen = document.getElementById("file-screen");
   const title = document.getElementById("file-title");
   const text = document.getElementById("file-text");
 
-  title.textContent = "FILE: " + fileName;
-  text.innerHTML = "";
+  if (dbView) dbView.classList.add("hidden");
+  if (fileScreen) fileScreen.classList.remove("hidden");
 
+  title.textContent = "FILE: " + fileName;
+  text.innerHTML = ""; // 기존 내용 비우기
+
+  // 1. 환영 텍스트 추가
   const welcome = document.createElement("p");
+  welcome.style.color = "#5effeb"; // 민트색 강조 (선택사항)
   welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
   text.appendChild(welcome);
 
+  // 2. 실제 본문 내용 추가
   const body = document.createElement("p");
+  body.style.marginTop = "10px";
   body.textContent = content;
   text.appendChild(body);
 }
-
-document.getElementById("back-btn").addEventListener("click", () => {
-  // 파일 화면 숨기기
-  document.getElementById("file-screen").classList.add("hidden");
-
-  // 메인 DB 화면 복귀
-  document.getElementById("database-view").classList.remove("hidden");
-
-  // 🔥 파일 화면 상태 초기화
-  document.getElementById("file-text").innerHTML = "";
-  document.getElementById("file-title").textContent = "ACCESSING FILE";
-});

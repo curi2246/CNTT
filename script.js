@@ -63,7 +63,11 @@ const mainScreen = document.getElementById("main-screen");
 const passwordInput = document.getElementById("password-input");
 const authMessage = document.getElementById("auth-message");
 
-passwordInput.addEventListener("keydown", (e) => {
+// 화면 뜰 때 자동 포커스
+passwordInput.focus();
+
+document.addEventListener("keydown", (e) => {
+  if (authScreen.classList.contains("hidden")) return;
   if (e.key !== "Enter") return;
 
   if (passwordInput.value === PASSWORD) {

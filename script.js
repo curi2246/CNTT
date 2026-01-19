@@ -136,11 +136,7 @@ function openFileScreen(fileName, content) {
 }
 
 
-  const backBtn = document.getElementById("back-btn");
-  if (backBtn) {
-    backBtn.addEventListener("click", () => {
-      fileScreen.classList.add("hidden");
-      main.classList.remove("hidden");
-    });
-  }
+  document.getElementById("back-btn").addEventListener("click", () => {
+  document.getElementById("file-screen").classList.add("hidden");
+  document.getElementById("database-view").classList.remove("hidden");
 });

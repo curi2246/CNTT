@@ -115,24 +115,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  function openFileScreen(fileName, content) {
-    main.classList.add("hidden");
-    fileScreen.classList.remove("hidden");
+function openFileScreen(fileName, content) {
+  document.getElementById("database-view").classList.add("hidden");
 
-    const title = document.getElementById("file-title");
-    const text = document.getElementById("file-text");
+  document.getElementById("file-screen").classList.remove("hidden");
 
-    title.textContent = "FILE: " + fileName;
-    text.innerHTML = "";
+  const title = document.getElementById("file-title");
+  const text = document.getElementById("file-text");
 
-    const welcome = document.createElement("p");
-    welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
-    text.appendChild(welcome);
+  title.textContent = "FILE: " + fileName;
+  text.innerHTML = "";
 
-    const body = document.createElement("p");
-    body.textContent = content;
-    text.appendChild(body);
-  }
+  const welcome = document.createElement("p");
+  welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
+  text.appendChild(welcome);
+
+  const body = document.createElement("p");
+  body.textContent = content;
+  text.appendChild(body);
+}
+
 
   const backBtn = document.getElementById("back-btn");
   if (backBtn) {

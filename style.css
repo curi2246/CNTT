@@ -1,3 +1,4 @@
+/* 기본 초기화 및 폰트 설정 */
 * {
   box-sizing: border-box;
   font-family: 'Courier New', monospace;
@@ -6,193 +7,183 @@
 body {
   margin: 0;
   background: #000;
-  color: #ff6b6b;
+  color: #ff6b6b; /* 기본 텍스트 색상: 핑크/레드 */
+  overflow-x: hidden;
 }
 
+/* 화면 공통 레이아웃 */
 .screen {
   padding: 16px;
-  max-width: 420px;
+  max-width: 480px;
   margin: 0 auto;
-  display: block;
+  min-height: 100vh;
 }
 
-#file-screen {
-  padding: 16px;
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-
+/* 헤더 및 텍스트 효과 */
 .header h1 {
+  text-align: center;
+  font-size: 1.5rem;
   text-shadow: 0 0 10px #00ff9c;
+  color: #fff;
+  margin: 10px 0;
 }
 
 .status {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 11px;
   color: #8fbaff;
-  opacity: 0.75;
+  opacity: 0.8;
+  border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+  padding-bottom: 5px;
+  margin-bottom: 15px;
 }
 
-
+/* 터미널 박스 디자인 */
 .terminal {
   width: 100%;
   border: 1px solid #ff6b6b;
-  box-shadow: 0 0 14px rgba(95, 211, 255, 0.35);
-  animation: pulseRed 3s infinite;
-  overflow-y: auto;
+  background: rgba(10, 10, 15, 0.9);
+  box-shadow: 0 0 14px rgba(255, 107, 107, 0.2);
+  padding: 15px;
+  margin-bottom: 20px;
+  min-height: 80px;
 }
 
 .terminal-inner {
   width: 100%;
 }
 
-.terminal p {
-  margin: 6px 0;
-}
-
-#terminal-text,
+/* 🔥 파일 텍스트 출력 영역 수정 */
 #file-text {
   white-space: pre-wrap;
+  color: #5fd3ff; /* 파일 내용은 민트색으로 구분하여 잘 보이게 함 */
+  line-height: 1.6;
 }
 
+#file-text p:first-child {
+  color: #00ff9c; /* "환영합니다" 첫 줄을 더 밝은 녹색으로 강조 */
+  font-weight: bold;
+  margin-bottom: 10px;
+}
 
+#terminal-text {
+  white-space: pre-wrap;
+  color: #ff6b6b;
+}
+
+/* 폴더 및 파일 리스트 디자인 */
 .directory {
-  margin-top: 24px;
-  width: 100%;
+  margin-top: 20px;
 }
 
 .folder {
   border: 1px solid #5fd3ff;
-  box-shadow: 0 0 10px rgba(95, 211, 255, 0.25);
-  animation: pulseRed 3s infinite;
+  color: #5fd3ff;
+  padding: 10px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: rgba(95, 211, 255, 0.05);
+}
+
+.folder:hover {
+  background: rgba(95, 211, 255, 0.2);
+  box-shadow: 0 0 12px rgba(95, 211, 255, 0.4);
 }
 
 .file-list {
-  margin-left: 20px;
-  font-size: 14px;
+  margin-left: 15px;
+  margin-bottom: 15px;
+  border-left: 1px solid rgba(95, 211, 255, 0.3);
 }
 
 .file {
   cursor: pointer;
-  margin: 4px 0;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
+.file:hover {
+  color: #5fd3ff;
+  background: rgba(255, 255, 255, 0.05);
+}
 
+/* 시길(심볼) 디자인 */
 .sigil {
   text-align: center;
   font-size: 48px;
   margin-bottom: 8px;
   color: #5fd3ff;
-  text-shadow:
-    0 0 6px #5fd3ff,
-    0 0 16px rgba(185, 166, 255, 0.6);
+  text-shadow: 0 0 10px #5fd3ff, 0 0 20px rgba(95, 211, 255, 0.5);
   animation: sigilPulse 4s ease-in-out infinite;
-}
-
-
-.cursor {
-  display: inline-block;
-  width: 8px;
-  background: currentColor;
-  animation: blink 1s steps(1) infinite;
-}
-
-
-#back-btn {
-  margin-top: 16px;
-  background: none;
-  border: 1px solid currentColor;
-  color: inherit;
-  padding: 6px 12px;
   cursor: pointer;
 }
 
+/* 커서 애니메이션 */
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background: #ff6b6b;
+  margin-left: 4px;
+  animation: blink 1s steps(1) infinite;
+  vertical-align: middle;
+}
+
+/* 버튼 및 입력창 */
+#back-btn {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid #5fd3ff;
+  color: #5fd3ff;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+#back-btn:hover {
+  background: #5fd3ff;
+  color: #000;
+}
 
 #password-input {
   width: 100%;
-  margin-top: 8px;
-  background: black;
-  border: 1px solid currentColor;
-  color: inherit;
-  font-family: inherit;
-  padding: 6px;
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #ff6b6b;
+  color: #5fd3ff;
+  font-size: 1.2rem;
+  padding: 5px;
+  outline: none;
 }
 
-
+/* 유틸리티 클래스 */
 .hidden {
   display: none !important;
 }
 
+/* 로딩 화면 */
 #loading-screen {
   position: fixed;
   inset: 0;
-  background: #05060a;
+  background: #000;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #b9a6ff;
   z-index: 999;
 }
 
-.loading-sigil {
-  font-size: 64px;
-  color: #5fd3ff;
-  text-shadow:
-    0 0 10px #5fd3ff,
-    0 0 30px rgba(255,59,59,0.4);
-  animation: loadingPulse 2s ease-in-out infinite;
-}
-
-.loading-text {
-  margin-top: 16px;
-  font-size: 14px;
-  letter-spacing: 2px;
-  opacity: 0.8;
-}
-
-
-@keyframes pulseRed {
-  0% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-  50% { box-shadow: 0 0 12px rgba(255,59,59,0.6); }
-  100% { box-shadow: 0 0 6px rgba(255,59,59,0.2); }
-}
-
+/* 애니메이션 정의 */
 @keyframes sigilPulse {
-  0% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.08) rotate(10deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.7;
-  }
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px #5fd3ff; }
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
-}
-
-@keyframes loadingPulse {
-  0% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.6; }
-}
-
-
-@media (min-width: 600px) {
-  .screen,
-  #file-screen {
-    max-width: 480px;
-  }
-}
-
-#file-view {
-  padding: 16px;
-}
+  50% { opacity

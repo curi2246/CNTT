@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cursor = document.createElement("span");
   cursor.className = "cursor";
 
+  // 1. 메인 터미널 타이핑 효과
   function typeLine() {
     if (lineIndex >= lines.length) return;
 
@@ -42,13 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (sigil) {
-    sigil.addEventListener("click", () => {
-      sigil.style.textShadow = "0 0 30px red";
-    });
-  }
-
-  // 로딩 → 인증 화면
+  // 2. 초기 로딩 연출
   setTimeout(() => {
     if (loading) loading.classList.add("hidden");
     if (authScreen) {
@@ -57,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 2000);
 
-  // 🔐 비밀번호 인증
+  // 3. 🔐 비밀번호 인증 및 연출 (핵심 수정 부분)
   const PASSWORD = "1234";
 
   document.addEventListener("keydown", (e) => {
@@ -65,20 +60,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key !== "Enter") return;
 
     if (passwordInput.value === PASSWORD) {
-      authMessage.textContent = "> 인증 성공. 시스템에 접속합니다...";
+      // ✅ [성공] 화면이 밝아지며 접속
+      authScreen.classList.add("auth-success-bg");
+      authMessage.textContent = "> 인증 성공. 시스템 동기화 중...";
+      passwordInput.disabled = true; // 연속 입력 방지
 
       setTimeout(() => {
         authScreen.classList.add("hidden");
+        authScreen.classList.remove("auth-success-bg"); // 상태 초기화
         main.classList.remove("hidden");
-        typeLine();
-      }, 800);
+        typeLine(); // 메인 타이핑 시작
+      }, 1000);
+
     } else {
+      // ✅ [실패] 화면이 빨갛게 변함
+      authScreen.classList.add("auth-error-bg");
       authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
-      passwordInput.value = "";
+      
+      setTimeout(() => {
+        authScreen.classList.remove("auth-error-bg");
+        authMessage.textContent = "> 다시 시도하십시오.";
+        passwordInput.value = "";
+        passwordInput.focus();
+      }, 800);
     }
   });
 
-  // 📁 파일 시스템 데이터
+  // 4. 📁 파일 시스템 데이터
   const fileSystem = {
     world: {
       "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다...",
@@ -90,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // 폴더 클릭 이벤트 설정
+  // 5. 폴더 및 파일 클릭 이벤트
   document.querySelectorAll(".folder").forEach(folder => {
     folder.addEventListener("click", () => {
       const key = folder.dataset.folder;
@@ -106,17 +114,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = document.createElement("div");
         file.className = "file";
         file.textContent = "📄 " + name;
-
         file.addEventListener("click", () => {
           openFileScreen(name, fileSystem[key][name]);
         });
-
         list.appendChild(file);
       });
     });
   });
 
-  // ✅ 중요: back-btn 리스너를 DOMContentLoaded 내부로 이동
+  // 6. 뒤로가기 버튼
   const backBtn = document.getElementById("back-btn");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
@@ -126,9 +132,16 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("file-title").textContent = "ACCESSING FILE";
     });
   }
+
+  // 시길 클릭 이벤트
+  if (sigil) {
+    sigil.addEventListener("click", () => {
+      sigil.style.textShadow = "0 0 30px red";
+    });
+  }
 });
 
-// ✅ openFileScreen 함수 (파일 열기)
+// ✅ openFileScreen 함수 (파일 내용 출력)
 function openFileScreen(fileName, content) {
   const dbView = document.getElementById("database-view");
   const fileScreen = document.getElementById("file-screen");
@@ -139,15 +152,15 @@ function openFileScreen(fileName, content) {
   if (fileScreen) fileScreen.classList.remove("hidden");
 
   title.textContent = "FILE: " + fileName;
-  text.innerHTML = ""; // 기존 내용 비우기
+  text.innerHTML = ""; 
 
-  // 1. 환영 텍스트 추가
+  // 환영 문구 추가
   const welcome = document.createElement("p");
-  welcome.style.color = "#5effeb"; // 민트색 강조 (선택사항)
+  welcome.style.color = "#00ff9c"; // CSS에서 설정한 강조색
   welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
   text.appendChild(welcome);
 
-  // 2. 실제 본문 내용 추가
+  // 본문 추가
   const body = document.createElement("p");
   body.style.marginTop = "10px";
   body.textContent = content;

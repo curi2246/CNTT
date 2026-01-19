@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 로딩 → 인증 화면
   setTimeout(() => {
-    loading.classList.add("hidden");
+    if (loading) loading.classList.add("hidden");
     authScreen.classList.remove("hidden");
     passwordInput.focus();
   }, 2000);
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function openFileScreen(fileName, content) {
   document.getElementById("database-view").classList.add("hidden");
-  document.getElementById("file-view").classList.remove("hidden");
+  document.getElementById("file-screen").classList.remove("hidden");
 
   const title = document.getElementById("file-title");
   const text = document.getElementById("file-text");
@@ -134,6 +134,6 @@ function openFileScreen(fileName, content) {
 }
 
 document.getElementById("back-btn").addEventListener("click", () => {
-  document.getElementById("file-view").classList.add("hidden");
+  document.getElementById("file-screen").classList.add("hidden");
   document.getElementById("database-view").classList.remove("hidden");
 });

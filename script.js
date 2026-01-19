@@ -141,6 +141,13 @@ function openFileScreen(fileName, content) {
 }
 
 document.getElementById("back-btn").addEventListener("click", () => {
+  // 파일 화면 숨기기
   document.getElementById("file-screen").classList.add("hidden");
+
+  // 메인 DB 화면 복귀
   document.getElementById("database-view").classList.remove("hidden");
+
+  // 🔥 파일 화면 상태 초기화
+  document.getElementById("file-text").innerHTML = "";
+  document.getElementById("file-title").textContent = "ACCESSING FILE";
 });

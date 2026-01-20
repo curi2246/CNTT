@@ -84,28 +84,30 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // 4. 📁 폴더/파일 클릭 이벤트 로직
-  document.querySelectorAll(".folder").forEach(folder => {
-    folder.addEventListener("click", () => {
-      const key = folder.dataset.folder;
-      const list = document.querySelector(`.file-list[data-files="${key}"]`);
-      
-      // 폴더 토글 (이미 열려있으면 닫기)
-      if (list.innerHTML !== "") { 
-        list.innerHTML = ""; 
-        return; 
-      }
+document.querySelectorAll(".folder").forEach(folder => {
+  folder.addEventListener("click", () => {
+    const key = folder.dataset.folder;
+    const list = document.querySelector(`.file-list[data-files="${key}"]`);
+    
+    if (list.innerHTML !== "") { 
+      list.innerHTML = ""; 
+      return; 
+    }
 
-      // 파일 목록 생성
-      Object.keys(fileSystem[key]).forEach(name => {
-        const fileDiv = document.createElement("div");
-        fileDiv.className = "file";
-        fileDiv.textContent = "📄 " + name;
-        fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
-        list.appendChild(fileDiv);
-      });
+    Object.keys(fileSystem[key]).forEach(name => {
+      const fileDiv = document.createElement("div");
+      // 🔍 이 부분이 핵심입니다: CSS의 .file 효과와 연결됨
+      fileDiv.className = "file"; 
+      fileDiv.textContent = "📄 " + name;
+      
+      // 클릭 시 파일 열기
+      fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
+      
+      list.appendChild(fileDiv);
     });
   });
-
+});
+  
   // 5. 📄 파일 열기 함수 (환영 문구 포함)
   function openFile(name, content) {
     dbView.classList.add("hidden");

@@ -94,17 +94,20 @@ document.querySelectorAll(".folder").forEach(folder => {
       return; 
     }
 
-    Object.keys(fileSystem[key]).forEach(name => {
-      const fileDiv = document.createElement("div");
-      // 🔍 이 부분이 핵심입니다: CSS의 .file 효과와 연결됨
-      fileDiv.className = "file"; 
-      fileDiv.textContent = "📄 " + name;
-      
-      // 클릭 시 파일 열기
-      fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
-      
-      list.appendChild(fileDiv);
-    });
+  // 폴더 클릭 시 파일 목록을 생성하는 로직
+Object.keys(fileSystem[key]).forEach(name => {
+    const fileDiv = document.createElement("div");
+    
+    // 🔍 이 줄이 가장 중요합니다! CSS의 .file과 연결하는 이름표입니다.
+    fileDiv.className = "file"; 
+    
+    fileDiv.textContent = "📄 " + name;
+    
+    // 클릭 시 파일 열기 함수 연결
+    fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
+    
+    list.appendChild(fileDiv);
+});
   });
 });
   

@@ -128,22 +128,24 @@ body {
 .folder:hover { background: rgba(94, 255, 235, 0.15); box-shadow: 0 0 10px var(--neon-mint); }
 
 /* --- 파일 호버 시 빛나는 효과 추가 --- */
+/* 파일 기본 스타일 */
 .file {
     cursor: pointer;
     padding: 8px 15px;
-    color: #fff; /* 기본 글자색 */
+    color: #fff;
     border-left: 1px dashed #444;
     margin-left: 15px;
-    transition: all 0.3s ease; /* 부드러운 변화를 위해 추가 */
+    transition: all 0.2s ease-in-out; /* 반응 속도를 살짝 올림 */
+    display: block; /* 클릭 영역 확보 */
 }
 
-/* 마우스를 올렸을 때 (Hover) */
+/* 🌟 마우스 오버 시 빛나는 효과 (가장 중요한 부분) */
 .file:hover {
-    color: var(--neon-mint); /* 글자색을 민트색으로 변경 */
-    background: rgba(94, 255, 235, 0.15); /* 배경에 은은한 민트색 광채 */
-    text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5); /* 글자 자체 발광 */
-    box-shadow: inset 5px 0 15px rgba(94, 255, 235, 0.2); /* 왼쪽 경계선 쪽 내부 광채 */
-    transform: translateX(5px); /* 오른쪽으로 살짝 이동하는 동적인 느낌 */
+    color: var(--neon-mint) !important; /* 강제로 민트색 적용 */
+    background: rgba(94, 255, 235, 0.2) !important;
+    text-shadow: 0 0 12px var(--neon-mint); /* 글자 광채 */
+    padding-left: 25px; /* 오른쪽으로 스르륵 밀리는 효과 */
+    box-shadow: inset 4px 0 0 var(--neon-mint); /* 왼쪽에 민트색 강조선 */
 }
 
 /* --- 🔍 인증 애니메이션용 클래스 (JS와 연동) --- */

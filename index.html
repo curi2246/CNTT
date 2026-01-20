@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE</title>
     <style>
-        /* --- CSS (디자인 및 요청 연출 적용) --- */
+        /* --- CSS (기존 스타일 유지 및 호버 효과 강화) --- */
         :root {
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
@@ -23,7 +23,7 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            transition: background-color 0.8s ease; /* 색상 변화 부드럽게 */
+            transition: background-color 0.8s ease;
         }
 
         .screen { 
@@ -39,14 +39,13 @@
         
         .hidden { display: none !important; }
 
-        /* 🔍 요청사항: 거대 배경 심볼 연출 */
         .bg-sigil {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 500px; /* 아주 크게 */
-            color: rgba(94, 255, 235, 0.08); /* 배경처럼 은은하게 */
+            font-size: 500px;
+            color: rgba(94, 255, 235, 0.08);
             text-shadow: 0 0 50px rgba(94, 255, 235, 0.2);
             z-index: 1;
             pointer-events: none;
@@ -54,7 +53,6 @@
             animation: sigilPulse 6s ease-in-out infinite;
         }
 
-        /* 헤더 및 콘텐츠 레이어 */
         .header { position: relative; z-index: 10; text-align: center; margin-bottom: 20px; }
         .sigil-small { font-size: 3rem; color: var(--neon-mint); text-shadow: 0 0 15px var(--neon-mint); margin-bottom: 10px; }
         h1 { font-size: 1.8rem; letter-spacing: 4px; text-shadow: 0 0 10px var(--neon-pink); margin: 15px 0; color: #fff; }
@@ -66,7 +64,6 @@
             opacity: 0.8; color: var(--neon-mint);
         }
 
-        /* 터미널 박스 */
         .terminal {
             position: relative; z-index: 10;
             border: 1px solid var(--neon-pink);
@@ -85,20 +82,39 @@
             text-align: center; letter-spacing: 5px; margin-top: 20px;
         }
 
-        /* 인증 성공/실패 시 화면 변화 클래스 */
         .auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.4); }
         .auth-error-flash { background-color: #240a0a !important; filter: saturate(1.5); }
 
-        /* 폴더 및 리스트 */
         .directory { position: relative; z-index: 10; margin-top: 20px; width: 90%; max-width: 600px; }
-        .folder { color: var(--folder-gold); cursor: pointer; padding: 10px; font-weight: bold; }
+        .folder { color: var(--folder-gold); cursor: pointer; padding: 10px; font-weight: bold; transition: 0.3s; }
+        .folder:hover { text-shadow: 0 0 10px var(--folder-gold); }
+        
         .file-list { margin-left: 20px; border-left: 1px dashed #444; }
-        .file { color: var(--neon-mint); cursor: pointer; padding: 8px 15px; }
+
+        /* 🔍 수정된 파일 스타일: 마우스 호버 시 빛나는 연출 */
+        .file { 
+            color: #fff; 
+            cursor: pointer; 
+            padding: 8px 15px; 
+            transition: all 0.3s ease; 
+            display: block;
+            position: relative;
+        }
+
+        .file:hover { 
+            color: var(--neon-mint); 
+            background: rgba(94, 255, 235, 0.15); 
+            text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5); 
+            padding-left: 25px; /* 오른쪽으로 밀리는 효과 */
+            box-shadow: inset 4px 0 0 var(--neon-mint); /* 왼쪽에 강조선 추가 */
+        }
 
         #back-btn {
             background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
             padding: 10px 20px; cursor: pointer; margin-top: 20px; position: relative; z-index: 10;
+            transition: 0.3s;
         }
+        #back-btn:hover { background: var(--neon-mint); color: #000; }
 
         @keyframes sigilPulse {
             0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.08; }
@@ -111,7 +127,8 @@
 <body>
 
     <div id="auth-screen" class="screen">
-        <div class="bg-sigil">⟡</div> <div class="header">
+        <div class="bg-sigil">⟡</div> 
+        <div class="header">
             <div class="sigil-small">⟡</div>
             <h1>SECURITY CHECK</h1>
         </div>
@@ -175,11 +192,9 @@
 
             const PASSWORD = "1234";
 
-            // 🔐 1. 비밀번호 인증 및 드라마틱 효과
             passwordInput.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
                     if (passwordInput.value === PASSWORD) {
-                        // 성공 연출
                         document.body.classList.add("auth-success-flash");
                         authMessage.style.color = "var(--neon-mint)";
                         authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
@@ -192,7 +207,6 @@
                             startTyping();
                         }, 1200);
                     } else {
-                        // 실패 연출
                         document.body.classList.add("auth-error-flash");
                         authMessage.style.color = "var(--neon-pink)";
                         authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
@@ -206,7 +220,6 @@
                 }
             });
 
-            // ⌨️ 2. 타이핑 효과
             const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
             let lineIdx = 0, charIdx = 0;
             const cursor = document.createElement("span");
@@ -231,7 +244,6 @@
                 }
             }
 
-            // 📁 3. 파일 시스템
             const fileSystem = {
                 world: {
                     "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다. 현재 관측된 타임라인은 총 4개다.",
@@ -251,7 +263,7 @@
 
                     Object.keys(fileSystem[key]).forEach(name => {
                         const fileDiv = document.createElement("div");
-                        fileDiv.className = "file";
+                        fileDiv.className = "file"; // 🔍 CSS의 .file 효과와 연결됨
                         fileDiv.textContent = "📄 " + name;
                         fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
                         list.appendChild(fileDiv);
@@ -264,10 +276,9 @@
                 fileScreen.classList.remove("hidden");
                 document.getElementById("file-title").textContent = "FILE: " + name;
                 
-                // 🔍 요청사항: 환영 문구 삽입
                 document.getElementById("file-text").innerHTML = `
                     <p style="color: var(--neon-mint); font-weight:bold;">> 환영합니다. 기록 열람을 시작합니다.</p>
-                    <p style="margin-top:15px; line-height: 1.8;">${content.replace(/\n/g, '<br>')}</p>
+                    <p style="margin-top:15px; line-height: 1.8; color: #fff;">${content.replace(/\n/g, '<br>')}</p>
                 `;
             }
 

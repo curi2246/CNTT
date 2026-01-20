@@ -7,43 +7,62 @@
 body {
   margin: 0;
   background: #000;
-  color: #ff6b6b; /* 기본 텍스트 색상: 핑크/레드 */
-  overflow-x: hidden;
-  transition: background-color 0.5s ease; /* 배경색 변화 부드럽게 */
+  color: #ff6b6b;
+  overflow: hidden; /* 배경 심볼이 커져서 스크롤 생기는 것 방지 */
+  transition: background-color 0.5s ease;
 }
 
 /* 화면 공통 레이아웃 */
 .screen {
+  position: relative; /* 자식 요소(심볼) 배치의 기준점 */
   padding: 16px;
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: filter 0.5s ease; /* 밝기 변화 부드럽게 */
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.5s ease;
 }
 
-/* 🔍 요청사항: 헤더 및 심볼 중앙 정렬 */
+/* 🔍 요청사항: 심볼을 배경으로 거대하게 배치 */
+.sigil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 정확히 화면 중앙 고정 */
+  font-size: 400px; /* 도안처럼 아주 크게 설정 */
+  color: rgba(95, 211, 255, 0.12); /* 배경처럼 은은하게 민트색 배치 */
+  text-shadow: 0 0 40px rgba(95, 211, 255, 0.3);
+  z-index: 1; /* 가장 뒤로 보냄 */
+  pointer-events: none; /* 클릭 방해 금지 */
+  animation: sigilPulse 6s ease-in-out infinite;
+  user-select: none;
+}
+
+/* 🔍 요청사항: 헤더 및 터미널을 심볼 위에 배치 */
 .header {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* 가로 중앙 */
-  justify-content: center;
+  position: relative;
+  z-index: 10; /* 심볼(1)보다 위에 배치 */
   text-align: center;
   margin-bottom: 20px;
 }
 
 .header h1 {
-  font-size: 1.5rem;
-  text-shadow: 0 0 10px #00ff9c;
+  font-size: 1.8rem;
+  letter-spacing: 4px;
+  text-shadow: 0 0 15px #ff6b6b;
   color: #fff;
   margin: 10px 0;
 }
 
 .status {
+  position: relative;
+  z-index: 10;
   display: flex;
   justify-content: space-between;
   width: 100%;
+  max-width: 500px;
   font-size: 11px;
   color: #8fbaff;
   opacity: 0.8;
@@ -54,103 +73,61 @@ body {
 
 /* 터미널 박스 디자인 */
 .terminal {
+  position: relative;
+  z-index: 10; /* 심볼보다 위에 배치 */
   width: 100%;
+  max-width: 500px;
   border: 1px solid #ff6b6b;
-  background: rgba(10, 10, 15, 0.9);
-  box-shadow: 0 0 14px rgba(255, 107, 107, 0.2);
-  padding: 15px;
+  background: rgba(0, 0, 0, 0.75); /* 심볼이 살짝 비치도록 투명도 조절 */
+  backdrop-filter: blur(3px); /* 뒤에 있는 심볼을 살짝 흐리게 효과 */
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.15);
+  padding: 20px;
   margin-bottom: 20px;
-  min-height: 80px;
 }
 
-/* 🔥 파일 텍스트 출력 영역 */
-#file-text {
-  white-space: pre-wrap;
+/* 파일/터미널 텍스트 색상 */
+#file-text { white-space: pre-wrap; color: #5fd3ff; line-height: 1.6; }
+#file-text p:first-child { color: #00ff9c; font-weight: bold; margin-bottom: 10px; }
+#terminal-text { white-space: pre-wrap; color: #ff6b6b; }
+
+/* 비밀번호 입력창 */
+#password-input {
+  width: 100%;
+  margin-top: 15px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #5fd3ff;
   color: #5fd3ff;
-  line-height: 1.6;
-}
-
-#file-text p:first-child {
-  color: #00ff9c;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-#terminal-text {
-  white-space: pre-wrap;
-  color: #ff6b6b;
+  font-size: 1.3rem;
+  padding: 8px;
+  outline: none;
+  text-align: center;
+  letter-spacing: 3px;
 }
 
 /* 폴더 및 파일 리스트 */
+.directory { position: relative; z-index: 10; width: 100%; max-width: 500px; }
 .folder {
   border: 1px solid #5fd3ff;
   color: #5fd3ff;
   padding: 10px;
   margin-bottom: 5px;
   cursor: pointer;
-  transition: 0.3s;
   background: rgba(95, 211, 255, 0.05);
 }
+.file { cursor: pointer; padding: 8px 12px; color: #fff; }
 
-.folder:hover {
-  background: rgba(95, 211, 255, 0.2);
-  box-shadow: 0 0 12px rgba(95, 211, 255, 0.4);
-}
-
-.file-list {
-  margin-left: 15px;
-  margin-bottom: 15px;
-  border-left: 1px solid rgba(95, 211, 255, 0.3);
-}
-
-.file {
-  cursor: pointer;
-  padding: 8px 12px;
-  color: #fff;
-  transition: 0.2s;
-}
-
-/* 시길(심볼) 디자인 - 항상 중앙 */
-.sigil {
-  font-size: 48px;
-  color: #5fd3ff;
-  text-shadow: 0 0 10px #5fd3ff, 0 0 20px rgba(95, 211, 255, 0.5);
-  animation: sigilPulse 4s ease-in-out infinite;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-
-/* 커서 및 입력창 */
-#password-input {
-  width: 100%;
-  margin-top: 12px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #ff6b6b;
-  color: #5fd3ff;
-  font-size: 1.2rem;
-  padding: 5px;
-  outline: none;
-  text-align: center; /* 입력창 텍스트도 중앙 */
-}
-
-/* 🔍 요청사항: 인증 애니메이션용 클래스 */
-.auth-success-bg {
-  background-color: #1a3a3a !important; /* 성공 시 어두운 청록색으로 밝아짐 */
-  filter: brightness(1.5) contrast(1.2);
-}
-
-.auth-error-bg {
-  background-color: #3a1a1a !important; /* 실패 시 어두운 빨간색 */
-  filter: saturate(2) brightness(1.2);
-}
+/* 인증 애니메이션 효과 */
+.auth-success-bg { background-color: #0a2a2a !important; filter: brightness(1.4); }
+.auth-error-bg { background-color: #2a0a0a !important; filter: saturate(1.5); }
 
 /* 유틸리티 */
 .hidden { display: none !important; }
 
+/* 🔍 애니메이션: 중앙 고정 상태에서 맥박치기 */
 @keyframes sigilPulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 25px #5fd3ff; }
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.12; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.22; text-shadow: 0 0 60px rgba(95, 211, 255, 0.5); }
 }
 
 @keyframes blink { 50% { opacity: 0; } }

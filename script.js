@@ -8,42 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("password-input");
   const authMessage = document.getElementById("auth-message");
 
-  const lines = [
-    "> 접속 승인. 환영합니다, 계약자님.",
-    "> 데이터베이스 접근이 허가되어 기록을 열람합니다."
-  ];
+  const PASSWORD = "1234";
 
-  let lineIndex = 0;
-  let charIndex = 0;
-
-  const cursor = document.createElement("span");
-  cursor.className = "cursor";
-
-  // 1. 메인 터미널 타이핑 효과
-  function typeLine() {
-    if (lineIndex >= lines.length) return;
-
-    let p = terminal.children[lineIndex];
-    if (!p) {
-      p = document.createElement("p");
-      terminal.appendChild(p);
-    }
-
-    p.textContent = lines[lineIndex].slice(0, charIndex + 1);
-    p.appendChild(cursor);
-
-    charIndex++;
-
-    if (charIndex === lines[lineIndex].length) {
-      charIndex = 0;
-      lineIndex++;
-      setTimeout(typeLine, 600);
-    } else {
-      setTimeout(typeLine, 40);
-    }
-  }
-
-  // 2. 초기 로딩 연출
+  // 1. 초기 로딩 연출
   setTimeout(() => {
     if (loading) loading.classList.add("hidden");
     if (authScreen) {
@@ -52,28 +19,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 2000);
 
-  // 3. 🔐 비밀번호 인증 및 연출 (핵심 수정 부분)
-  const PASSWORD = "1234";
-
+  // 2. 🔐 비밀번호 인증 및 색상 연출
   document.addEventListener("keydown", (e) => {
     if (!authScreen || authScreen.classList.contains("hidden")) return;
     if (e.key !== "Enter") return;
 
     if (passwordInput.value === PASSWORD) {
-      // ✅ [성공] 화면이 밝아지며 접속
+      // ✅ 성공: 화면이 청록색 톤으로 밝아짐
       authScreen.classList.add("auth-success-bg");
       authMessage.textContent = "> 인증 성공. 시스템 동기화 중...";
-      passwordInput.disabled = true; // 연속 입력 방지
+      passwordInput.disabled = true;
 
       setTimeout(() => {
         authScreen.classList.add("hidden");
-        authScreen.classList.remove("auth-success-bg"); // 상태 초기화
+        authScreen.classList.remove("auth-success-bg");
         main.classList.remove("hidden");
-        typeLine(); // 메인 타이핑 시작
+        startTyping(); // 인증 후 메인 타이핑 시작
       }, 1000);
-
     } else {
-      // ✅ [실패] 화면이 빨갛게 변함
+      // ✅ 실패: 화면이 붉은색 톤으로 변함
       authScreen.classList.add("auth-error-bg");
       authMessage.textContent = "> 인증 실패. 접근이 거부되었습니다.";
       
@@ -86,7 +50,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 4. 📁 파일 시스템 데이터
+  // 3. 메인 화면 타이핑 효과
+  const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 접근 권한이 확인되었습니다."];
+  let lineIdx = 0, charIdx = 0;
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+
+  function startTyping() {
+    if (lineIdx >= lines.length) return;
+    let p = terminal.children[lineIdx];
+    if (!p) {
+      p = document.createElement("p");
+      terminal.appendChild(p);
+    }
+    p.textContent = lines[lineIdx].slice(0, charIdx + 1);
+    p.appendChild(cursor);
+    charIdx++;
+    if (charIdx === lines[lineIdx].length) {
+      charIdx = 0; lineIdx++;
+      setTimeout(startTyping, 600);
+    } else {
+      setTimeout(startTyping, 40);
+    }
+  }
+
+  // 4. 파일 시스템 데이터
   const fileSystem = {
     world: {
       "timeline.txt": "세계는 선택에 따라 여러 갈래로 분기된다...",
@@ -98,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // 5. 폴더 및 파일 클릭 이벤트
+  // 5. 폴더/파일 클릭 로직
   document.querySelectorAll(".folder").forEach(folder => {
     folder.addEventListener("click", () => {
       const key = folder.dataset.folder;
@@ -111,13 +99,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       Object.keys(fileSystem[key]).forEach(name => {
-        const file = document.createElement("div");
-        file.className = "file";
-        file.textContent = "📄 " + name;
-        file.addEventListener("click", () => {
-          openFileScreen(name, fileSystem[key][name]);
-        });
-        list.appendChild(file);
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "file";
+        fileDiv.textContent = "📄 " + name;
+        fileDiv.onclick = () => openFileScreen(name, fileSystem[key][name]);
+        list.appendChild(fileDiv);
       });
     });
   });
@@ -128,41 +114,25 @@ document.addEventListener("DOMContentLoaded", () => {
     backBtn.addEventListener("click", () => {
       document.getElementById("file-screen").classList.add("hidden");
       document.getElementById("database-view").classList.remove("hidden");
-      document.getElementById("file-text").innerHTML = "";
-      document.getElementById("file-title").textContent = "ACCESSING FILE";
-    });
-  }
-
-  // 시길 클릭 이벤트
-  if (sigil) {
-    sigil.addEventListener("click", () => {
-      sigil.style.textShadow = "0 0 30px red";
     });
   }
 });
 
-// ✅ openFileScreen 함수 (파일 내용 출력)
+// ✅ 7. 파일 열기 함수 (환영 문구 강제 삽입)
 function openFileScreen(fileName, content) {
   const dbView = document.getElementById("database-view");
   const fileScreen = document.getElementById("file-screen");
   const title = document.getElementById("file-title");
-  const text = document.getElementById("file-text");
+  const textContainer = document.getElementById("file-text");
 
   if (dbView) dbView.classList.add("hidden");
   if (fileScreen) fileScreen.classList.remove("hidden");
 
   title.textContent = "FILE: " + fileName;
-  text.innerHTML = ""; 
-
-  // 환영 문구 추가
-  const welcome = document.createElement("p");
-  welcome.style.color = "#00ff9c"; // CSS에서 설정한 강조색
-  welcome.textContent = "> 환영합니다. 기록 열람을 시작합니다.";
-  text.appendChild(welcome);
-
-  // 본문 추가
-  const body = document.createElement("p");
-  body.style.marginTop = "10px";
-  body.textContent = content;
-  text.appendChild(body);
+  
+  // 환영 문구와 본문을 HTML로 한꺼번에 삽입 (더 확실한 방법)
+  textContainer.innerHTML = `
+    <p style="color: #00ff9c; font-weight: bold; margin-bottom: 12px;">> 환영합니다. 기록 열람을 시작합니다.</p>
+    <p style="color: #5fd3ff;">${content}</p>
+  `;
 }

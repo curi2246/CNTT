@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE</title>
     <style>
-        /* --- 기본 초기화 및 폰트 --- */
+        /* --- 이미지 테마에 맞춘 색상 고정 --- */
         * {
             box-sizing: border-box;
             font-family: 'Courier New', monospace;
@@ -14,7 +14,8 @@
         :root {
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
-            --bg-black: #050505;
+            /* 이미지의 느낌을 살린 매우 어두운 청록색 배경 */
+            --bg-black: #020d0d; 
         }
 
         body {
@@ -38,25 +39,20 @@
             z-index: 2;
         }
 
-        /* --- 거대 배경 심볼 고정 --- */
+        /* --- 거대 배경 심볼 (이미지처럼 아주 은은하게) --- */
         .bg-sigil {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: min(70vh, 70vw);
-            color: rgba(94, 255, 235, 0.05);
-            text-shadow: 0 0 40px rgba(94, 255, 235, 0.15);
+            color: rgba(94, 255, 235, 0.03); /* 투명도를 더 낮춰서 깊이감 부여 */
+            text-shadow: 0 0 30px rgba(94, 255, 235, 0.1);
             z-index: 1;
             pointer-events: none;
             user-select: none;
             animation: sigilPulse 6s ease-in-out infinite;
             line-height: 1;
-        }
-
-        .header, .terminal, .directory, #back-btn {
-            position: relative;
-            z-index: 10;
         }
 
         .header h1 {
@@ -66,6 +62,7 @@
             color: #fff;
             margin: 10px 0;
             text-align: center;
+            text-transform: uppercase;
         }
 
         .sigil-small {
@@ -94,9 +91,8 @@
             width: 100%;
             max-width: 600px;
             border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.88);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
+            background: rgba(0, 0, 0, 0.8); /* 뒤 배경이 살짝 비치는 어두운 배경 */
+            backdrop-filter: blur(5px);
             padding: 20px;
             margin-bottom: 15px;
         }
@@ -104,6 +100,7 @@
         .terminal-inner {
             min-height: 100px;
             word-break: break-all;
+            line-height: 1.6;
         }
 
         #password-input {
@@ -120,41 +117,41 @@
             letter-spacing: 5px;
         }
 
-        /* --- 디렉토리 및 파일 리스트 --- */
+        /* --- 디렉토리 리스트 --- */
         .directory {
             width: 100%;
             max-width: 600px;
-            max-height: 40vh;
+            max-height: 45vh;
             overflow-y: auto;
-            padding-right: 5px;
         }
-        .directory::-webkit-scrollbar { width: 3px; }
-        .directory::-webkit-scrollbar-thumb { background: var(--neon-mint); }
 
         .folder {
             border: 1px solid var(--neon-mint);
             color: var(--neon-mint);
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 8px;
             cursor: pointer;
             background: rgba(94, 255, 235, 0.05);
             font-weight: bold;
             transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        .folder:hover { background: rgba(94, 255, 235, 0.2); }
+        .folder:hover { background: rgba(94, 255, 235, 0.15); }
 
         .file {
             cursor: pointer;
-            padding: 8px 15px;
+            padding: 10px 15px;
             color: #ffffff;
             border-left: 1px dashed #444;
             margin: 2px 0 2px 15px;
             transition: all 0.2s ease;
             display: block;
+            font-size: 14px;
         }
         .file:hover {
             color: var(--neon-mint) !important;
-            background: rgba(94, 255, 235, 0.1) !important;
+            background: rgba(255, 255, 255, 0.05);
             padding-left: 25px;
             border-left: 2px solid var(--neon-mint);
         }
@@ -169,17 +166,18 @@
 
         @keyframes blink { 50% { opacity: 0; } }
         @keyframes sigilPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
-            50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.12; }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.03; }
+            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.07; }
         }
 
         .hidden { display: none !important; }
-        .auth-success-flash { background-color: #0a2424 !important; }
-        .auth-error-flash { background-color: #240a0a !important; }
+        .auth-success-flash { background-color: #011a1a !important; }
+        .auth-error-flash { background-color: #1a0101 !important; }
 
         #back-btn {
             background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
             padding: 10px 20px; cursor: pointer; margin-top: 15px; transition: 0.3s;
+            text-transform: uppercase;
         }
         #back-btn:hover { background: var(--neon-mint); color: #000; }
     </style>
@@ -195,7 +193,7 @@
         </div>
         <div class="terminal">
             <form id="auth-form" class="terminal-inner">
-                <p style="text-align: center;">> ENTER PASSWORD</p>
+                <p style="text-align: center;">> ENTER ACCESS KEY</p>
                 <input id="password-input" type="password" inputmode="numeric" autofocus autocomplete="off" />
                 <div id="auth-message" style="margin-top:15px; text-align: center; font-size: 14px;"></div>
             </form>
@@ -205,7 +203,7 @@
     <div id="main-screen" class="screen hidden">
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><div class="sigil-small">⟡</div><h1 id="file-title">FILE</h1></div>
-            <div class="terminal" style="min-height: 300px;"><div id="file-text" class="terminal-inner"></div></div>
+            <div class="terminal" style="min-height: 350px;"><div id="file-text" class="terminal-inner"></div></div>
             <button id="back-btn">← BACK TO LIST</button>
         </div>
 
@@ -321,6 +319,7 @@
                 const lines = ["> DATABASE ACCESS GRANTED.", "> LOADING DIRECTORIES..."];
                 lines.forEach((line, i) => {
                     const p = document.createElement("p");
+                    p.style.margin = "5px 0";
                     terminalText.appendChild(p);
                     let idx = 0;
                     function type() {

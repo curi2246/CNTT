@@ -34,29 +34,34 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* 콘텐츠 중앙 정렬 */
             padding: 20px;
             transition: filter 0.8s ease;
+            z-index: 2;
         }
 
-        /* --- 거대 배경 심볼 --- */
+        /* --- 🔍 위치 수정된 거대 배경 심볼 --- */
         .bg-sigil {
-            position: absolute;
+            position: fixed; /* 절대 위치가 아닌 화면 고정으로 변경 */
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 450px;
-            color: rgba(94, 255, 235, 0.08);
-            text-shadow: 0 0 40px rgba(94, 255, 235, 0.2);
-            z-index: 1;
+            transform: translate(-50%, -50%); /* 정확히 화면 중앙 고정 */
+            font-size: min(80vh, 80vw); /* 화면 크기에 맞춰 유동적으로 조절 */
+            color: rgba(94, 255, 235, 0.06); /* 조금 더 은은하게 */
+            text-shadow: 0 0 40px rgba(94, 255, 235, 0.15);
+            z-index: 1; /* 콘텐츠 뒤쪽 */
             pointer-events: none;
             user-select: none;
             animation: sigilPulse 6s ease-in-out infinite;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .header, .terminal, .directory, #back-btn {
             position: relative;
-            z-index: 10;
+            z-index: 10; /* 심볼보다 위로 */
         }
 
         .header h1 {
@@ -74,6 +79,7 @@
             text-shadow: 0 0 15px var(--neon-mint);
             margin-bottom: 10px;
             cursor: pointer;
+            text-align: center;
         }
 
         .status {
@@ -94,8 +100,8 @@
             width: 100%;
             max-width: 600px;
             border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.85); /* 뒤가 살짝 보이게 투명도 조정 */
+            backdrop-filter: blur(6px);
             box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
             padding: 25px;
             margin-bottom: 20px;
@@ -162,8 +168,8 @@
         @keyframes blink { 50% { opacity: 0; } }
 
         @keyframes sigilPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.08; }
-            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.18; text-shadow: 0 0 60px rgba(94, 255, 235, 0.4); }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.06; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.14; text-shadow: 0 0 60px rgba(94, 255, 235, 0.3); }
         }
 
         .hidden { display: none !important; }
@@ -179,8 +185,9 @@
 </head>
 <body>
 
+    <div class="bg-sigil">⟡</div>
+
     <div id="auth-screen" class="screen">
-        <div class="bg-sigil">⟡</div>
         <div class="header">
             <div class="sigil-small">⟡</div>
             <h1>SECURITY CHECK</h1>
@@ -196,8 +203,6 @@
     </div>
 
     <div id="main-screen" class="screen hidden">
-        <div class="bg-sigil">⟡</div>
-
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header">
                 <div class="sigil-small">⟡</div>
@@ -221,7 +226,7 @@
             <div class="terminal">
                 <div id="terminal-text" class="terminal-inner"></div>
             </div>
-            <div class="directory" id="directory">
+            <div class="directory" id="directory" style="width: 100%; max-width: 600px;">
                 <div class="folder" data-folder="world">📁 WORLD_DATA</div>
                 <div class="file-list" data-files="world"></div>
                 <div class="folder" data-folder="yokai">📁 YOKAI_DATA</div>
@@ -244,7 +249,6 @@
 
             const PASSWORD = "1234";
 
-            // 1. 비밀번호 인증 (모바일 엔터 대응)
             authForm.addEventListener("submit", (e) => {
                 e.preventDefault();
                 if (passwordInput.value === PASSWORD) {
@@ -268,8 +272,8 @@
                 }
             });
 
-            // 2. 메인 화면 접속 타이핑
             function startTypingMain() {
+                terminalText.innerHTML = "";
                 const welcomeLines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
                 welcomeLines.forEach((line, i) => {
                     const p = document.createElement("p");
@@ -286,10 +290,9 @@
                 });
             }
 
-            // 3. 파일 시스템 데이터
             const fileSystem = {
                 world: {
-                    "timeline.txt": "세상은 여러 선택에 따라 분류된다. 현재 곽측 가능한 시간선들을 매우 드물지만 중간중간 오는 것들이 몇몇 있다.\n\n일련번호: 99123\n우리 세계에 침범하던 다른 시간선도 존재한다.\n\n일련번호: 002\n만약 리에(Leay)가 나타나지 않았다면? 이라는 선택에서 파생된 시간선이다.",
+                    "timeline.txt": "세상은 여러 선택에 따라 분류된다. 현재 관측 가능한 시간선들을 매우 드물지만 중간중간 오는 것들이 몇몇 있다.\n\n일련번호: 99123\n우리 세계에 침범하던 다른 시간선도 존재한다.\n\n일련번호: 002\n만약 리에(Leay)가 나타나지 않았다면? 이라는 선택에서 파생된 시간선이다.",
                     "contracts.log": "기록된 계약자 수: 41423\n위험도: HIGH\n최근 업데이트: 2026-01-20"
                 },
                 yokai: {
@@ -298,7 +301,6 @@
                 }
             };
 
-            // 4. 폴더/파일 클릭 로직
             document.querySelectorAll(".folder").forEach(folder => {
                 folder.addEventListener("click", () => {
                     const key = folder.dataset.folder;
@@ -315,14 +317,12 @@
                 });
             });
 
-            // 5. 파일 열기 (환영메시지 타이핑 -> 삭제 -> 본문 고속 타이핑)
             function openFile(name, content) {
                 dbView.classList.add("hidden");
                 fileScreen.classList.remove("hidden");
                 document.getElementById("file-title").textContent = "FILE: " + name;
                 fileText.innerHTML = "";
 
-                // 1단계: 환영 메시지
                 const welcomeLine = document.createElement("p");
                 welcomeLine.className = "typing-cursor";
                 welcomeLine.style.color = "var(--neon-mint)";
@@ -338,13 +338,12 @@
                         setTimeout(typeWelcome, 40);
                     } else {
                         setTimeout(() => {
-                            welcomeLine.remove(); // 🔍 삭제 연출
+                            welcomeLine.remove();
                             typeMainContent();
                         }, 1000);
                     }
                 }
 
-                // 2단계: 본문 고속 타이핑
                 function typeMainContent() {
                     const contentLine = document.createElement("p");
                     contentLine.className = "typing-cursor";
@@ -359,7 +358,7 @@
                                 contentLine.innerHTML += content[mainIdx];
                             }
                             mainIdx++;
-                            setTimeout(typeMain, 15); // ⚡ 고속 타이핑
+                            setTimeout(typeMain, 15);
                         } else {
                             contentLine.classList.remove("typing-cursor");
                         }
@@ -369,7 +368,6 @@
                 typeWelcome();
             }
 
-            // 뒤로가기
             document.getElementById("back-btn").addEventListener("click", () => {
                 fileScreen.classList.add("hidden");
                 dbView.classList.remove("hidden");

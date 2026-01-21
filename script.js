@@ -114,19 +114,67 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
-    // --- 5. 📄 파일 열기 함수 ---
-    function openFile(name, content) {
-        dbView.classList.add("hidden");
-        fileScreen.classList.remove("hidden");
-        document.getElementById("file-title").textContent = "FILE: " + name;
-        
-        const textArea = document.getElementById("file-text");
-        
-        textArea.innerHTML = `
-            <p style="color: var(--neon-mint); font-weight:bold;">> 환영합니다. 기록 열람을 시작합니다.</p>
-            <p style="margin-top:15px; line-height: 1.8; color: #fff;">${content.replace(/\n/g, '<br>')}</p>
-        `;
+  // 5. 📄 파일 열기 함수 (더블 타이핑 연출 적용)
+function openFile(name, content) {
+    dbView.classList.add("hidden");
+    fileScreen.classList.remove("hidden");
+    document.getElementById("file-title").textContent = "FILE: " + name;
+
+    const textArea = document.getElementById("file-text");
+    textArea.innerHTML = ""; // 기존 내용 초기화
+
+    const welcomeMsg = "> 환영합니다. 기록 열람을 시작합니다.";
+    const p = document.createElement("p");
+    p.style.color = "var(--neon-mint)";
+    p.style.fontWeight = "bold";
+    textArea.appendChild(p);
+
+    let charIdx = 0;
+
+    // 단계 1: 환영 메시지 타이핑
+    function typeWelcome() {
+        if (charIdx < welcomeMsg.length) {
+            p.textContent += welcomeMsg[charIdx];
+            charIdx++;
+            setTimeout(typeWelcome, 30); // 환영 메시지 속도
+        } else {
+            // 타이핑 완료 후 0.8초 대기했다가 본문 출력
+            setTimeout(startMainContent, 800);
+        }
     }
+
+    // 단계 2: 환영 메시지 유지 또는 삭제 후 본문 출력
+    function startMainContent() {
+        // (선택사항) 환영 메시지를 지우고 싶다면 아래 주석을 해제하세요.
+        // p.textContent = ""; 
+
+        const contentP = document.createElement("p");
+        contentP.style.marginTop = "15px";
+        contentP.style.lineHeight = "1.8";
+        contentP.style.color = "#fff";
+        textArea.appendChild(contentP);
+
+        let mainIdx = 0;
+        // <br> 태그 등을 인식하기 위해 줄바꿈 처리된 배열 생성
+        const formattedContent = content.replace(/\n/g, '\n'); 
+
+        function typeMain() {
+            if (mainIdx < formattedContent.length) {
+                // 한 글자씩 추가하되, \n은 <br>로 변환
+                if (formattedContent[mainIdx] === "\n") {
+                    contentP.innerHTML += "<br>";
+                } else {
+                    contentP.textContent += formattedContent[mainIdx];
+                }
+                mainIdx++;
+                setTimeout(typeMain, 10); // ⚡ 본문 타이핑 속도 (매우 빠름)
+            }
+        }
+        typeMain();
+    }
+
+    typeWelcome();
+}
 
     // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").addEventListener("click", () => {

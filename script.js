@@ -10,35 +10,41 @@ document.addEventListener("DOMContentLoaded", () => {
   const PASSWORD = "1234";
 
   // 1. 🔐 비밀번호 인증 및 드라마틱 효과 (배경색 변경)
-  passwordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      if (passwordInput.value === PASSWORD) {
-        // ✅ [성공] 화면이 청록색 톤으로 변함
-        document.body.classList.add("auth-success-flash");
-        authMessage.style.color = "var(--neon-mint)";
-        authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
-        passwordInput.disabled = true;
+ // 🔐 1. 비밀번호 인증 (PC 엔터 + 모바일 완료 버튼 대응)
+passwordInput.addEventListener("keypress", (e) => {
+    // e.which는 오래된 브라우저/모바일 대응용입니다.
+    const keyCode = e.keyCode || e.which;
 
-        setTimeout(() => {
-          document.body.classList.remove("auth-success-flash");
-          authScreen.classList.add("hidden");
-          mainScreen.classList.remove("hidden");
-          startTyping(); // 인증 성공 후 메인 화면 타이핑 시작
-        }, 1200);
-      } else {
-        // ✅ [실패] 화면이 붉은색 톤으로 변함
-        document.body.classList.add("auth-error-flash");
-        authMessage.style.color = "var(--neon-pink)";
-        authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
+    if (keyCode === 13) { // 13은 엔터(Enter) 키 번호입니다.
+        e.preventDefault(); // 페이지 새로고침 방지
         
-        setTimeout(() => {
-          document.body.classList.remove("auth-error-flash");
-          passwordInput.value = "";
-          passwordInput.focus();
-        }, 800);
-      }
+        if (passwordInput.value === PASSWORD) {
+            // 성공 연출
+            document.body.classList.add("auth-success-flash");
+            authMessage.style.color = "var(--neon-mint)";
+            authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
+            passwordInput.disabled = true;
+
+            setTimeout(() => {
+                document.body.classList.remove("auth-success-flash");
+                authScreen.classList.add("hidden");
+                mainScreen.classList.remove("hidden");
+                startTyping();
+            }, 1200);
+        } else {
+            // 실패 연출
+            document.body.classList.add("auth-error-flash");
+            authMessage.style.color = "var(--neon-pink)";
+            authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
+            
+            setTimeout(() => {
+                document.body.classList.remove("auth-error-flash");
+                passwordInput.value = "";
+                passwordInput.focus();
+            }, 800);
+        }
     }
-  });
+});
 
   // 2. ⌨️ 메인 화면 접속 타이핑 효과
   const lines = [

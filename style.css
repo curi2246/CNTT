@@ -16,168 +16,170 @@ body {
     background: var(--bg-black);
     color: var(--neon-pink);
     overflow: hidden; /* 배경 심볼로 인한 스크롤 방지 */
-    transition: background-color 0.8s ease; /* 인증 시 배경색 부드럽게 변경 */
+    transition: background-color 0.8s ease;
 }
 
-/* --- 화면 공통 레이아웃 --- */
+/* --- 화면 공통 레이아웃 (정중앙 정렬 보정) --- */
 .screen {
-    position: relative; /* 거대 심볼 배치의 기준점 */
+    position: relative;
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
+    justify-content: flex-start; /* 상단부터 차례대로 배치 */
+    padding-top: 5vh; /* 상단 여유 공간 */
     transition: filter 0.8s ease;
+    z-index: 2;
 }
 
-/* --- 🔍 핵심: 거대 배경 심볼 (도안 스타일) --- */
-.bg-sigil, .sigil {
-    position: absolute;
+/* --- 🔍 배경 거대 심볼 (위치 고정 및 투명도 조절) --- */
+.bg-sigil {
+    position: fixed; /* 화면에 완전히 고정 */
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* 화면 정중앙 고정 */
-    font-size: 450px; /* 도안처럼 아주 크게 조절 */
-    color: rgba(94, 255, 235, 0.08); /* 배경처럼 은은한 민트색 */
-    text-shadow: 0 0 40px rgba(94, 255, 235, 0.2);
-    z-index: 1; /* 모든 요소의 뒤쪽 */
-    pointer-events: none; /* 클릭 방해 금지 */
+    transform: translate(-50%, -50%); /* 정확히 화면 정중앙 */
+    font-size: 80vh; /* 화면 높이에 맞춘 거대 크기 */
+    color: rgba(94, 255, 235, 0.05); /* 더 은은하게 조정 */
+    text-shadow: 0 0 50px rgba(94, 255, 235, 0.1);
+    z-index: 1; /* 콘텐츠 뒤로 배치 */
+    pointer-events: none;
     user-select: none;
     animation: sigilPulse 6s ease-in-out infinite;
+    line-height: 1;
 }
 
-/* --- 콘텐츠 레이어 (심볼 위로 배치) --- */
+/* --- 콘텐츠 레이어 --- */
 .header, .terminal, .directory, #back-btn {
     position: relative;
-    z-index: 10; /* 심볼(z-index: 1)보다 위로 올림 */
+    z-index: 10;
+    width: 100%;
+    max-width: 650px; /* 터미널 너비 일관성 */
 }
 
 .header h1 {
-    font-size: 1.8rem;
-    letter-spacing: 5px;
+    font-size: 2rem;
+    letter-spacing: 8px;
     text-shadow: 0 0 15px var(--neon-pink);
     color: #fff;
-    margin: 10px 0;
+    margin: 15px 0;
     text-align: center;
 }
 
 .sigil-small {
-    font-size: 3rem;
+    font-size: 3.5rem;
     color: var(--neon-mint);
-    text-shadow: 0 0 15px var(--neon-mint);
-    margin-bottom: 10px;
+    text-shadow: 0 0 20px var(--neon-mint);
+    text-align: center;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 
 .status {
     display: flex;
     justify-content: space-between;
-    width: 100%;
-    max-width: 600px;
     font-size: 11px;
     color: var(--neon-mint);
     opacity: 0.8;
     border-bottom: 1px solid rgba(255, 94, 94, 0.3);
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-}
-
-/* --- 터미널 박스 디자인 --- */
-.terminal {
-    width: 100%;
-    max-width: 600px;
-    border: 1px solid var(--neon-pink);
-    background: rgba(0, 0, 0, 0.8); /* 뒤의 심볼이 은은하게 비침 */
-    backdrop-filter: blur(4px); /* 뒤쪽을 살짝 흐리게 */
-    box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
-    padding: 25px;
+    padding-bottom: 8px;
     margin-bottom: 20px;
 }
 
-/* --- 텍스트 및 입력창 --- */
-#file-text { white-space: pre-wrap; color: #fff; line-height: 1.7; min-height: 150px; }
-#terminal-text { white-space: pre-wrap; color: var(--neon-pink); }
+/* --- 터미널 디자인 --- */
+.terminal {
+    border: 1px solid var(--neon-pink);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 30px rgba(255, 94, 94, 0.15);
+    padding: 30px;
+    margin-bottom: 25px;
+}
+
+#file-text { white-space: pre-wrap; color: #fff; line-height: 1.8; font-size: 0.95rem; }
+#terminal-text { white-space: pre-wrap; color: var(--neon-pink); font-size: 0.95rem; }
 
 #password-input {
     width: 100%;
-    margin-top: 15px;
+    margin-top: 20px;
     background: transparent;
     border: none;
     border-bottom: 2px solid var(--neon-mint);
     color: var(--neon-mint);
-    font-size: 1.4rem;
-    padding: 8px;
+    font-size: 1.5rem;
+    padding: 10px;
     outline: none;
     text-align: center;
-    letter-spacing: 5px;
+    letter-spacing: 10px;
 }
 
 /* --- 폴더 및 파일 리스트 --- */
-.directory { width: 100%; max-width: 600px; }
 .folder {
     border: 1px solid var(--neon-mint);
     color: var(--neon-mint);
-    padding: 10px;
-    margin-bottom: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
     cursor: pointer;
     background: rgba(94, 255, 235, 0.05);
     font-weight: bold;
+    text-align: center;
     transition: 0.3s;
 }
-.folder:hover { background: rgba(94, 255, 235, 0.15); box-shadow: 0 0 10px var(--neon-mint); }
+.folder:hover { 
+    background: rgba(94, 255, 235, 0.2); 
+    box-shadow: 0 0 15px var(--neon-mint); 
+}
 
-/* --- 파일 리스트 아이템 --- */
 .file {
     cursor: pointer;
-    padding: 8px 15px;
+    padding: 10px 20px;
     color: #ffffff;
-    border-left: 1px dashed #444;
-    margin-left: 15px;
-    transition: all 0.2s ease;
+    border-left: 2px solid #333;
+    margin: 5px 0 5px 20px;
+    transition: all 0.3s ease;
     display: block;
 }
 
 .file:hover {
     color: var(--neon-mint) !important;
-    background: rgba(94, 255, 235, 0.15) !important;
-    text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5);
-    padding-left: 25px;
+    background: rgba(94, 255, 235, 0.1);
+    text-shadow: 0 0 10px var(--neon-mint);
+    border-left: 2px solid var(--neon-mint);
+    padding-left: 30px;
 }
 
-/* --- 🔍 인증 애니메이션용 클래스 --- */
-.auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.3); }
-.auth-error-flash { background-color: #240a0a !important; filter: saturate(1.2); }
-
-/* --- 버튼 스타일 --- */
-#back-btn {
-    background: transparent;
-    border: 1px solid var(--neon-mint);
-    color: var(--neon-mint);
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: 0.3s;
-}
-#back-btn:hover { background: var(--neon-mint); color: #000; }
-
-/* --- 애니메이션 정의 --- */
-@keyframes sigilPulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.08; }
-    50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.18; text-shadow: 0 0 60px rgba(94, 255, 235, 0.4); }
-}
-
-/* ⌨️ 타이핑 커서 효과 (추가됨) */
+/* --- ⌨️ 타이핑 커서 (JS 연동) --- */
 .cursor { 
     display: inline-block; 
     width: 10px; 
     height: 1.2rem; 
-    background: var(--neon-mint); /* 커서 색상을 민트색으로 설정 */
+    background: var(--neon-mint); 
     animation: blink 0.8s infinite; 
     vertical-align: middle; 
     margin-left: 5px; 
 }
 
 @keyframes blink { 50% { opacity: 0; } }
+
+/* --- 애니메이션 및 상태 --- */
+@keyframes sigilPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
+    50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.12; }
+}
+
+.auth-success-flash { background-color: #0a2424 !important; }
+.auth-error-flash { background-color: #240a0a !important; }
+
+#back-btn {
+    background: transparent;
+    border: 1px solid var(--neon-mint);
+    color: var(--neon-mint);
+    padding: 12px 25px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+    letter-spacing: 2px;
+}
+#back-btn:hover { background: var(--neon-mint); color: #000; }
 
 .hidden { display: none !important; }

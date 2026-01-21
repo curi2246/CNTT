@@ -120,7 +120,7 @@
             letter-spacing: 5px;
         }
 
-        /* --- 디렉토리 및 파일 리스트 (스크롤 가능하게) --- */
+        /* --- 디렉토리 및 파일 리스트 --- */
         .directory {
             width: 100%;
             max-width: 600px;
@@ -216,8 +216,7 @@
                 <div class="status"><span>SYNC ACTIVE</span><span>CONTRACT: KSN00916</span></div>
             </div>
             <div class="terminal"><div id="terminal-text" class="terminal-inner"></div></div>
-            <div class="directory" id="directory">
-                </div>
+            <div class="directory" id="directory"></div>
         </div>
     </div>
 
@@ -236,12 +235,11 @@
 
             const PASSWORD = "1234";
 
-            // --- 통합된 데이터베이스 파일 시스템 ---
             const fileSystem = {
                 "The main character": {
-                    "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n현재 상태: 양호\n특이사항: 시간에 구애받지 않고 드나드는 노에인(Noein).\n\n[능력 데이터]\n능력명: 존재하지 않음 그저 평범한 여성 인간.\n경고: 인간이라고 해서 얕보면은 안됨 .\n\n[기억 파편]\n밝은 회색에 1개의 꼬리를 가진 구미호와 어느 악마들의 공주님....그게 내 첫 시작이자 무한한 희망에 시작이였어.\n\n[장비 및 관계]\n소지 무기: '존재하지 않음'\n동료: 큐로, 키스네\n\n[관찰 기록]\n리에의 존재는 인과율에 어긋나 있다. 그녀가 걷는 모든 발자국이 새로운 평행세계를 생성하고 있다."
-                    "Curo_Half_Archive.txt": "명칭: 큐로(curo)"\
-                    "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)"
+                    "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n현재 상태: 양호\n특이사항: 시간에 구애받지 않고 드나드는 노에인(Noein).\n\n[능력 데이터]\n능력명: 존재하지 않음 그저 평범한 여성 인간.\n경고: 인간이라고 해서 얕보면은 안됨 .\n\n[기억 파편]\n밝은 회색에 1개의 꼬리를 가진 구미호와 어느 악마들의 공주님....그게 내 첫 시작이자 무한한 희망에 시작이였어.\n\n[장비 및 관계]\n소지 무기: '존재하지 않음'\n동료: 큐로, 키스네\n\n[관찰 기록]\n리에의 존재는 인과율에 어긋나 있다. 그녀가 걷는 모든 발자국이 새로운 평행세계를 생성하고 있다.",
+                    "Curo_Half_Archive.txt": "명칭: 큐로(Curo)\n현재 상태: 양호.\n추가 정보는 아직 암호화되어 있습니다.",
+                    "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)\n현재 상태: 양호.\n\n현 악마계의 공주이자 여왕인 존재."
                 },
                 "Demon": {
                     "demon_rank.txt": "상위 7위 이내의 악마들은 개별적인 지옥을 소유하며 인과율을 비틀 수 있는 권능을 가진다.",
@@ -265,7 +263,6 @@
                 }
             };
 
-            // 폴더 생성 로직
             function buildDirectory() {
                 directory.innerHTML = "";
                 Object.keys(fileSystem).forEach(folderName => {

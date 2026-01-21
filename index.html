@@ -15,7 +15,6 @@
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
             --bg-black: #050505;
-            --folder-gold: #ffca28;
         }
 
         body {
@@ -34,38 +33,34 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* 콘텐츠 중앙 정렬 */
+            justify-content: center;
             padding: 20px;
-            transition: filter 0.8s ease;
             z-index: 2;
         }
 
-        /* --- 🔍 위치 수정된 거대 배경 심볼 --- */
+        /* --- 거대 배경 심볼 고정 --- */
         .bg-sigil {
-            position: fixed; /* 절대 위치가 아닌 화면 고정으로 변경 */
+            position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* 정확히 화면 중앙 고정 */
-            font-size: min(80vh, 80vw); /* 화면 크기에 맞춰 유동적으로 조절 */
-            color: rgba(94, 255, 235, 0.06); /* 조금 더 은은하게 */
+            transform: translate(-50%, -50%);
+            font-size: min(70vh, 70vw);
+            color: rgba(94, 255, 235, 0.05);
             text-shadow: 0 0 40px rgba(94, 255, 235, 0.15);
-            z-index: 1; /* 콘텐츠 뒤쪽 */
+            z-index: 1;
             pointer-events: none;
             user-select: none;
             animation: sigilPulse 6s ease-in-out infinite;
             line-height: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .header, .terminal, .directory, #back-btn {
             position: relative;
-            z-index: 10; /* 심볼보다 위로 */
+            z-index: 10;
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             letter-spacing: 5px;
             text-shadow: 0 0 15px var(--neon-pink);
             color: #fff;
@@ -74,11 +69,10 @@
         }
 
         .sigil-small {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: var(--neon-mint);
             text-shadow: 0 0 15px var(--neon-mint);
-            margin-bottom: 10px;
-            cursor: pointer;
+            margin-bottom: 5px;
             text-align: center;
         }
 
@@ -87,9 +81,9 @@
             justify-content: space-between;
             width: 100%;
             max-width: 600px;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--neon-mint);
-            opacity: 0.8;
+            opacity: 0.7;
             border-bottom: 1px solid rgba(255, 94, 94, 0.3);
             padding-bottom: 5px;
             margin-bottom: 15px;
@@ -100,15 +94,15 @@
             width: 100%;
             max-width: 600px;
             border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.85); /* 뒤가 살짝 보이게 투명도 조정 */
-            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(8px);
             box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
         }
 
         .terminal-inner {
-            min-height: 120px;
+            min-height: 100px;
             word-break: break-all;
         }
 
@@ -126,24 +120,16 @@
             letter-spacing: 5px;
         }
 
-        /* --- 파일 호버 효과 --- */
-        .file {
-            cursor: pointer;
-            padding: 8px 15px;
-            color: #ffffff;
-            border-left: 1px dashed #444;
-            margin-left: 15px;
-            transition: all 0.2s ease;
-            display: block;
+        /* --- 디렉토리 및 파일 리스트 (스크롤 가능하게) --- */
+        .directory {
+            width: 100%;
+            max-width: 600px;
+            max-height: 40vh;
+            overflow-y: auto;
+            padding-right: 5px;
         }
-
-        .file:hover {
-            color: var(--neon-mint) !important;
-            background: rgba(94, 255, 235, 0.15) !important;
-            text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5);
-            padding-left: 25px;
-            box-shadow: inset 4px 0 0 var(--neon-mint);
-        }
+        .directory::-webkit-scrollbar { width: 3px; }
+        .directory::-webkit-scrollbar-thumb { background: var(--neon-mint); }
 
         .folder {
             border: 1px solid var(--neon-mint);
@@ -155,7 +141,23 @@
             font-weight: bold;
             transition: 0.3s;
         }
-        .folder:hover { background: rgba(94, 255, 235, 0.15); box-shadow: 0 0 10px var(--neon-mint); }
+        .folder:hover { background: rgba(94, 255, 235, 0.2); }
+
+        .file {
+            cursor: pointer;
+            padding: 8px 15px;
+            color: #ffffff;
+            border-left: 1px dashed #444;
+            margin: 2px 0 2px 15px;
+            transition: all 0.2s ease;
+            display: block;
+        }
+        .file:hover {
+            color: var(--neon-mint) !important;
+            background: rgba(94, 255, 235, 0.1) !important;
+            padding-left: 25px;
+            border-left: 2px solid var(--neon-mint);
+        }
 
         /* --- 타이핑 커서 --- */
         .typing-cursor::after {
@@ -166,15 +168,14 @@
         }
 
         @keyframes blink { 50% { opacity: 0; } }
-
         @keyframes sigilPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.06; }
-            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.14; text-shadow: 0 0 60px rgba(94, 255, 235, 0.3); }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
+            50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.12; }
         }
 
         .hidden { display: none !important; }
-        .auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.3); }
-        .auth-error-flash { background-color: #240a0a !important; filter: saturate(1.2); }
+        .auth-success-flash { background-color: #0a2424 !important; }
+        .auth-error-flash { background-color: #240a0a !important; }
 
         #back-btn {
             background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
@@ -194,9 +195,8 @@
         </div>
         <div class="terminal">
             <form id="auth-form" class="terminal-inner">
-                <p style="text-align: center;">> ENTER PASSWORD TO ACCESS SYSTEM</p>
+                <p style="text-align: center;">> ENTER PASSWORD</p>
                 <input id="password-input" type="password" inputmode="numeric" autofocus autocomplete="off" />
-                <button type="submit" style="display:none;">SUBMIT</button>
                 <div id="auth-message" style="margin-top:15px; text-align: center; font-size: 14px;"></div>
             </form>
         </div>
@@ -204,34 +204,20 @@
 
     <div id="main-screen" class="screen hidden">
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="header">
-                <div class="sigil-small">⟡</div>
-                <h1 id="file-title">ACCESSING FILE</h1>
-            </div>
-            <div class="terminal" style="min-height: 250px;">
-                <div id="file-text" class="terminal-inner"></div>
-            </div>
-            <button id="back-btn">← BACK TO DATABASE</button>
+            <div class="header"><div class="sigil-small">⟡</div><h1 id="file-title">FILE</h1></div>
+            <div class="terminal" style="min-height: 300px;"><div id="file-text" class="terminal-inner"></div></div>
+            <button id="back-btn">← BACK TO LIST</button>
         </div>
 
         <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header">
                 <div class="sigil-small">⟡</div>
-                <h1>CONTRACT DATABASE</h1>
-                <div class="status">
-                    <span>C.N.T.T SYSTEM v4.0.2</span>
-                    <span>CONTRACT: KSN00916</span>
+                <h1>CENTRAL DATABASE</h1>
+                <div class="status"><span>SYNC ACTIVE</span><span>CONTRACT: KSN00916</span></div>
+            </div>
+            <div class="terminal"><div id="terminal-text" class="terminal-inner"></div></div>
+            <div class="directory" id="directory">
                 </div>
-            </div>
-            <div class="terminal">
-                <div id="terminal-text" class="terminal-inner"></div>
-            </div>
-            <div class="directory" id="directory" style="width: 100%; max-width: 600px;">
-                <div class="folder" data-folder="world">📁 WORLD_DATA</div>
-                <div class="file-list" data-files="world"></div>
-                <div class="folder" data-folder="yokai">📁 YOKAI_DATA</div>
-                <div class="file-list" data-files="yokai"></div>
-            </div>
         </div>
     </div>
 
@@ -246,25 +232,86 @@
             const dbView = document.getElementById("database-view");
             const fileScreen = document.getElementById("file-screen");
             const fileText = document.getElementById("file-text");
+            const directory = document.getElementById("directory");
 
             const PASSWORD = "1234";
+
+            // --- 통합된 데이터베이스 파일 시스템 ---
+            const fileSystem = {
+                "The main character": {
+                    "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n현재 상태: 양호\n특이사항: 시간에 구애받지 않고 드나드는 노에인(Noein).\n\n[능력 데이터]\n능력명: 존재하지 않음 그저 평범한 여성 인간.\n경고: 인간이라고 해서 얕보면은 안됨 .\n\n[기억 파편]\n밝은 회색에 1개의 꼬리를 가진 구미호와 어느 악마들의 공주님....그게 내 첫 시작이자 무한한 희망에 시작이였어.\n\n[장비 및 관계]\n소지 무기: '존재하지 않음'\n동료: 큐로, 키스네\n\n[관찰 기록]\n리에의 존재는 인과율에 어긋나 있다. 그녀가 걷는 모든 발자국이 새로운 평행세계를 생성하고 있다."
+                    "Curo_Half_Archive.txt": "명칭: 큐로(curo)"\
+                    "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)"
+                },
+                "Demon": {
+                    "demon_rank.txt": "상위 7위 이내의 악마들은 개별적인 지옥을 소유하며 인과율을 비틀 수 있는 권능을 가진다.",
+                    "inferno_gate.txt": "게이트 오픈 조건: 혈액 500cc와 정해진 언어의 영창."
+                },
+                "Angel": {
+                    "seraphim_law.txt": "천사들은 감정을 배제한 채 시스템의 유지보수만을 목적으로 행동한다.",
+                    "heaven_protocol.txt": "지상 강림 시 물리적 육체의 질량 보존 법칙을 준수해야 함."
+                },
+                "Human": {
+                    "survivor_list.txt": "잔존 인류 수: 124,000명\n거주 구역: 지하 셸터 09-C",
+                    "resistance_info.txt": "인간 저항군 '언더도그'는 현재 4번째 시간선의 복구를 시도 중이다."
+                },
+                "Principle": {
+                    "causality_law.txt": "모든 행동은 등가의 대가를 요구한다. 이것이 세계를 유지하는 제1원칙이다.",
+                    "erasure_protocol.txt": "오류가 감지된 시간선은 '공백'으로 처리하여 영구 삭제한다."
+                },
+                "World": {
+                    "timeline.txt": "다중 시간선의 교차점이 발견되었습니다.",
+                    "contracts.log": "계약자 식별 코드: KSN00916"
+                }
+            };
+
+            // 폴더 생성 로직
+            function buildDirectory() {
+                directory.innerHTML = "";
+                Object.keys(fileSystem).forEach(folderName => {
+                    const folderDiv = document.createElement("div");
+                    folderDiv.className = "folder";
+                    folderDiv.textContent = "📁 " + folderName.toUpperCase();
+                    
+                    const fileListDiv = document.createElement("div");
+                    fileListDiv.className = "file-list hidden";
+                    
+                    folderDiv.onclick = () => {
+                        const isHidden = fileListDiv.classList.contains("hidden");
+                        document.querySelectorAll(".file-list").forEach(el => el.classList.add("hidden"));
+                        if(isHidden) fileListDiv.classList.remove("hidden");
+                    };
+
+                    Object.keys(fileSystem[folderName]).forEach(fileName => {
+                        const fileDiv = document.createElement("div");
+                        fileDiv.className = "file";
+                        fileDiv.textContent = "📄 " + fileName;
+                        fileDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            openFile(fileName, fileSystem[folderName][fileName]);
+                        };
+                        fileListDiv.appendChild(fileDiv);
+                    });
+
+                    directory.appendChild(folderDiv);
+                    directory.appendChild(fileListDiv);
+                });
+            }
 
             authForm.addEventListener("submit", (e) => {
                 e.preventDefault();
                 if (passwordInput.value === PASSWORD) {
                     document.body.classList.add("auth-success-flash");
-                    authMessage.style.color = "var(--neon-mint)";
-                    authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
+                    authMessage.textContent = "> SYNCING...";
                     setTimeout(() => {
-                        document.body.classList.remove("auth-success-flash");
                         authScreen.classList.add("hidden");
                         mainScreen.classList.remove("hidden");
+                        buildDirectory();
                         startTypingMain();
-                    }, 1200);
+                    }, 1000);
                 } else {
                     document.body.classList.add("auth-error-flash");
-                    authMessage.style.color = "var(--neon-pink)";
-                    authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
+                    authMessage.textContent = "> DENIED";
                     setTimeout(() => {
                         document.body.classList.remove("auth-error-flash");
                         passwordInput.value = "";
@@ -274,104 +321,62 @@
 
             function startTypingMain() {
                 terminalText.innerHTML = "";
-                const welcomeLines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
-                welcomeLines.forEach((line, i) => {
+                const lines = ["> DATABASE ACCESS GRANTED.", "> LOADING DIRECTORIES..."];
+                lines.forEach((line, i) => {
                     const p = document.createElement("p");
                     terminalText.appendChild(p);
-                    let charIdx = 0;
+                    let idx = 0;
                     function type() {
-                        if (charIdx < line.length) {
-                            p.textContent += line[charIdx];
-                            charIdx++;
-                            setTimeout(type, 40);
-                        }
+                        if (idx < line.length) { p.textContent += line[idx++]; setTimeout(type, 30); }
                     }
-                    setTimeout(type, i * 1000);
+                    setTimeout(type, i * 800);
                 });
             }
-
-            const fileSystem = {
-                world: {
-                    "timeline.txt": "세상은 여러 선택에 따라 분류된다. 현재 관측 가능한 시간선들을 매우 드물지만 중간중간 오는 것들이 몇몇 있다.\n\n일련번호: 99123\n우리 세계에 침범하던 다른 시간선도 존재한다.\n\n일련번호: 002\n만약 리에(Leay)가 나타나지 않았다면? 이라는 선택에서 파생된 시간선이다.",
-                    "contracts.log": "기록된 계약자 수: 41423\n위험도: HIGH\n최근 업데이트: 2026-01-20"
-                },
-                yokai: {
-                    "kitsune.txt": "어느 구슬을 지키기 위한 존재. 아홉 개의 꼬리는 각각 다른 권능을 상징한다.",
-                    "sealed.txt": "[접근 거부] 이 데이터는 1급 기밀로 분류되어 열람이 차단되었습니다."
-                }
-            };
-
-            document.querySelectorAll(".folder").forEach(folder => {
-                folder.addEventListener("click", () => {
-                    const key = folder.dataset.folder;
-                    const list = document.querySelector(`.file-list[data-files="${key}"]`);
-                    if (list.innerHTML !== "") { list.innerHTML = ""; return; }
-
-                    Object.keys(fileSystem[key]).forEach(name => {
-                        const fileDiv = document.createElement("div");
-                        fileDiv.className = "file";
-                        fileDiv.textContent = "📄 " + name;
-                        fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
-                        list.appendChild(fileDiv);
-                    });
-                });
-            });
 
             function openFile(name, content) {
                 dbView.classList.add("hidden");
                 fileScreen.classList.remove("hidden");
-                document.getElementById("file-title").textContent = "FILE: " + name;
+                document.getElementById("file-title").textContent = name;
                 fileText.innerHTML = "";
-
+                
                 const welcomeLine = document.createElement("p");
                 welcomeLine.className = "typing-cursor";
-                welcomeLine.style.color = "var(--neon-mint)";
                 fileText.appendChild(welcomeLine);
-
-                const welcomeText = "> SYSTEM: 기록 열람을 시작합니다...";
-                let charIdx = 0;
-
+                
+                let idx = 0;
+                const welcomeStr = "> DECRYPTING: " + name + "...";
+                
                 function typeWelcome() {
-                    if (charIdx < welcomeText.length) {
-                        welcomeLine.textContent += welcomeText[charIdx];
-                        charIdx++;
+                    if (idx < welcomeStr.length) {
+                        welcomeLine.textContent += welcomeStr[idx++];
                         setTimeout(typeWelcome, 40);
                     } else {
                         setTimeout(() => {
                             welcomeLine.remove();
-                            typeMainContent();
-                        }, 1000);
-                    }
-                }
-
-                function typeMainContent() {
-                    const contentLine = document.createElement("p");
-                    contentLine.className = "typing-cursor";
-                    fileText.appendChild(contentLine);
-                    let mainIdx = 0;
-
-                    function typeMain() {
-                        if (mainIdx < content.length) {
-                            if (content[mainIdx] === "\n") {
-                                contentLine.innerHTML += "<br>";
-                            } else {
-                                contentLine.innerHTML += content[mainIdx];
+                            const mainLine = document.createElement("p");
+                            mainLine.className = "typing-cursor";
+                            fileText.appendChild(mainLine);
+                            let midx = 0;
+                            function typeMain() {
+                                if (midx < content.length) {
+                                    mainLine.innerHTML += content[midx] === "\n" ? "<br>" : content[midx];
+                                    midx++;
+                                    setTimeout(typeMain, 15);
+                                } else {
+                                    mainLine.classList.remove("typing-cursor");
+                                }
                             }
-                            mainIdx++;
-                            setTimeout(typeMain, 15);
-                        } else {
-                            contentLine.classList.remove("typing-cursor");
-                        }
+                            typeMain();
+                        }, 800);
                     }
-                    typeMain();
                 }
                 typeWelcome();
             }
 
-            document.getElementById("back-btn").addEventListener("click", () => {
+            document.getElementById("back-btn").onclick = () => {
                 fileScreen.classList.add("hidden");
                 dbView.classList.remove("hidden");
-            });
+            };
         });
     </script>
 </body>

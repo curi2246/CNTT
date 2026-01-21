@@ -114,68 +114,66 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
-  // 5. 📄 파일 열기 함수 (더블 타이핑 연출 적용)
 function openFile(name, content) {
     dbView.classList.add("hidden");
     fileScreen.classList.remove("hidden");
     document.getElementById("file-title").textContent = "FILE: " + name;
 
     const textArea = document.getElementById("file-text");
-    textArea.innerHTML = ""; // 기존 내용 초기화
+    textArea.innerHTML = ""; // 기존 내용 비우기
 
-    const welcomeMsg = "> 환영합니다. 기록 열람을 시작합니다.";
-    const p = document.createElement("p");
-    p.style.color = "var(--neon-mint)";
-    p.style.fontWeight = "bold";
-    textArea.appendChild(p);
+    // 1단계: 환영 메시지 설정
+    const welcomeLine = document.createElement("p");
+    welcomeLine.style.color = "var(--neon-mint)";
+    welcomeLine.className = "typing-cursor"; // 커서 효과 추가
+    textArea.appendChild(welcomeLine);
 
+    const welcomeText = "> SYSTEM: 기록 열람을 시작합니다...";
     let charIdx = 0;
 
-    // 단계 1: 환영 메시지 타이핑
+    // 환영 메시지 타이핑 함수
     function typeWelcome() {
-        if (charIdx < welcomeMsg.length) {
-            p.textContent += welcomeMsg[charIdx];
+        if (charIdx < welcomeText.length) {
+            welcomeLine.textContent += welcomeText[charIdx];
             charIdx++;
-            setTimeout(typeWelcome, 30); // 환영 메시지 속도
+            setTimeout(typeWelcome, 40); // 보통 속도
         } else {
-            // 타이핑 완료 후 0.8초 대기했다가 본문 출력
-            setTimeout(startMainContent, 800);
+            // 타이핑 끝나면 1초 뒤에 지우고 본문 시작
+            setTimeout(() => {
+                welcomeLine.remove(); // 환영 메시지 삭제
+                startMainContent();
+            }, 1000);
         }
     }
 
-    // 단계 2: 환영 메시지 유지 또는 삭제 후 본문 출력
+    // 2단계: 본문 고속 타이핑 함수
     function startMainContent() {
-        // (선택사항) 환영 메시지를 지우고 싶다면 아래 주석을 해제하세요.
-        // p.textContent = ""; 
-
-        const contentP = document.createElement("p");
-        contentP.style.marginTop = "15px";
-        contentP.style.lineHeight = "1.8";
-        contentP.style.color = "#fff";
-        textArea.appendChild(contentP);
+        const contentLine = document.createElement("p");
+        contentLine.style.color = "#fff";
+        contentLine.style.lineHeight = "1.8";
+        contentLine.className = "typing-cursor"; 
+        textArea.appendChild(contentLine);
 
         let mainIdx = 0;
-        // <br> 태그 등을 인식하기 위해 줄바꿈 처리된 배열 생성
-        const formattedContent = content.replace(/\n/g, '\n'); 
-
+        // 텍스트의 \n을 <br>로 바꾸지 않고, 한 글자씩 검사하며 넣기
         function typeMain() {
-            if (mainIdx < formattedContent.length) {
-                // 한 글자씩 추가하되, \n은 <br>로 변환
-                if (formattedContent[mainIdx] === "\n") {
-                    contentP.innerHTML += "<br>";
+            if (mainIdx < content.length) {
+                if (content[mainIdx] === "\n") {
+                    contentLine.innerHTML += "<br>";
                 } else {
-                    contentP.textContent += formattedContent[mainIdx];
+                    contentLine.innerHTML += content[mainIdx];
                 }
                 mainIdx++;
-                setTimeout(typeMain, 10); // ⚡ 본문 타이핑 속도 (매우 빠름)
+                setTimeout(typeMain, 15); // ⚡ 고속 타이핑 (15ms)
+            } else {
+                contentLine.classList.remove("typing-cursor"); // 다 쓰면 커서 제거
             }
         }
         typeMain();
     }
 
-    typeWelcome();
+    typeWelcome(); // 실행 시작
 }
-
     // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").addEventListener("click", () => {
         fileScreen.classList.add("hidden");

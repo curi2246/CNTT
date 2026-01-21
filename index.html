@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE</title>
     <style>
-        /* --- CSS (기존 스타일 유지 및 호버 효과 강화) --- */
+        /* --- CSS (기존 스타일 유지) --- */
         :root {
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
@@ -76,10 +76,12 @@
             backdrop-filter: blur(4px);
         }
 
+        /* 🔍 수정: 입력창 최적화 */
         #password-input {
             background: transparent; border: none; border-bottom: 2px solid var(--neon-mint);
             color: var(--neon-mint); width: 100%; outline: none; font-size: 1.4rem;
             text-align: center; letter-spacing: 5px; margin-top: 20px;
+            display: block;
         }
 
         .auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.4); }
@@ -91,7 +93,6 @@
         
         .file-list { margin-left: 20px; border-left: 1px dashed #444; }
 
-        /* 🔍 수정된 파일 스타일: 마우스 호버 시 빛나는 연출 */
         .file { 
             color: #fff; 
             cursor: pointer; 
@@ -105,8 +106,8 @@
             color: var(--neon-mint); 
             background: rgba(94, 255, 235, 0.15); 
             text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5); 
-            padding-left: 25px; /* 오른쪽으로 밀리는 효과 */
-            box-shadow: inset 4px 0 0 var(--neon-mint); /* 왼쪽에 강조선 추가 */
+            padding-left: 25px;
+            box-shadow: inset 4px 0 0 var(--neon-mint);
         }
 
         #back-btn {
@@ -134,11 +135,12 @@
         </div>
 
         <div class="terminal">
-            <div class="terminal-inner">
+            <form id="auth-form" class="terminal-inner">
                 <p style="text-align: center;">> ENTER PASSWORD TO ACCESS SYSTEM</p>
-                <input id="password-input" type="password" autofocus autocomplete="off" />
+                <input id="password-input" type="password" inputmode="numeric" autofocus autocomplete="off" />
+                <button type="submit" style="display:none;">SUBMIT</button>
                 <div id="auth-message" style="margin-top:15px; text-align: center; font-size: 14px;"></div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -182,6 +184,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            const authForm = document.getElementById("auth-form");
             const authScreen = document.getElementById("auth-screen");
             const mainScreen = document.getElementById("main-screen");
             const terminal = document.getElementById("terminal-text");
@@ -192,31 +195,31 @@
 
             const PASSWORD = "1234";
 
-            passwordInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    if (passwordInput.value === PASSWORD) {
-                        document.body.classList.add("auth-success-flash");
-                        authMessage.style.color = "var(--neon-mint)";
-                        authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
-                        passwordInput.disabled = true;
+            // 🔐 🔍 수정: form submit 이벤트로 통합 (모바일/PC 공용)
+            authForm.addEventListener("submit", (e) => {
+                e.preventDefault(); 
+                if (passwordInput.value === PASSWORD) {
+                    document.body.classList.add("auth-success-flash");
+                    authMessage.style.color = "var(--neon-mint)";
+                    authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
+                    passwordInput.disabled = true;
 
-                        setTimeout(() => {
-                            document.body.classList.remove("auth-success-flash");
-                            authScreen.classList.add("hidden");
-                            mainScreen.classList.remove("hidden");
-                            startTyping();
-                        }, 1200);
-                    } else {
-                        document.body.classList.add("auth-error-flash");
-                        authMessage.style.color = "var(--neon-pink)";
-                        authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
-                        
-                        setTimeout(() => {
-                            document.body.classList.remove("auth-error-flash");
-                            passwordInput.value = "";
-                            passwordInput.focus();
-                        }, 800);
-                    }
+                    setTimeout(() => {
+                        document.body.classList.remove("auth-success-flash");
+                        authScreen.classList.add("hidden");
+                        mainScreen.classList.remove("hidden");
+                        startTyping();
+                    }, 1200);
+                } else {
+                    document.body.classList.add("auth-error-flash");
+                    authMessage.style.color = "var(--neon-pink)";
+                    authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
+                    
+                    setTimeout(() => {
+                        document.body.classList.remove("auth-error-flash");
+                        passwordInput.value = "";
+                        passwordInput.focus();
+                    }, 800);
                 }
             });
 
@@ -244,8 +247,9 @@
                 }
             }
 
+            // 📁 🔍 수정: world 데이터 객체 구조 오류 수정 (중괄호 추가)
             const fileSystem = {
-                world: 
+                world: {
                     "The World.txt": "세상은 여러 선택에 따라 분류된다. 절망, 행복, 고통, 후회 등등 자신의 선택에 따라 모든 시간선이 영향을 받아 새로운 것들을 만들어간다.\n여태까지 관측 가능한 시간선은 1개지만 우리 또한 수많은 시간선들 중에서 고통을 받는 존재들 일지도 모른다.\n\n일련번호: 99123, 이 번호는 우리가 속해있는 시간선이다.\n과거 우리 세계에 침범하던 다른 시간선도 있다.\n\n일련번호: 002\n만약 주요 인물이 나오지 않았다면?이라는 가능성이 생긴 시간선이다.",
                     "contracts.log": "기록된 계약자 수: nnnnn41423\n위험도: HIGH\n최근 업데이트: 2026-01-19"
                 },
@@ -263,7 +267,7 @@
 
                     Object.keys(fileSystem[key]).forEach(name => {
                         const fileDiv = document.createElement("div");
-                        fileDiv.className = "file"; // 🔍 CSS의 .file 효과와 연결됨
+                        fileDiv.className = "file";
                         fileDiv.textContent = "📄 " + name;
                         fileDiv.onclick = () => openFile(name, fileSystem[key][name]);
                         list.appendChild(fileDiv);

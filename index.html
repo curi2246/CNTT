@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE</title>
     <style>
-        /* --- CSS (기존 스타일 유지) --- */
+        /* --- 기본 초기화 및 폰트 --- */
+        * {
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
         :root {
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
@@ -14,126 +19,172 @@
         }
 
         body {
-            background-color: var(--bg-black);
-            color: var(--neon-pink);
-            font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background: var(--bg-black);
+            color: var(--neon-pink);
             overflow: hidden;
             transition: background-color 0.8s ease;
         }
 
-        .screen { 
-            width: 100vw; 
-            height: 100vh; 
-            position: relative; 
+        /* --- 화면 공통 레이아웃 --- */
+        .screen {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 20px;
             transition: filter 0.8s ease;
         }
-        
-        .hidden { display: none !important; }
 
+        /* --- 거대 배경 심볼 --- */
         .bg-sigil {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 500px;
+            font-size: 450px;
             color: rgba(94, 255, 235, 0.08);
-            text-shadow: 0 0 50px rgba(94, 255, 235, 0.2);
+            text-shadow: 0 0 40px rgba(94, 255, 235, 0.2);
             z-index: 1;
             pointer-events: none;
             user-select: none;
             animation: sigilPulse 6s ease-in-out infinite;
         }
 
-        .header { position: relative; z-index: 10; text-align: center; margin-bottom: 20px; }
-        .sigil-small { font-size: 3rem; color: var(--neon-mint); text-shadow: 0 0 15px var(--neon-mint); margin-bottom: 10px; }
-        h1 { font-size: 1.8rem; letter-spacing: 4px; text-shadow: 0 0 10px var(--neon-pink); margin: 15px 0; color: #fff; }
-        
-        .status { 
-            position: relative; z-index: 10;
-            display: flex; justify-content: space-between; width: 100%; max-width: 600px;
-            font-size: 0.7rem; border-top: 1px solid rgba(255, 94, 94, 0.4); padding-top: 8px;
-            opacity: 0.8; color: var(--neon-mint);
+        .header, .terminal, .directory, #back-btn {
+            position: relative;
+            z-index: 10;
         }
 
+        .header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 5px;
+            text-shadow: 0 0 15px var(--neon-pink);
+            color: #fff;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .sigil-small {
+            font-size: 3rem;
+            color: var(--neon-mint);
+            text-shadow: 0 0 15px var(--neon-mint);
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            font-size: 11px;
+            color: var(--neon-mint);
+            opacity: 0.8;
+            border-bottom: 1px solid rgba(255, 94, 94, 0.3);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        /* --- 터미널 디자인 --- */
         .terminal {
-            position: relative; z-index: 10;
+            width: 100%;
+            max-width: 600px;
             border: 1px solid var(--neon-pink);
             background: rgba(0, 0, 0, 0.85);
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            min-height: 120px;
-            box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
             backdrop-filter: blur(4px);
+            box-shadow: 0 0 20px rgba(255, 94, 94, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
         }
 
-        /* 🔍 수정: 입력창 최적화 */
+        .terminal-inner {
+            min-height: 120px;
+            word-break: break-all;
+        }
+
         #password-input {
-            background: transparent; border: none; border-bottom: 2px solid var(--neon-mint);
-            color: var(--neon-mint); width: 100%; outline: none; font-size: 1.4rem;
-            text-align: center; letter-spacing: 5px; margin-top: 20px;
+            width: 100%;
+            margin-top: 15px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--neon-mint);
+            color: var(--neon-mint);
+            font-size: 1.4rem;
+            padding: 8px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        /* --- 파일 호버 효과 --- */
+        .file {
+            cursor: pointer;
+            padding: 8px 15px;
+            color: #ffffff;
+            border-left: 1px dashed #444;
+            margin-left: 15px;
+            transition: all 0.2s ease;
             display: block;
         }
 
-        .auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.4); }
-        .auth-error-flash { background-color: #240a0a !important; filter: saturate(1.5); }
-
-        .directory { position: relative; z-index: 10; margin-top: 20px; width: 90%; max-width: 600px; }
-        .folder { color: var(--folder-gold); cursor: pointer; padding: 10px; font-weight: bold; transition: 0.3s; }
-        .folder:hover { text-shadow: 0 0 10px var(--folder-gold); }
-        
-        .file-list { margin-left: 20px; border-left: 1px dashed #444; }
-
-        .file { 
-            color: #fff; 
-            cursor: pointer; 
-            padding: 8px 15px; 
-            transition: all 0.3s ease; 
-            display: block;
-            position: relative;
-        }
-
-        .file:hover { 
-            color: var(--neon-mint); 
-            background: rgba(94, 255, 235, 0.15); 
-            text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5); 
+        .file:hover {
+            color: var(--neon-mint) !important;
+            background: rgba(94, 255, 235, 0.15) !important;
+            text-shadow: 0 0 10px var(--neon-mint), 0 0 20px rgba(94, 255, 235, 0.5);
             padding-left: 25px;
             box-shadow: inset 4px 0 0 var(--neon-mint);
         }
 
-        #back-btn {
-            background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
-            padding: 10px 20px; cursor: pointer; margin-top: 20px; position: relative; z-index: 10;
+        .folder {
+            border: 1px solid var(--neon-mint);
+            color: var(--neon-mint);
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background: rgba(94, 255, 235, 0.05);
+            font-weight: bold;
             transition: 0.3s;
         }
-        #back-btn:hover { background: var(--neon-mint); color: #000; }
+        .folder:hover { background: rgba(94, 255, 235, 0.15); box-shadow: 0 0 10px var(--neon-mint); }
+
+        /* --- 타이핑 커서 --- */
+        .typing-cursor::after {
+            content: "█";
+            margin-left: 5px;
+            color: var(--neon-mint);
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
 
         @keyframes sigilPulse {
             0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.08; }
-            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.18; }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.18; text-shadow: 0 0 60px rgba(94, 255, 235, 0.4); }
         }
-        .cursor { display: inline-block; width: 8px; height: 1.2rem; background: var(--neon-pink); animation: blink 0.8s infinite; vertical-align: middle; }
-        @keyframes blink { 50% { opacity: 0; } }
+
+        .hidden { display: none !important; }
+        .auth-success-flash { background-color: #0a2424 !important; filter: brightness(1.3); }
+        .auth-error-flash { background-color: #240a0a !important; filter: saturate(1.2); }
+
+        #back-btn {
+            background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
+            padding: 10px 20px; cursor: pointer; margin-top: 15px; transition: 0.3s;
+        }
+        #back-btn:hover { background: var(--neon-mint); color: #000; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen" class="screen">
-        <div class="bg-sigil">⟡</div> 
+        <div class="bg-sigil">⟡</div>
         <div class="header">
             <div class="sigil-small">⟡</div>
             <h1>SECURITY CHECK</h1>
         </div>
-
         <div class="terminal">
             <form id="auth-form" class="terminal-inner">
                 <p style="text-align: center;">> ENTER PASSWORD TO ACCESS SYSTEM</p>
@@ -152,8 +203,8 @@
                 <div class="sigil-small">⟡</div>
                 <h1 id="file-title">ACCESSING FILE</h1>
             </div>
-            <div class="terminal">
-                <div class="terminal-inner" id="file-text"></div>
+            <div class="terminal" style="min-height: 250px;">
+                <div id="file-text" class="terminal-inner"></div>
             </div>
             <button id="back-btn">← BACK TO DATABASE</button>
         </div>
@@ -164,19 +215,16 @@
                 <h1>CONTRACT DATABASE</h1>
                 <div class="status">
                     <span>C.N.T.T SYSTEM v4.0.2</span>
-                    <span>CONTRACT NUMBER: KSN00916</span>
+                    <span>CONTRACT: KSN00916</span>
                 </div>
             </div>
-
             <div class="terminal">
                 <div id="terminal-text" class="terminal-inner"></div>
             </div>
-
-            <div class="directory">
+            <div class="directory" id="directory">
                 <div class="folder" data-folder="world">📁 WORLD_DATA</div>
                 <div class="file-list" data-files="world"></div>
-
-                <div class="folder" data-folder="yokai">📁 Yokai_DATA</div>
+                <div class="folder" data-folder="yokai">📁 YOKAI_DATA</div>
                 <div class="file-list" data-files="yokai"></div>
             </div>
         </div>
@@ -187,71 +235,62 @@
             const authForm = document.getElementById("auth-form");
             const authScreen = document.getElementById("auth-screen");
             const mainScreen = document.getElementById("main-screen");
-            const terminal = document.getElementById("terminal-text");
             const passwordInput = document.getElementById("password-input");
             const authMessage = document.getElementById("auth-message");
+            const terminalText = document.getElementById("terminal-text");
             const dbView = document.getElementById("database-view");
             const fileScreen = document.getElementById("file-screen");
+            const fileText = document.getElementById("file-text");
 
             const PASSWORD = "1234";
 
-            // 🔐 🔍 수정: form submit 이벤트로 통합 (모바일/PC 공용)
+            // 1. 비밀번호 인증 (모바일 엔터 대응)
             authForm.addEventListener("submit", (e) => {
-                e.preventDefault(); 
+                e.preventDefault();
                 if (passwordInput.value === PASSWORD) {
                     document.body.classList.add("auth-success-flash");
                     authMessage.style.color = "var(--neon-mint)";
                     authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
-                    passwordInput.disabled = true;
-
                     setTimeout(() => {
                         document.body.classList.remove("auth-success-flash");
                         authScreen.classList.add("hidden");
                         mainScreen.classList.remove("hidden");
-                        startTyping();
+                        startTypingMain();
                     }, 1200);
                 } else {
                     document.body.classList.add("auth-error-flash");
                     authMessage.style.color = "var(--neon-pink)";
                     authMessage.textContent = "> ACCESS DENIED. INVALID CREDENTIALS.";
-                    
                     setTimeout(() => {
                         document.body.classList.remove("auth-error-flash");
                         passwordInput.value = "";
-                        passwordInput.focus();
                     }, 800);
                 }
             });
 
-            const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
-            let lineIdx = 0, charIdx = 0;
-            const cursor = document.createElement("span");
-            cursor.className = "cursor";
-
-            function startTyping() {
-                if (lineIdx >= lines.length) return;
-                let p = terminal.querySelectorAll("p")[lineIdx];
-                if (!p) {
-                    p = document.createElement("p");
-                    terminal.appendChild(p);
-                }
-                p.textContent = lines[lineIdx].slice(0, charIdx + 1);
-                p.appendChild(cursor);
-                charIdx++;
-
-                if (charIdx === lines[lineIdx].length) {
-                    charIdx = 0; lineIdx++;
-                    setTimeout(startTyping, 600);
-                } else {
-                    setTimeout(startTyping, 40);
-                }
+            // 2. 메인 화면 접속 타이핑
+            function startTypingMain() {
+                const welcomeLines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
+                welcomeLines.forEach((line, i) => {
+                    const p = document.createElement("p");
+                    terminalText.appendChild(p);
+                    let charIdx = 0;
+                    function type() {
+                        if (charIdx < line.length) {
+                            p.textContent += line[charIdx];
+                            charIdx++;
+                            setTimeout(type, 40);
+                        }
+                    }
+                    setTimeout(type, i * 1000);
+                });
             }
 
-            // 📁 🔍 수정: world 데이터 객체 구조 오류 수정 (중괄호 추가)
+            // 3. 파일 시스템 데이터
             const fileSystem = {
                 world: {
-                    "The World.txt": "세상은 여러 선택에 따라 분류된다. 절망, 행복, 고통, 후회 등등 자신의 선택에 따라 모든 시간선이 영향을 받아 새로운 것들을 만들어간다.\n여태까지 관측 가능한 시간선은 1개지만 우리 또한 수많은 시간선들 중에서 고통을 받는 존재들 일지도 모른다.\n\n일련번호: 99123, 이 번호는 우리가 속해있는 시간선이다.\n과거 우리 세계에 침범하던 다른 시간선도 있다.\n\n일련번호: 002\n만약 주요 인물이 나오지 않았다면?이라는 가능성이 생긴 시간선이다.",
-                    "contracts.log": "기록된 계약자 수: nnnnn41423\n위험도: HIGH\n최근 업데이트: 2026-01-19"
+                    "timeline.txt": "세상은 여러 선택에 따라 분류된다. 현재 곽측 가능한 시간선들을 매우 드물지만 중간중간 오는 것들이 몇몇 있다.\n\n일련번호: 99123\n우리 세계에 침범하던 다른 시간선도 존재한다.\n\n일련번호: 002\n만약 리에(Leay)가 나타나지 않았다면? 이라는 선택에서 파생된 시간선이다.",
+                    "contracts.log": "기록된 계약자 수: 41423\n위험도: HIGH\n최근 업데이트: 2026-01-20"
                 },
                 yokai: {
                     "kitsune.txt": "어느 구슬을 지키기 위한 존재. 아홉 개의 꼬리는 각각 다른 권능을 상징한다.",
@@ -259,6 +298,7 @@
                 }
             };
 
+            // 4. 폴더/파일 클릭 로직
             document.querySelectorAll(".folder").forEach(folder => {
                 folder.addEventListener("click", () => {
                     const key = folder.dataset.folder;
@@ -275,17 +315,61 @@
                 });
             });
 
+            // 5. 파일 열기 (환영메시지 타이핑 -> 삭제 -> 본문 고속 타이핑)
             function openFile(name, content) {
                 dbView.classList.add("hidden");
                 fileScreen.classList.remove("hidden");
                 document.getElementById("file-title").textContent = "FILE: " + name;
-                
-                document.getElementById("file-text").innerHTML = `
-                    <p style="color: var(--neon-mint); font-weight:bold;">> 환영합니다. 기록 열람을 시작합니다.</p>
-                    <p style="margin-top:15px; line-height: 1.8; color: #fff;">${content.replace(/\n/g, '<br>')}</p>
-                `;
+                fileText.innerHTML = "";
+
+                // 1단계: 환영 메시지
+                const welcomeLine = document.createElement("p");
+                welcomeLine.className = "typing-cursor";
+                welcomeLine.style.color = "var(--neon-mint)";
+                fileText.appendChild(welcomeLine);
+
+                const welcomeText = "> SYSTEM: 기록 열람을 시작합니다...";
+                let charIdx = 0;
+
+                function typeWelcome() {
+                    if (charIdx < welcomeText.length) {
+                        welcomeLine.textContent += welcomeText[charIdx];
+                        charIdx++;
+                        setTimeout(typeWelcome, 40);
+                    } else {
+                        setTimeout(() => {
+                            welcomeLine.remove(); // 🔍 삭제 연출
+                            typeMainContent();
+                        }, 1000);
+                    }
+                }
+
+                // 2단계: 본문 고속 타이핑
+                function typeMainContent() {
+                    const contentLine = document.createElement("p");
+                    contentLine.className = "typing-cursor";
+                    fileText.appendChild(contentLine);
+                    let mainIdx = 0;
+
+                    function typeMain() {
+                        if (mainIdx < content.length) {
+                            if (content[mainIdx] === "\n") {
+                                contentLine.innerHTML += "<br>";
+                            } else {
+                                contentLine.innerHTML += content[mainIdx];
+                            }
+                            mainIdx++;
+                            setTimeout(typeMain, 15); // ⚡ 고속 타이핑
+                        } else {
+                            contentLine.classList.remove("typing-cursor");
+                        }
+                    }
+                    typeMain();
+                }
+                typeWelcome();
             }
 
+            // 뒤로가기
             document.getElementById("back-btn").addEventListener("click", () => {
                 fileScreen.classList.add("hidden");
                 dbView.classList.remove("hidden");

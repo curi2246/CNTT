@@ -211,6 +211,7 @@ body {
 
 /* --- 3. 히든 트리거 존 (경고 문구 + 버튼) --- */
 .hidden-trigger-zone {
+    display: none; /* 기본적으로 숨김 처리 (JS에서 제어) */
     margin-top: 400px; /* 한참 내려야 보이도록 여백 확보 */
     padding: 60px 0;
     text-align: center;

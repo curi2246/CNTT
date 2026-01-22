@@ -3,183 +3,73 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CENTRAL DATABASE</title>
+    <title>CENTRAL DATABASE - SYSTEM ERROR</title>
     <style>
-        /* --- 이미지 테마에 맞춘 색상 고정 --- */
-        * {
-            box-sizing: border-box;
-            font-family: 'Courier New', monospace;
-        }
-
+        * { box-sizing: border-box; font-family: 'Courier New', monospace; }
         :root {
             --neon-pink: #ff5e5e;
             --neon-mint: #5effeb;
-            /* 이미지의 느낌을 살린 매우 어두운 청록색 배경 */
             --bg-black: #020d0d; 
         }
 
         body {
-            margin: 0;
-            background: var(--bg-black);
-            color: var(--neon-pink);
-            overflow: hidden;
-            transition: background-color 0.8s ease;
+            margin: 0; background: var(--bg-black); color: var(--neon-pink);
+            overflow: hidden; transition: background-color 0.5s;
         }
 
-        /* --- 화면 공통 레이아웃 --- */
-        .screen {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 2;
+        /* --- 글리치 애니메이션 --- */
+        @keyframes screenShake {
+            0% { transform: translate(0); filter: hue-rotate(0deg); }
+            10% { transform: translate(-5px, 5px); filter: invert(1); }
+            20% { transform: translate(5px, -5px); }
+            30% { transform: translate(-5px, 0); }
+            100% { transform: translate(0); }
         }
 
-        /* --- 거대 배경 심볼 (이미지처럼 아주 은은하게) --- */
+        .glitch-active {
+            animation: screenShake 0.15s infinite !important;
+        }
+
         .bg-sigil {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: min(70vh, 70vw);
-            color: rgba(94, 255, 235, 0.03); /* 투명도를 더 낮춰서 깊이감 부여 */
-            text-shadow: 0 0 30px rgba(94, 255, 235, 0.1);
-            z-index: 1;
-            pointer-events: none;
-            user-select: none;
-            animation: sigilPulse 6s ease-in-out infinite;
-            line-height: 1;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.03);
+            z-index: 1; pointer-events: none;
         }
 
-        .header h1 {
-            font-size: 1.6rem;
-            letter-spacing: 5px;
-            text-shadow: 0 0 15px var(--neon-pink);
-            color: #fff;
-            margin: 10px 0;
-            text-align: center;
-            text-transform: uppercase;
+        .screen {
+            position: relative; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; z-index: 2;
         }
 
-        .sigil-small {
-            font-size: 2.5rem;
-            color: var(--neon-mint);
-            text-shadow: 0 0 15px var(--neon-mint);
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        .status {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 600px;
-            font-size: 10px;
-            color: var(--neon-mint);
-            opacity: 0.7;
-            border-bottom: 1px solid rgba(255, 94, 94, 0.3);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-
-        /* --- 터미널 디자인 --- */
         .terminal {
-            width: 100%;
-            max-width: 600px;
-            border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.8); /* 뒤 배경이 살짝 비치는 어두운 배경 */
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            margin-bottom: 15px;
+            width: 100%; max-width: 600px; border: 1px solid var(--neon-pink);
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+            padding: 20px; margin-bottom: 15px;
         }
 
-        .terminal-inner {
-            min-height: 100px;
-            word-break: break-all;
-            line-height: 1.6;
+        #file-scroll-container { max-height: 400px; overflow-y: auto; scroll-behavior: smooth; }
+        
+        /* 히든 버튼 스타일 */
+        .hidden-trigger-zone { 
+            margin-top: 200px; padding: 50px 0; text-align: center; 
+            display: none; /* 기본적으로 숨김 */
         }
 
-        #password-input {
-            width: 100%;
-            margin-top: 15px;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--neon-mint);
-            color: var(--neon-mint);
-            font-size: 1.4rem;
-            padding: 8px;
-            outline: none;
-            text-align: center;
-            letter-spacing: 5px;
+        .hidden-button {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: radial-gradient(circle, #ff0000, #000);
+            border: 2px solid #fff; cursor: pointer;
+            margin: 20px auto; box-shadow: 0 0 15px #ff0000;
+            animation: pulse 1s infinite;
         }
 
-        /* --- 디렉토리 리스트 --- */
-        .directory {
-            width: 100%;
-            max-width: 600px;
-            max-height: 45vh;
-            overflow-y: auto;
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        .folder {
-            border: 1px solid var(--neon-mint);
-            color: var(--neon-mint);
-            padding: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            background: rgba(94, 255, 235, 0.05);
-            font-weight: bold;
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .folder:hover { background: rgba(94, 255, 235, 0.15); }
-
-        .file {
-            cursor: pointer;
-            padding: 10px 15px;
-            color: #ffffff;
-            border-left: 1px dashed #444;
-            margin: 2px 0 2px 15px;
-            transition: all 0.2s ease;
-            display: block;
-            font-size: 14px;
-        }
-        .file:hover {
-            color: var(--neon-mint) !important;
-            background: rgba(255, 255, 255, 0.05);
-            padding-left: 25px;
-            border-left: 2px solid var(--neon-mint);
-        }
-
-        /* --- 타이핑 커서 --- */
-        .typing-cursor::after {
-            content: "█";
-            margin-left: 5px;
-            color: var(--neon-mint);
-            animation: blink 0.8s infinite;
-        }
-
-        @keyframes blink { 50% { opacity: 0; } }
-        @keyframes sigilPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.03; }
-            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.07; }
-        }
-
+        .directory { width: 100%; max-width: 600px; }
+        .folder { border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 12px; margin-bottom: 8px; cursor: pointer; }
+        .file { cursor: pointer; padding: 10px; color: #fff; border-left: 1px dashed #444; margin-left: 15px; }
         .hidden { display: none !important; }
-        .auth-success-flash { background-color: #011a1a !important; }
-        .auth-error-flash { background-color: #1a0101 !important; }
-
-        #back-btn {
-            background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint);
-            padding: 10px 20px; cursor: pointer; margin-top: 15px; transition: 0.3s;
-            text-transform: uppercase;
-        }
-        #back-btn:hover { background: var(--neon-mint); color: #000; }
     </style>
 </head>
 <body>
@@ -187,193 +77,123 @@
     <div class="bg-sigil">⟡</div>
 
     <div id="auth-screen" class="screen">
-        <div class="header">
-            <div class="sigil-small">⟡</div>
-            <h1>SECURITY CHECK</h1>
-        </div>
+        <div class="header"><h1>SECURITY CHECK</h1></div>
         <div class="terminal">
-            <form id="auth-form" class="terminal-inner">
-                <p style="text-align: center;">> ENTER ACCESS KEY</p>
-                <input id="password-input" type="password" inputmode="numeric" autofocus autocomplete="off" />
-                <div id="auth-message" style="margin-top:15px; text-align: center; font-size: 14px;"></div>
-            </form>
+            <form id="auth-form"><input id="password-input" type="password" placeholder="PASSWORD" style="width:100%; text-align:center; background:none; border:none; border-bottom:1px solid var(--neon-mint); color:white; outline:none;"></form>
         </div>
     </div>
 
     <div id="main-screen" class="screen hidden">
-        <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="header"><div class="sigil-small">⟡</div><h1 id="file-title">FILE</h1></div>
-            <div class="terminal" style="min-height: 350px;"><div id="file-text" class="terminal-inner"></div></div>
-            <button id="back-btn">← BACK TO LIST</button>
+        <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="header"><h1>CENTRAL DATABASE</h1></div>
+            <div class="terminal"><div id="terminal-text">> SYSTEM READY...</div></div>
+            <div class="directory" id="directory"></div>
         </div>
 
-        <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="header">
-                <div class="sigil-small">⟡</div>
-                <h1>CENTRAL DATABASE</h1>
-                <div class="status"><span>SYNC ACTIVE</span><span>CONTRACT: KSN00916</span></div>
+        <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="header"><h1 id="file-title">FILE</h1></div>
+            <div class="terminal">
+                <div id="file-scroll-container">
+                    <div id="file-text"></div>
+                    <div id="hidden-zone" class="hidden-trigger-zone">
+                        <p style="color:red; font-weight:bold;">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>
+                        <div id="secret-btn" class="hidden-button"></div>
+                    </div>
+                </div>
             </div>
-            <div class="terminal"><div id="terminal-text" class="terminal-inner"></div></div>
-            <div class="directory" id="directory"></div>
+            <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer;">← BACK</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const authForm = document.getElementById("auth-form");
-            const authScreen = document.getElementById("auth-screen");
-            const mainScreen = document.getElementById("main-screen");
-            const passwordInput = document.getElementById("password-input");
-            const authMessage = document.getElementById("auth-message");
-            const terminalText = document.getElementById("terminal-text");
-            const dbView = document.getElementById("database-view");
-            const fileScreen = document.getElementById("file-screen");
-            const fileText = document.getElementById("file-text");
-            const directory = document.getElementById("directory");
+        const PASSWORD = "1234";
+        let isGlitchUnlocked = false; // glitch 입력 여부
+        let inputBuffer = ""; // 타이핑 저장용
 
-            const PASSWORD = "1234";
-
-            const fileSystem = {
-                "The main character": {
-                    "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n현재 상태: 양호\n특이사항: 시간에 구애받지 않고 드나드는 노에인(Noein).\n\n[능력 데이터]\n능력명: 존재하지 않음 그저 평범한 여성 인간.\n경고: 인간이라고 해서 얕보면은 안됨 .\n\n[기억 파편]\n밝은 회색에 1개의 꼬리를 가진 구미호와 어느 악마들의 공주님....그게 내 첫 시작이자 무한한 희망에 시작이였어.\n\n[장비 및 관계]\n소지 무기: '존재하지 않음'\n동료: 큐로, 키스네\n\n[관찰 기록]\n리에의 존재는 인과율에 어긋나 있다. 그녀가 걷는 모든 발자국이 새로운 시간선들을 창조해내고 있다.\n\n[외형 및 프로필]\n키: 169cm\n몸무게: 51.2kg\n하얀 머리카락에 작은 체구, 회색 후드티를 입고 다니며 대부분 모자를 쓰고 다녀 몸을 가린 상태로 돌아다닌다. 하지만 중간중간 모자를 벗고 다니기도 하며 변덕으로 인한 가림으로 추정된다.\n성격은 친절하면서도 이기적인 어디에나 있을법한 인간 여성이다. 하지만 무슨 이유에서인지 이 세계가 시간선에 한 부분이란 것을 알며",
-                    "Curo_Half_Archive.txt": "명칭: 큐로(Curo)\n현재 상태: 양호.\n추가 정보는 아직 암호화되어 있습니다.",
-                    "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)\n현재 상태: 양호.\n\n현 악마계의 공주이자 여왕인 존재."
-                },
-                "Demon": {
-                    "demon_rank.txt": "상위 7위 이내의 악마들은 개별적인 지옥을 소유하며 인과율을 비틀 수 있는 권능을 가진다.",
-                    "inferno_gate.txt": "게이트 오픈 조건: 혈액 500cc와 정해진 언어의 영창."
-                },
-                "Angel": {
-                    "seraphim_law.txt": "천사들은 감정을 배제한 채 시스템의 유지보수만을 목적으로 행동한다.",
-                    "heaven_protocol.txt": "지상 강림 시 물리적 육체의 질량 보존 법칙을 준수해야 함."
-                },
-                "Human": {
-                    "survivor_list.txt": "잔존 인류 수: 124,000명\n거주 구역: 지하 셸터 09-C",
-                    "resistance_info.txt": "인간 저항군 '언더도그'는 현재 4번째 시간선의 복구를 시도 중이다."
-                },
-                "Principle": {
-                    "causality_law.txt": "모든 행동은 등가의 대가를 요구한다. 이것이 세계를 유지하는 제1원칙이다.",
-                    "erasure_protocol.txt": "오류가 감지된 시간선은 '공백'으로 처리하여 영구 삭제한다."
-                },
-                "World": {
-                    "timeline.txt": "다중 시간선의 교차점이 발견되었습니다.",
-                    "contracts.log": "계약자 식별 코드: KSN00916"
-                }
-            };
-
-            function buildDirectory() {
-                directory.innerHTML = "";
-                Object.keys(fileSystem).forEach(folderName => {
-                    const folderDiv = document.createElement("div");
-                    folderDiv.className = "folder";
-                    folderDiv.textContent = "📁 " + folderName.toUpperCase();
-                    
-                    const fileListDiv = document.createElement("div");
-                    fileListDiv.className = "file-list hidden";
-                    
-                    folderDiv.onclick = () => {
-                        const isHidden = fileListDiv.classList.contains("hidden");
-                        document.querySelectorAll(".file-list").forEach(el => el.classList.add("hidden"));
-                        if(isHidden) fileListDiv.classList.remove("hidden");
-                    };
-
-                    Object.keys(fileSystem[folderName]).forEach(fileName => {
-                        const fileDiv = document.createElement("div");
-                        fileDiv.className = "file";
-                        fileDiv.textContent = "📄 " + fileName;
-                        fileDiv.onclick = (e) => {
-                            e.stopPropagation();
-                            openFile(fileName, fileSystem[folderName][fileName]);
-                        };
-                        fileListDiv.appendChild(fileDiv);
-                    });
-
-                    directory.appendChild(folderDiv);
-                    directory.appendChild(fileListDiv);
-                });
+        const fileSystem = {
+            "The main character": {
+                "Leay_Full_Archive.txt": "리에 데이터...",
+                "Curo_Half_Archive.txt": "명칭: 큐로(Curo)\n[기록]\n데이터가 심하게 오염되었습니다.\n시스템 관리자에게 문의하십시오.\n\n(글리치 코드를 입력하기 전까지는 아무것도 없습니다.)",
+                "Kisune_Full_Archive.txt": "키스네 데이터..."
             }
+        };
 
-            authForm.addEventListener("submit", (e) => {
-                e.preventDefault();
-                if (passwordInput.value === PASSWORD) {
-                    document.body.classList.add("auth-success-flash");
-                    authMessage.textContent = "> SYNCING...";
-                    setTimeout(() => {
-                        authScreen.classList.add("hidden");
-                        mainScreen.classList.remove("hidden");
-                        buildDirectory();
-                        startTypingMain();
-                    }, 1000);
-                } else {
-                    document.body.classList.add("auth-error-flash");
-                    authMessage.textContent = "> DENIED";
-                    setTimeout(() => {
-                        document.body.classList.remove("auth-error-flash");
-                        passwordInput.value = "";
-                    }, 800);
-                }
-            });
+        // 1. "glitch" 키워드 감지
+        window.addEventListener('keydown', (e) => {
+            inputBuffer += e.key.toLowerCase();
+            if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
 
-            function startTypingMain() {
-                terminalText.innerHTML = "";
-                const lines = ["> DATABASE ACCESS GRANTED.", "> LOADING DIRECTORIES..."];
-                lines.forEach((line, i) => {
-                    const p = document.createElement("p");
-                    p.style.margin = "5px 0";
-                    terminalText.appendChild(p);
-                    let idx = 0;
-                    function type() {
-                        if (idx < line.length) { p.textContent += line[idx++]; setTimeout(type, 30); }
-                    }
-                    setTimeout(type, i * 800);
-                });
+            if (inputBuffer === "glitch") {
+                triggerSystemGlitch();
             }
-
-            function openFile(name, content) {
-                dbView.classList.add("hidden");
-                fileScreen.classList.remove("hidden");
-                document.getElementById("file-title").textContent = name;
-                fileText.innerHTML = "";
-                
-                const welcomeLine = document.createElement("p");
-                welcomeLine.className = "typing-cursor";
-                fileText.appendChild(welcomeLine);
-                
-                let idx = 0;
-                const welcomeStr = "> DECRYPTING: " + name + "...";
-                
-                function typeWelcome() {
-                    if (idx < welcomeStr.length) {
-                        welcomeLine.textContent += welcomeStr[idx++];
-                        setTimeout(typeWelcome, 40);
-                    } else {
-                        setTimeout(() => {
-                            welcomeLine.remove();
-                            const mainLine = document.createElement("p");
-                            mainLine.className = "typing-cursor";
-                            fileText.appendChild(mainLine);
-                            let midx = 0;
-                            function typeMain() {
-                                if (midx < content.length) {
-                                    mainLine.innerHTML += content[midx] === "\n" ? "<br>" : content[midx];
-                                    midx++;
-                                    setTimeout(typeMain, 15);
-                                } else {
-                                    mainLine.classList.remove("typing-cursor");
-                                }
-                            }
-                            typeMain();
-                        }, 800);
-                    }
-                }
-                typeWelcome();
-            }
-
-            document.getElementById("back-btn").onclick = () => {
-                fileScreen.classList.add("hidden");
-                dbView.classList.remove("hidden");
-            };
         });
+
+        function triggerSystemGlitch() {
+            isGlitchUnlocked = true;
+            document.body.classList.add('glitch-active');
+            
+            // 2초간 미친듯이 흔들리다가 멈춤
+            setTimeout(() => {
+                document.body.classList.remove('glitch-active');
+                alert("SYSTEM BREACHED: HIDDEN DATA UNLOCKED");
+            }, 1500);
+        }
+
+        // 로그인 로직
+        document.getElementById("auth-form").onsubmit = (e) => {
+            e.preventDefault();
+            if(document.getElementById("password-input").value === PASSWORD) {
+                document.getElementById("auth-screen").classList.add("hidden");
+                document.getElementById("main-screen").classList.remove("hidden");
+                buildDirectory();
+            }
+        };
+
+        function buildDirectory() {
+            const dir = document.getElementById("directory");
+            dir.innerHTML = "";
+            Object.keys(fileSystem).forEach(folder => {
+                const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = folder;
+                const list = document.createElement("div"); list.className = "hidden";
+                fDiv.onclick = () => list.classList.toggle("hidden");
+                Object.keys(fileSystem[folder]).forEach(file => {
+                    const fi = document.createElement("div"); fi.className = "file"; fi.textContent = file;
+                    fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
+                    list.appendChild(fi);
+                });
+                dir.appendChild(fDiv); dir.appendChild(list);
+            });
+        }
+
+        function openFile(name, content) {
+            document.getElementById("database-view").classList.add("hidden");
+            document.getElementById("file-screen").classList.remove("hidden");
+            document.getElementById("file-title").textContent = name;
+            document.getElementById("file-text").innerText = content;
+            const container = document.getElementById("file-scroll-container");
+            const hZone = document.getElementById("hidden-zone");
+            
+            container.scrollTop = 0;
+            hZone.style.display = "none"; // 기본 숨김
+
+            // 큐로 파일이고 + glitch가 이미 입력되었다면 스크롤 감시
+            if (name.includes("Curo") && isGlitchUnlocked) {
+                container.onscroll = () => {
+                    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+                        hZone.style.display = "block"; // 스크롤 내리면 버튼 등장
+                    }
+                };
+            }
+        }
+
+        document.getElementById("back-btn").onclick = () => {
+            document.getElementById("file-screen").classList.add("hidden");
+            document.getElementById("database-view").classList.remove("hidden");
+        };
+
+        document.getElementById("secret-btn").onclick = () => {
+            alert("존재하지 않은 구역에 진입합니다...");
+        };
     </script>
 </body>
 </html>

@@ -183,3 +183,64 @@ body {
 #back-btn:hover { background: var(--neon-mint); color: #000; }
 
 .hidden { display: none !important; }
+
+/* =========================================
+   🚨 히든 추가 요소 (GLITCH & SECRET BUTTON)
+   ========================================= */
+
+/* --- 1. 전체 화면 글리치 효과 --- */
+@keyframes screenGlitch {
+    0% { transform: translate(0); }
+    10% { transform: translate(-5px, 2px) skewX(2deg); filter: hue-rotate(90deg); }
+    20% { transform: translate(5px, -2px) skewX(-2deg); }
+    30% { transform: translate(-2px, 5px); filter: invert(0.1); }
+    100% { transform: translate(0); }
+}
+
+.glitch-active {
+    animation: screenGlitch 0.15s infinite !important;
+}
+
+/* --- 2. 큐로 파일 하단 스크롤 영역 제어 --- */
+#file-scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 15px;
+    scroll-behavior: smooth;
+}
+
+/* --- 3. 히든 트리거 존 (경고 문구 + 버튼) --- */
+.hidden-trigger-zone {
+    margin-top: 400px; /* 한참 내려야 보이도록 여백 확보 */
+    padding: 60px 0;
+    text-align: center;
+    border-top: 1px dashed rgba(255, 0, 0, 0.3);
+}
+
+.glitch-text {
+    color: #ff0000;
+    font-weight: bold;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px #000;
+    animation: blink 0.2s infinite;
+}
+
+.hidden-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff0000, #440000);
+    border: 2px solid #fff;
+    cursor: pointer;
+    margin: 0 auto;
+    box-shadow: 0 0 20px #ff0000, inset 0 0 15px #000;
+    transition: all 0.3s ease;
+}
+
+.hidden-button:hover {
+    transform: scale(1.2) rotate(10deg);
+    box-shadow: 0 0 40px #ff0000;
+    background: radial-gradient(circle, #ff4444, #660000);
+}

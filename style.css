@@ -11,24 +11,43 @@
     --folder-gold: #ffca28;
 }
 
+/* 🚨 [추가] 이미지처럼 다크한 스크롤바 디자인 */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 6px;
+    border: 3px solid #0a0a0a;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+
 body {
     margin: 0;
     background: var(--bg-black);
     color: var(--neon-pink);
-    overflow: hidden; /* 배경 심볼로 인한 스크롤 방지 */
+    /* 🚨 [수정] 스크롤 방지 해제 (이미지처럼 스크롤 가능하게 변경) */
+    overflow-x: hidden; 
+    overflow-y: auto; 
     transition: background-color 0.8s ease;
 }
 
 /* --- 화면 공통 레이아웃 (정중앙 정렬 보정) --- */
 .screen {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    /* 🚨 [수정] 고정 높이 100vh를 최소 높이로 변경하여 내용에 따라 늘어나게 함 */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* 상단부터 차례대로 배치 */
-    padding-top: 5vh; /* 상단 여유 공간 */
+    justify-content: flex-start; 
+    padding: 5vh 0 10vh 0; /* 상하단 여유 공간 */
     transition: filter 0.8s ease;
     z-index: 2;
 }
@@ -38,11 +57,11 @@ body {
     position: fixed; /* 화면에 완전히 고정 */
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* 정확히 화면 정중앙 */
-    font-size: 80vh; /* 화면 높이에 맞춘 거대 크기 */
-    color: rgba(94, 255, 235, 0.05); /* 더 은은하게 조정 */
+    transform: translate(-50%, -50%); 
+    font-size: 80vh; 
+    color: rgba(94, 255, 235, 0.05); 
     text-shadow: 0 0 50px rgba(94, 255, 235, 0.1);
-    z-index: 1; /* 콘텐츠 뒤로 배치 */
+    z-index: 1; 
     pointer-events: none;
     user-select: none;
     animation: sigilPulse 6s ease-in-out infinite;
@@ -53,8 +72,8 @@ body {
 .header, .terminal, .directory, #back-btn {
     position: relative;
     z-index: 10;
-    width: 100%;
-    max-width: 650px; /* 터미널 너비 일관성 */
+    width: 90%; /* 모바일 대응을 위해 약간 축소 */
+    max-width: 650px; 
 }
 
 .header h1 {
@@ -117,8 +136,8 @@ body {
 .folder {
     border: 1px solid var(--neon-mint);
     color: var(--neon-mint);
-    padding: 12px;
-    margin-bottom: 10px;
+    padding: 15px; /* 약간 더 여유 있게 조정 */
+    margin-bottom: 12px;
     cursor: pointer;
     background: rgba(94, 255, 235, 0.05);
     font-weight: bold;
@@ -188,7 +207,6 @@ body {
    🚨 히든 추가 요소 (GLITCH & SECRET BUTTON)
    ========================================= */
 
-/* --- 1. 전체 화면 글리치 효과 --- */
 @keyframes screenGlitch {
     0% { transform: translate(0); }
     10% { transform: translate(-5px, 2px) skewX(2deg); filter: hue-rotate(90deg); }
@@ -201,7 +219,6 @@ body {
     animation: screenGlitch 0.15s infinite !important;
 }
 
-/* --- 2. 큐로 파일 하단 스크롤 영역 제어 --- */
 #file-scroll-container {
     max-height: 400px;
     overflow-y: auto;
@@ -209,10 +226,9 @@ body {
     scroll-behavior: smooth;
 }
 
-/* --- 3. 히든 트리거 존 (경고 문구 + 버튼) --- */
 .hidden-trigger-zone {
-    display: none; /* 기본적으로 숨김 처리 (JS에서 제어) */
-    margin-top: 400px; /* 한참 내려야 보이도록 여백 확보 */
+    display: none; 
+    margin-top: 400px; 
     padding: 60px 0;
     text-align: center;
     border-top: 1px dashed rgba(255, 0, 0, 0.3);

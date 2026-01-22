@@ -111,7 +111,7 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
-        // 사용자님이 주신 텍스트 데이터 (그대로 보존)
+        // 사용자 데이터 보존 (건드리지 않음)
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n\n[종족]\n인간(human),노에인(Noein)\n\n[성별]\n여성\n\n[프로필]\n키: 169cm\n몸무게: 51.2kg]\n성격: 친절하면서도 이기주의 성향의 소유자이며 때때로 이익을 따지기도 한다.\n외형: 흰색 머리카락에 약간 왜소한 체형을 하고있고 밝은 회색에 후드티를 입고 다니며 대부분 모자를 쓰고 다니며 활동한다. 중간중간 모자를 벗고 다양한 패션을 보여준 적도 있지만 대부분 몸을 어느정도 가리고 다닌다.\n\n[능력]\n기본적인 여성의 근력과 능력을 가졌지만 리셋에서도 잃지않는 기억들과 끈기, 무엇보다 여러 일들을 겹쳐 겪은 여파로 모든 생물들 중에서 가장 뒤어난 동체시력을 가지고 있다.\n\n[일행]\n큐로,키스네와 대부분 함꼐 지내며 어디에서 잠과 식사를 해결하는지는 미지수이다.\n\n[만난 적 있음, 혹은 접점이 있던 존재들]\n아레인(Arein), 토리(tory), 시로(shiro), 실크(silk), 애키스(ekis), 키스네 코든(kisune_Corden) 등등 대부분의 인물들과 전부 접점이 있던 것으로 알려져 있으며 대부분 친분이 어느정도 있는 것으로 추정되고 있다.",
@@ -242,7 +242,7 @@
             });
         }
 
-        // --- 5. 파일 열기 & 타이핑 로직 ---
+        // --- 5. 파일 열기 & 타이핑 로직 (버그 수정 완료) ---
         function openFile(name, content) {
             document.getElementById("database-view").classList.add("hidden");
             document.getElementById("file-screen").classList.remove("hidden");
@@ -252,11 +252,13 @@
             const container = document.getElementById("file-scroll-container");
             const hZone = document.getElementById("hidden-zone");
             
+            // [중요] 초기화: 이전 스크롤 이벤트 제거 및 강제 숨김
             textTarget.innerHTML = ""; 
             container.scrollTop = 0;
+            container.onscroll = null; 
             hZone.style.display = "none";
 
-            // 시스템 메시지 먼저 출력
+            // 시스템 메시지
             const sysMsg = document.createElement("p");
             sysMsg.style.color = "var(--neon-mint)";
             sysMsg.className = "typing-cursor";
@@ -276,24 +278,21 @@
                     if(charIdx < content.length) {
                         bodyMsg.textContent += content[charIdx];
                         charIdx++;
-                        setTimeout(typeBody, 5); // 빠른 타이핑
-                        // 텍스트가 길어지면 자동으로 아래로 스크롤
+                        setTimeout(typeBody, 5); 
                         container.scrollTop = container.scrollHeight;
+                    } else {
+                        // [핵심] 타이핑이 "완전히 끝난 후"에만 스크롤 감지 활성화
+                        if (name.includes("Curo") && isGlitchUnlocked) {
+                            container.onscroll = () => {
+                                if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
+                                    hZone.style.display = "block";
+                                }
+                            };
+                        }
                     }
                 }
                 typeBody();
             }, 800);
-
-            // Curo 파일 + 글리치 해제 상태일 때만 스크롤 감지
-            if (name.includes("Curo") && isGlitchUnlocked) {
-                container.onscroll = () => {
-                    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
-                        hZone.style.display = "block";
-                    }
-                };
-            } else {
-                container.onscroll = null;
-            }
         }
 
         // --- 6. 기타 버튼 로직 ---

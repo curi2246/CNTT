@@ -14,10 +14,36 @@
 
         body {
             margin: 0; background: var(--bg-black); color: var(--neon-pink);
-            overflow: hidden; transition: background-color 0.5s;
+            overflow: hidden; transition: background-color 0.4s;
         }
 
-        /* --- 글리치 애니메이션 --- */
+        /* --- 💓 심장 박동 애니메이션 추가 --- */
+        .bg-sigil {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.05);
+            z-index: 1; pointer-events: none;
+            animation: pulse-neon 3s ease-in-out infinite; /* 심장 박동 효과 */
+        }
+
+        @keyframes pulse-neon {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; text-shadow: 0 0 10px rgba(94, 255, 235, 0.1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.2; text-shadow: 0 0 40px rgba(94, 255, 235, 0.5); }
+        }
+
+        /* --- ✨ 인증 성공/실패 플래시 효과 --- */
+        .auth-success-flash { animation: flash-mint 0.8s ease-out forwards; }
+        @keyframes flash-mint {
+            0% { background-color: var(--neon-mint); filter: brightness(2); }
+            100% { background-color: var(--bg-black); }
+        }
+
+        .auth-error-flash { animation: flash-red 0.5s ease-in-out; }
+        @keyframes flash-red {
+            0%, 100% { background-color: var(--bg-black); }
+            50% { background-color: #440a0a; }
+        }
+
+        /* 글리치 애니메이션 */
         @keyframes screenShake {
             0% { transform: translate(0); filter: hue-rotate(0deg); }
             10% { transform: translate(-5px, 5px); filter: invert(1); }
@@ -25,45 +51,14 @@
             30% { transform: translate(-5px, 0); }
             100% { transform: translate(0); }
         }
+        .glitch-active { animation: screenShake 0.15s infinite !important; }
 
-        .glitch-active {
-            animation: screenShake 0.15s infinite !important;
-        }
-
-        .bg-sigil {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.03);
-            z-index: 1; pointer-events: none;
-        }
-
-        .screen {
-            position: relative; width: 100vw; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; z-index: 2;
-        }
-
-        .terminal {
-            width: 100%; max-width: 600px; border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
-            padding: 20px; margin-bottom: 15px;
-        }
-
+        .screen { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 2; }
+        .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; }
         #file-scroll-container { max-height: 400px; overflow-y: auto; scroll-behavior: smooth; }
         
-        /* 히든 버튼 스타일 */
-        .hidden-trigger-zone { 
-            margin-top: 200px; padding: 50px 0; text-align: center; 
-            display: none; /* 기본적으로 숨김 */
-        }
-
-        .hidden-button {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: radial-gradient(circle, #ff0000, #000);
-            border: 2px solid #fff; cursor: pointer;
-            margin: 20px auto; box-shadow: 0 0 15px #ff0000;
-            animation: pulse 1s infinite;
-        }
-
+        .hidden-trigger-zone { margin-top: 200px; padding: 50px 0; text-align: center; display: none; }
+        .hidden-button { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #ff0000, #000); border: 2px solid #fff; cursor: pointer; margin: 20px auto; box-shadow: 0 0 15px #ff0000; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .directory { width: 100%; max-width: 600px; }
@@ -78,15 +73,18 @@
 
     <div id="auth-screen" class="screen">
         <div class="header"><h1>SECURITY CHECK</h1></div>
+        <div id="auth-message" style="margin-bottom: 10px;">ENTER ACCESS KEY</div>
         <div class="terminal">
-            <form id="auth-form"><input id="password-input" type="password" placeholder="PASSWORD" style="width:100%; text-align:center; background:none; border:none; border-bottom:1px solid var(--neon-mint); color:white; outline:none;"></form>
+            <form id="auth-form">
+                <input id="password-input" type="password" placeholder="PASSWORD" autocomplete="off" style="width:100%; text-align:center; background:none; border:none; border-bottom:1px solid var(--neon-mint); color:white; outline:none;">
+            </form>
         </div>
     </div>
 
     <div id="main-screen" class="screen hidden">
         <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1>CENTRAL DATABASE</h1></div>
-            <div class="terminal"><div id="terminal-text">> SYSTEM READY...</div></div>
+            <div class="terminal"><div id="terminal-text">> SYSTEM SYNCHRONIZED...</div></div>
             <div class="directory" id="directory"></div>
         </div>
 
@@ -147,35 +145,43 @@
                 }
             };
         
-
-        // 1. "glitch" 키워드 감지
+// 1. "glitch" 감지
         window.addEventListener('keydown', (e) => {
             inputBuffer += e.key.toLowerCase();
             if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
-
             if (inputBuffer === "glitch") {
-                triggerSystemGlitch();
+                isGlitchUnlocked = true;
+                document.body.classList.add('glitch-active');
+                setTimeout(() => {
+                    document.body.classList.remove('glitch-active');
+                    alert("SYSTEM BREACHED: HIDDEN DATA UNLOCKED");
+                }, 1500);
             }
         });
-
-        function triggerSystemGlitch() {
-            isGlitchUnlocked = true;
-            document.body.classList.add('glitch-active');
-            
-            // 2초간 미친듯이 흔들리다가 멈춤
-            setTimeout(() => {
-                document.body.classList.remove('glitch-active');
-                alert("SYSTEM BREACHED: HIDDEN DATA UNLOCKED");
-            }, 1500);
-        }
-
-        // 로그인 로직
+   
+        // 2. 로그인 로직 (연출 보강)
         document.getElementById("auth-form").onsubmit = (e) => {
             e.preventDefault();
-            if(document.getElementById("password-input").value === PASSWORD) {
-                document.getElementById("auth-screen").classList.add("hidden");
-                document.getElementById("main-screen").classList.remove("hidden");
-                buildDirectory();
+            const val = document.getElementById("password-input").value;
+            const msg = document.getElementById("auth-message");
+
+            if(val === PASSWORD) {
+                document.body.classList.add("auth-success-flash");
+                msg.textContent = "> ACCESS GRANTED";
+                msg.style.color = "var(--neon-mint)";
+                setTimeout(() => {
+                    document.body.classList.remove("auth-success-flash");
+                    document.getElementById("auth-screen").classList.add("hidden");
+                    document.getElementById("main-screen").classList.remove("hidden");
+                    buildDirectory();
+                }, 800);
+            } else {
+                document.body.classList.add("auth-error-flash");
+                msg.textContent = "> ACCESS DENIED";
+                setTimeout(() => {
+                    document.body.classList.remove("auth-error-flash");
+                    document.getElementById("password-input").value = "";
+                }, 500);
             }
         };
 
@@ -183,11 +189,11 @@
             const dir = document.getElementById("directory");
             dir.innerHTML = "";
             Object.keys(fileSystem).forEach(folder => {
-                const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = folder;
+                const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
                 const list = document.createElement("div"); list.className = "hidden";
                 fDiv.onclick = () => list.classList.toggle("hidden");
                 Object.keys(fileSystem[folder]).forEach(file => {
-                    const fi = document.createElement("div"); fi.className = "file"; fi.textContent = file;
+                    const fi = document.createElement("div"); fi.className = "file"; fi.textContent = "📄 " + file;
                     fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
                     list.appendChild(fi);
                 });
@@ -198,19 +204,18 @@
         function openFile(name, content) {
             document.getElementById("database-view").classList.add("hidden");
             document.getElementById("file-screen").classList.remove("hidden");
-            document.getElementById("file-title").textContent = name;
+            document.getElementById("file-title").textContent = "FILE: " + name;
             document.getElementById("file-text").innerText = content;
+            
             const container = document.getElementById("file-scroll-container");
             const hZone = document.getElementById("hidden-zone");
-            
             container.scrollTop = 0;
-            hZone.style.display = "none"; // 기본 숨김
+            hZone.style.display = "none";
 
-            // 큐로 파일이고 + glitch가 이미 입력되었다면 스크롤 감시
             if (name.includes("Curo") && isGlitchUnlocked) {
                 container.onscroll = () => {
-                    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
-                        hZone.style.display = "block"; // 스크롤 내리면 버튼 등장
+                    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
+                        hZone.style.display = "block";
                     }
                 };
             }
@@ -222,7 +227,7 @@
         };
 
         document.getElementById("secret-btn").onclick = () => {
-            alert("존재하지 않은 구역에 진입합니다...");
+            alert("⚠️ WARNING: 유효하지 않은 타임라인 데이터에 접근합니다.");
         };
     </script>
 </body>

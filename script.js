@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const PASSWORD = "1234";
     let inputBuffer = "";      
     let isGlitchUnlocked = false; 
-    const fileSystem = {}; // HTML에서 읽어온 데이터가 저장될 공간
+    const fileSystem = {}; // HTML에서 읽어온 데이터 저장소
 
     // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const folder = item.dataset.folder;
             const fileName = item.dataset.file;
             const content = item.innerText.trim();
-
             if (!fileSystem[folder]) fileSystem[folder] = {};
             fileSystem[folder][fileName] = content;
         });
@@ -40,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.body.classList.remove("auth-success-flash");
                 authScreen.classList.add("hidden");
                 mainScreen.classList.remove("hidden");
-                buildDirectory(); // 폴더 목록 생성
+                buildDirectory(); 
                 startTyping();
             }, 1200);
         } else {
@@ -76,81 +75,99 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 3. 📁 폴더/파일 목록 생성 로직 ---
+    // --- 3. 📁 폴더/파일 목록 생성 ---
     function buildDirectory() {
-        const dirContainer = document.getElementById("directory");
-        dirContainer.innerHTML = "";
-        
-        Object.keys(fileSystem).forEach(folderName => {
-            const fDiv = document.createElement("div");
-            fDiv.className = "folder";
-            fDiv.textContent = "📁 " + folderName;
+        const dir = document.getElementById("directory");
+        dir.innerHTML = "";
+        Object.keys(fileSystem).forEach(folder => {
+            const fDiv = document.createElement("div"); 
+            fDiv.className = "folder"; 
+            fDiv.textContent = "📁 " + folder;
             
-            const fileList = document.createElement("div");
-            fileList.className = "hidden";
+            const list = document.createElement("div"); 
+            list.className = "hidden";
             
-            fDiv.onclick = () => fileList.classList.toggle("hidden");
+            fDiv.onclick = () => list.classList.toggle("hidden");
             
-            Object.keys(fileSystem[folderName]).forEach(fileName => {
-                const fi = document.createElement("div");
-                fi.className = "file";
-                fi.textContent = "📄 " + fileName;
+            Object.keys(fileSystem[folder]).forEach(file => {
+                const fi = document.createElement("div"); 
+                fi.className = "file"; 
+                fi.textContent = "📄 " + file;
                 fi.onclick = (e) => { 
                     e.stopPropagation(); 
-                    openFile(fileName, fileSystem[folderName][fileName]); 
+                    openFile(file, fileSystem[folder][file]); 
                 };
-                fileList.appendChild(fi);
+                list.appendChild(fi);
             });
-            dirContainer.appendChild(fDiv);
-            dirContainer.appendChild(fileList);
+            dir.appendChild(fDiv); 
+            dir.appendChild(list);
         });
     }
 
-    // --- 4. 📄 파일 열기 및 타이핑 효과 ---
+    // --- 4. 📄 파일 열기 로직 (수정 및 통합 버전) ---
     function openFile(name, content) {
         dbView.classList.add("hidden");
         fileScreen.classList.remove("hidden");
         document.getElementById("file-title").textContent = "FILE: " + name;
-
-        const hiddenZone = document.getElementById("hidden-zone");
-        if(hiddenZone) hiddenZone.style.display = "none";
+        
+        const textTarget = document.getElementById("file-text");
+        const hZone = document.getElementById("hidden-zone");
+        
+        // 초기화 로직
+        textTarget.innerHTML = ""; 
         fileScrollContainer.scrollTop = 0;
+        fileScrollContainer.onscroll = null; // 기존 스크롤 이벤트 해제
+        if(hZone) hZone.style.display = "none"; 
 
-        const textArea = document.getElementById("file-text");
-        textArea.innerHTML = ""; 
-
-        const welcomeLine = document.createElement("p");
-        welcomeLine.style.color = "var(--neon-mint)";
-        welcomeLine.textContent = "> SYSTEM: 기록 열람을 시작합니다...";
-        textArea.appendChild(welcomeLine);
+        const sysMsg = document.createElement("p");
+        sysMsg.style.color = "var(--neon-mint)";
+        sysMsg.textContent = "> SYSTEM: 기록 열람을 시작합니다...";
+        textTarget.appendChild(sysMsg);
 
         setTimeout(() => {
-            welcomeLine.remove();
-            const contentLine = document.createElement("p");
-            contentLine.style.color = "#fff";
-            contentLine.style.whiteSpace = "pre-wrap"; // 줄바꿈 유지
-            textArea.appendChild(contentLine);
+            sysMsg.remove(); // 시스템 메시지 삭제 후 본문 타이핑
+            const bodyMsg = document.createElement("p");
+            bodyMsg.style.color = "#fff";
+            bodyMsg.style.whiteSpace = "pre-wrap";
+            bodyMsg.style.lineHeight = "1.6";
+            textTarget.appendChild(bodyMsg);
 
             let mainIdx = 0;
-            function typeMain() {
-                if (mainIdx < content.length) {
-                    contentLine.textContent += content[mainIdx];
+            function typeBody() {
+                if(mainIdx < content.length) {
+                    bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
-                    setTimeout(typeMain, 10);
+                    setTimeout(typeBody, 10); 
                     fileScrollContainer.scrollTop = fileScrollContainer.scrollHeight;
+                } else {
+                    // 타이핑이 완전히 끝난 후 히든 체크 활성화
+                    enableHiddenCheck(name);
                 }
             }
-            typeMain();
+            typeBody();
         }, 800);
     }
 
-    // --- 5. 🔙 뒤로가기 버튼 ---
+    // --- 5. 🖱️ 히든 체크 (스크롤 감지) ---
+    function enableHiddenCheck(fileName) {
+        if (isGlitchUnlocked && fileName.includes("Curo")) {
+            fileScrollContainer.onscroll = () => {
+                const isAtBottom = fileScrollContainer.scrollTop + fileScrollContainer.clientHeight >= fileScrollContainer.scrollHeight - 20;
+                if (isAtBottom) {
+                    document.getElementById("hidden-zone").style.display = "block";
+                    fileScrollContainer.onscroll = null; // 한 번 나타나면 감지 중지
+                }
+            };
+        }
+    }
+
+    // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").onclick = () => {
         fileScreen.classList.add("hidden");
         dbView.classList.remove("hidden");
     };
 
-    // --- 6. ⌨️ "glitch" 감지 ---
+    // --- 7. ⌨️ "glitch" 커맨드 감지 ---
     window.addEventListener("keydown", (e) => {
         inputBuffer += e.key.toLowerCase();
         if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
@@ -164,16 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 7. 🖱️ 스크롤 감지 (히든 버튼) ---
-    fileScrollContainer.onscroll = () => {
-        const currentTitle = document.getElementById("file-title").textContent;
-        if (isGlitchUnlocked && currentTitle.includes("Curo")) {
-            if (fileScrollContainer.scrollTop + fileScrollContainer.clientHeight >= fileScrollContainer.scrollHeight - 20) {
-                document.getElementById("hidden-zone").style.display = "block";
-            }
-        }
-    };
-
+    // --- 8. 🖱️ 히든 버튼 클릭 ---
     document.getElementById("secret-btn").onclick = () => {
         alert("관리자 권한으로 심연의 데이터에 접속합니다...");
     };

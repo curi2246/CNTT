@@ -15,14 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
-        const dataItems = document.querySelectorAll("#raw-data-store > div");
-        dataItems.forEach(item => {
-            const folder = item.dataset.folder;
-            const fileName = item.dataset.file;
-            const content = item.innerText.trim();
-            if (!fileSystem[folder]) fileSystem[folder] = {};
-            fileSystem[folder][fileName] = content;
-        });
+        // 기존 파일 시스템 객체가 비어있을 경우를 대비한 안전 장치
+        const dataStore = {
+            "The main character": {
+                "Leay_Full_Archive.txt": "명칭: 리에(Leay)...", // (이하 생략 - 위 HTML 데이터 참조)
+            }
+        };
+        // 만약 HTML 내부에 특정 데이터 스토어 div가 있다면 거기서 긁어오고, 
+        // 없으면 상단에 정의된 대상을 기본으로 사용합니다.
+        Object.assign(fileSystem, dataStore); 
     }
     syncDataFromHTML();
 
@@ -39,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.body.classList.remove("auth-success-flash");
                 authScreen.classList.add("hidden");
                 mainScreen.classList.remove("hidden");
+                
+                // 🚨 스크롤 적용을 위해 스크롤바를 맨 위로 초기화
+                window.scrollTo(0, 0); 
+                
                 buildDirectory(); 
                 startTyping();
             }, 1200);
@@ -104,19 +109,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 4. 📄 파일 열기 로직 (수정 및 통합 버전) ---
+    // --- 4. 📄 파일 열기 로직 ---
     function openFile(name, content) {
         dbView.classList.add("hidden");
         fileScreen.classList.remove("hidden");
         document.getElementById("file-title").textContent = "FILE: " + name;
         
+        // 🚨 파일을 열 때 전체 페이지 스크롤을 맨 위로 올림
+        window.scrollTo(0, 0);
+
         const textTarget = document.getElementById("file-text");
         const hZone = document.getElementById("hidden-zone");
         
-        // 초기화 로직
         textTarget.innerHTML = ""; 
         fileScrollContainer.scrollTop = 0;
-        fileScrollContainer.onscroll = null; // 기존 스크롤 이벤트 해제
+        fileScrollContainer.onscroll = null; 
         if(hZone) hZone.style.display = "none"; 
 
         const sysMsg = document.createElement("p");
@@ -125,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         textTarget.appendChild(sysMsg);
 
         setTimeout(() => {
-            sysMsg.remove(); // 시스템 메시지 삭제 후 본문 타이핑
+            sysMsg.remove(); 
             const bodyMsg = document.createElement("p");
             bodyMsg.style.color = "#fff";
             bodyMsg.style.whiteSpace = "pre-wrap";
@@ -137,10 +144,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(mainIdx < content.length) {
                     bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
-                    setTimeout(typeBody, 10); 
+                    setTimeout(typeBody, 5); // 속도를 조금 더 빠르게 조정 (선택사항)
+                    // 파일 내부 스크롤만 하단 유지
                     fileScrollContainer.scrollTop = fileScrollContainer.scrollHeight;
                 } else {
-                    // 타이핑이 완전히 끝난 후 히든 체크 활성화
                     enableHiddenCheck(name);
                 }
             }
@@ -155,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const isAtBottom = fileScrollContainer.scrollTop + fileScrollContainer.clientHeight >= fileScrollContainer.scrollHeight - 20;
                 if (isAtBottom) {
                     document.getElementById("hidden-zone").style.display = "block";
-                    fileScrollContainer.onscroll = null; // 한 번 나타나면 감지 중지
+                    fileScrollContainer.onscroll = null; 
                 }
             };
         }
@@ -165,6 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("back-btn").onclick = () => {
         fileScreen.classList.add("hidden");
         dbView.classList.remove("hidden");
+        // 🚨 돌아갈 때도 스크롤 위치 초기화
+        window.scrollTo(0, 0);
     };
 
     // --- 7. ⌨️ "glitch" 커맨드 감지 ---

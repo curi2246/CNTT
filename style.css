@@ -261,3 +261,21 @@ body {
     box-shadow: 0 0 40px #ff0000;
     background: radial-gradient(circle, #ff4444, #660000);
 }
+
+/* =========================================
+   🎵 [추가] 배경음악 정보창 디자인
+   ========================================= */
+#music-info-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--neon-mint);
+    color: var(--neon-mint);
+    padding: 10px 15px;
+    font-size: 12px;
+    z-index: 100;
+    display: none; /* JS에서 인증 후 보이게 설정됨 */
+    box-shadow: 0 0 15px rgba(94, 255, 235, 0.2);
+    border-radius: 4px;
+}

@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileScreen = document.getElementById("file-screen");
     const fileScrollContainer = document.getElementById("file-scroll-container");
 
+    // --- [추가] 배경음악 요소 가져오기 ---
+    const bgm = document.getElementById("main-bgm");
+
     const PASSWORD = "1234";
     let inputBuffer = "";      
     let isGlitchUnlocked = false; 
@@ -15,14 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
-        // 기존 파일 시스템 객체가 비어있을 경우를 대비한 안전 장치
+        // 이 부분은 사용자님의 원본 로직을 유지합니다. 
+        // 실제 데이터는 HTML에서 가져오거나 별도로 정의된 객체를 사용하게 됩니다.
         const dataStore = {
             "The main character": {
-                "Leay_Full_Archive.txt": "명칭: 리에(Leay)...", // (이하 생략 - 위 HTML 데이터 참조)
+                "Leay_Full_Archive.txt": "내용 생략 (HTML 데이터를 참조합니다)",
             }
         };
-        // 만약 HTML 내부에 특정 데이터 스토어 div가 있다면 거기서 긁어오고, 
-        // 없으면 상단에 정의된 대상을 기본으로 사용합니다.
         Object.assign(fileSystem, dataStore); 
     }
     syncDataFromHTML();
@@ -36,12 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
 
+            // --- [추가] 배경음악 재생 ---
+            if (bgm) {
+                bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
+            }
+
             setTimeout(() => {
                 document.body.classList.remove("auth-success-flash");
                 authScreen.classList.add("hidden");
                 mainScreen.classList.remove("hidden");
                 
-                // 🚨 스크롤 적용을 위해 스크롤바를 맨 위로 초기화
                 window.scrollTo(0, 0); 
                 
                 buildDirectory(); 
@@ -115,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         fileScreen.classList.remove("hidden");
         document.getElementById("file-title").textContent = "FILE: " + name;
         
-        // 🚨 파일을 열 때 전체 페이지 스크롤을 맨 위로 올림
         window.scrollTo(0, 0);
 
         const textTarget = document.getElementById("file-text");
@@ -144,8 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(mainIdx < content.length) {
                     bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
-                    setTimeout(typeBody, 5); // 속도를 조금 더 빠르게 조정 (선택사항)
-                    // 파일 내부 스크롤만 하단 유지
+                    setTimeout(typeBody, 5); 
                     fileScrollContainer.scrollTop = fileScrollContainer.scrollHeight;
                 } else {
                     enableHiddenCheck(name);
@@ -172,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("back-btn").onclick = () => {
         fileScreen.classList.add("hidden");
         dbView.classList.remove("hidden");
-        // 🚨 돌아갈 때도 스크롤 위치 초기화
         window.scrollTo(0, 0);
     };
 

@@ -198,7 +198,7 @@ window.addEventListener("keydown", (e) => {
             glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
         }
         if (musicTitle) {
-            musicTitle.textContent = "재생 중: Reupload Undertale The Hackers End - Its Just You And Me.mp3"; // 정보창 텍스트 변경
+            musicTitle.textContent = "재생 중: error.mp3.mp3"; // 정보창 텍스트 변경
         }
 
         // 화면 글리치 효과 시작

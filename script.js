@@ -179,19 +179,37 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0, 0);
     };
 
-    // --- 7. ⌨️ "glitch" 커맨드 감지 ---
-    window.addEventListener("keydown", (e) => {
-        inputBuffer += e.key.toLowerCase();
-        if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
-        if (inputBuffer === "glitch" && !isGlitchUnlocked) {
-            isGlitchUnlocked = true;
-            document.body.classList.add("glitch-active");
-            setTimeout(() => {
-                document.body.classList.remove("glitch-active");
-                alert("SYSTEM BREACHED: HIDDEN SECTOR UNLOCKED");
-            }, 1500);
+   // --- 7. ⌨️ "glitch" 커맨드 감지 ---
+window.addEventListener("keydown", (e) => {
+    inputBuffer += e.key.toLowerCase();
+    if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
+
+    if (inputBuffer === "glitch" && !isGlitchUnlocked) {
+        isGlitchUnlocked = true;
+
+        // 🎵 음악 교체 로직
+        const mainBgm = document.getElementById("main-bgm");
+        const glitchBgm = document.getElementById("glitch-bgm");
+        const musicTitle = document.getElementById("music-title");
+
+        if (mainBgm) mainBgm.pause(); // 기존 노래 정지
+        if (glitchBgm) {
+            glitchBgm.currentTime = 0; // 처음부터 재생
+            glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
         }
-    });
+        if (musicTitle) {
+            musicTitle.textContent = "재생 중: CRITICAL_ERROR.mp3"; // 정보창 텍스트 변경
+        }
+
+        // 화면 글리치 효과 시작
+        document.body.classList.add("glitch-active");
+        
+        setTimeout(() => {
+            document.body.classList.remove("glitch-active");
+            alert("SYSTEM BREACHED: HIDDEN SECTOR UNLOCKED");
+        }, 1500);
+    }
+});
 
     // --- 8. 🖱️ 히든 버튼 클릭 ---
     document.getElementById("secret-btn").onclick = () => {

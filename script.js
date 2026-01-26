@@ -127,9 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const hZone = document.getElementById("hidden-zone");
         
         textTarget.innerHTML = ""; 
-        fileScrollContainer.scrollTop = 0;
-        fileScrollContainer.onscroll = null; 
-        if(hZone) hZone.style.display = "none"; 
+        window.onscroll = null; // 이전 스크롤 초기화
+        document.body.style.backgroundColor = "var(--bg-black)"; // 배경색 초기화
 
         const sysMsg = document.createElement("p");
         sysMsg.style.color = "var(--neon-mint)";
@@ -149,8 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(mainIdx < content.length) {
                     bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
-                    setTimeout(typeBody, 5); 
-                    fileScrollContainer.scrollTop = fileScrollContainer.scrollHeight;
+                    setTimeout(typeBody, 2); 
                 } else {
                     enableHiddenCheck(name);
                 }
@@ -159,14 +157,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 
-    // --- 5. 🖱️ 히든 체크 (스크롤 감지) ---
+    // --- 5. 🖱️ 히든 체크 (전체 화면 스크롤 및 암전 적용) ---
     function enableHiddenCheck(fileName) {
+        const hZone = document.getElementById("hidden-zone");
         if (isGlitchUnlocked && fileName.includes("Curo")) {
-            fileScrollContainer.onscroll = () => {
-                const isAtBottom = fileScrollContainer.scrollTop + fileScrollContainer.clientHeight >= fileScrollContainer.scrollHeight - 20;
-                if (isAtBottom) {
-                    document.getElementById("hidden-zone").style.display = "block";
-                    fileScrollContainer.onscroll = null; 
+            if(hZone) {
+                hZone.style.display = "block";
+                hZone.style.opacity = "0"; // 처음엔 투명하게
+            }
+
+            window.onscroll = () => {
+                const scrollY = window.scrollY;
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                
+                if (maxScroll <= 0) return;
+
+                // 1. 배경 암전 (0.8은 텍스트가 위로 충분히 올라간 뒤 어두워지게 함)
+                const darknessRatio = Math.min(scrollY / (maxScroll * 0.9), 1);
+                document.body.style.backgroundColor = `rgba(0, 0, 0, ${darknessRatio})`;
+
+                // 2. 버튼 투명도 (70% 지점부터 서서히 등장)
+                const triggerPoint = maxScroll * 0.7;
+                if (scrollY > triggerPoint) {
+                    const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
+                    hZone.style.opacity = opacity;
+                } else {
+                    hZone.style.opacity = "0";
                 }
             };
         }
@@ -174,6 +190,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").onclick = () => {
+        window.onscroll = null; // 스크롤 이벤트 해제
+        document.body.style.backgroundColor = "var(--bg-black)"; // 배경 원복
         fileScreen.classList.add("hidden");
         dbView.classList.remove("hidden");
         window.scrollTo(0, 0);

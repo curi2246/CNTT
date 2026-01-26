@@ -66,9 +66,21 @@
 
         #auth-screen { justify-content: center; }
         .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; }
-        #file-scroll-container { max-height: 400px; overflow-y: auto; scroll-behavior: smooth; }
         
-        .hidden-trigger-zone { margin-top: 200px; padding: 50px 0; text-align: center; display: none; }
+        /* 🛠️ 박스 스크롤 제거: 전체 화면 스크롤 사용을 위해 높이 제한 해제 */
+        #file-scroll-container { width: 100%; overflow: visible; }
+        
+        /* 🌑 심연 구역: 텍스트 뒤에 나타날 아주 긴 암흑 공간 */
+        .hidden-trigger-zone { 
+            margin-top: 50px; 
+            padding-top: 100vh; /* 한 화면만큼 더 내려가야 함 */
+            padding-bottom: 200px;
+            text-align: center; 
+            display: none; 
+            transition: opacity 0.5s;
+            opacity: 0;
+        }
+
         .hidden-button { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #ff0000, #000); border: 2px solid #fff; cursor: pointer; margin: 20px auto; box-shadow: 0 0 15px #ff0000; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
@@ -128,7 +140,7 @@
                     </div>
                 </div>
             </div>
-            <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer;">← BACK</button>
+            <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer; margin-bottom: 50px;">← BACK</button>
         </div>
     </div>
 
@@ -137,6 +149,7 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
+  
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n\n[종족]\n인간(human),노에인(Noein)\n\n[성별]\n여성\n\n[프로필]\n키: 169cm\n몸무게: 51.2kg]\n성격: 친절하면서도 이기주의 성향의 소유자이며 때때로 이익을 따지기도 한다.\n외형: 흰색 머리카락에 약간 왜소한 체형을 하고있고 밝은 회색에 후드티를 입고 다니며 대부분 모자를 쓰고 다니며 활동한다. 중간중간 모자를 벗고 다양한 패션을 보여준 적도 있지만 대부분 몸을 어느정도 가리고 다닌다.\n\n[능력]\n기본적인 여성의 근력과 능력을 가졌지만 리셋에서도 잃지않는 기억들과 끈기, 무엇보다 여러 일들을 겹쳐 겪은 여파로 모든 생물들 중에서 가장 뒤어난 동체시력을 가지고 있다.\n\n[일행]\n큐로,키스네와 대부분 함꼐 지내며 어디에서 잠과 식사를 해결하는지는 미지수이다.\n\n[만난 적 있음, 혹은 접점이 있던 존재들]\n아레인(Arein), 토리(tory), 시로(shiro), 실크(silk), 애키스(ekis), 키스네 코든(kisune_Corden) 등등 대부분의 인물들과 전부 접점이 있던 것으로 알려져 있으며 대부분 친분이 어느정도 있는 것으로 추정되고 있다.",
@@ -280,20 +293,21 @@
             });
         }
 
-        // --- 5. 파일 열기 로직 ---
+        // --- 5. 파일 열기 로직 (전체 화면 스크롤 암전 연출 적용) ---
         function openFile(name, content) {
+            window.scrollTo(0, 0); // 새 파일 열 때 맨 위로
             document.getElementById("database-view").classList.add("hidden");
             document.getElementById("file-screen").classList.remove("hidden");
             document.getElementById("file-title").textContent = "FILE: " + name;
             
             const textTarget = document.getElementById("file-text");
-            const container = document.getElementById("file-scroll-container");
             const hZone = document.getElementById("hidden-zone");
             
             textTarget.innerHTML = ""; 
-            container.scrollTop = 0;
-            container.onscroll = null; 
+            window.onscroll = null; // 이전 스크롤 이벤트 초기화
             hZone.style.display = "none";
+            hZone.style.opacity = "0";
+            document.body.style.backgroundColor = "var(--bg-black)";
 
             const sysMsg = document.createElement("p");
             sysMsg.style.color = "var(--neon-mint)";
@@ -314,13 +328,27 @@
                     if(charIdx < content.length) {
                         bodyMsg.textContent += content[charIdx];
                         charIdx++;
-                        setTimeout(typeBody, 5); 
-                        container.scrollTop = container.scrollHeight;
+                        setTimeout(typeBody, 2); // 전체 스크롤을 위해 타이핑 속도 상향
                     } else {
+                        // 💡 'glitch' 해제 상태에서 Curo 파일일 때만 심연 연출 활성화
                         if (name.includes("Curo") && isGlitchUnlocked) {
-                            container.onscroll = () => {
-                                if (container.scrollTop + container.clientHeight >= container.scrollHeight - 20) {
-                                    hZone.style.display = "block";
+                            hZone.style.display = "block";
+                            
+                            // 전체 브라우저 스크롤 이벤트 연결
+                            window.onscroll = () => {
+                                const scrollY = window.scrollY;
+                                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                                
+                                if (maxScroll <= 0) return;
+
+                                // 1. 배경색 암전: 아래로 갈수록 완전한 블랙으로
+                                const darkness = Math.min(scrollY / (maxScroll * 0.8), 1);
+                                document.body.style.backgroundColor = `rgba(0, 0, 0, ${darkness})`;
+
+                                // 2. 버튼 등장: 70% 이상 내려갔을 때부터 서서히 노출
+                                if (scrollY > maxScroll * 0.5) {
+                                    const btnOpacity = (scrollY - maxScroll * 0.5) / (maxScroll * 0.5);
+                                    hZone.style.opacity = Math.min(btnOpacity, 1);
                                 }
                             };
                         }
@@ -331,6 +359,8 @@
         }
 
         document.getElementById("back-btn").onclick = () => {
+            window.onscroll = null;
+            document.body.style.backgroundColor = "var(--bg-black)";
             document.getElementById("file-screen").classList.add("hidden");
             document.getElementById("database-view").classList.remove("hidden");
         };

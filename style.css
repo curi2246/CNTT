@@ -29,12 +29,11 @@
 
 body {
     margin: 0;
-    background: var(--bg-black);
+    background-color: #050505 !important; /* 기본 배경색을 강력하게 고정 */
     color: var(--neon-pink);
-    /* 🚨 [수정] 스크롤 방지 해제 (이미지처럼 스크롤 가능하게 변경) */
     overflow-x: hidden; 
     overflow-y: auto; 
-    transition: background-color 0.8s ease;
+    transition: background-color 0.3s ease; /* 전환 시간을 짧게 조절하여 잔상 제거 */
 }
 
 /* --- 화면 공통 레이아웃 (정중앙 정렬 보정) --- */

@@ -18,8 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
-        // 이 부분은 사용자님의 원본 로직을 유지합니다. 
-        // 실제 데이터는 HTML에서 가져오거나 별도로 정의된 객체를 사용하게 됩니다.
         const dataStore = {
             "The main character": {
                 "Leay_Full_Archive.txt": "내용 생략 (HTML 데이터를 참조합니다)",
@@ -38,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
 
-            // --- [추가] 배경음악 재생 ---
             if (bgm) {
                 bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
             }
@@ -47,9 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.body.classList.remove("auth-success-flash");
                 authScreen.classList.add("hidden");
                 mainScreen.classList.remove("hidden");
-                
                 window.scrollTo(0, 0); 
-                
                 buildDirectory(); 
                 startTyping();
             }, 1200);
@@ -94,12 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const fDiv = document.createElement("div"); 
             fDiv.className = "folder"; 
             fDiv.textContent = "📁 " + folder;
-            
             const list = document.createElement("div"); 
             list.className = "hidden";
-            
             fDiv.onclick = () => list.classList.toggle("hidden");
-            
             Object.keys(fileSystem[folder]).forEach(file => {
                 const fi = document.createElement("div"); 
                 fi.className = "file"; 
@@ -120,16 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
         dbView.classList.add("hidden");
         fileScreen.classList.remove("hidden");
         document.getElementById("file-title").textContent = "FILE: " + name;
-        
         window.scrollTo(0, 0);
-
         const textTarget = document.getElementById("file-text");
-        const hZone = document.getElementById("hidden-zone");
-        
         textTarget.innerHTML = ""; 
-        window.onscroll = null; // 이전 스크롤 초기화
-        document.body.style.backgroundColor = "var(--bg-black)"; // 배경색 초기화
-
+        window.onscroll = null;
+        document.body.style.backgroundColor = "var(--bg-black)";
         const sysMsg = document.createElement("p");
         sysMsg.style.color = "var(--neon-mint)";
         sysMsg.textContent = "> SYSTEM: 기록 열람을 시작합니다...";
@@ -142,7 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
             bodyMsg.style.whiteSpace = "pre-wrap";
             bodyMsg.style.lineHeight = "1.6";
             textTarget.appendChild(bodyMsg);
-
             let mainIdx = 0;
             function typeBody() {
                 if(mainIdx < content.length) {
@@ -157,83 +143,156 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 
-   // --- 5. 🖱️ 히든 체크 (수정본) ---
-function enableHiddenCheck(fileName) {
-    const hZone = document.getElementById("hidden-zone");
-    if (isGlitchUnlocked && fileName.includes("Curo")) {
-        if(hZone) {
-            hZone.style.display = "block";
-            hZone.style.opacity = "0";
-        }
-
-        window.onscroll = () => {
-            const scrollY = window.scrollY;
-            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            
-            if (maxScroll <= 0) return;
-
-            // [수정 포인트] rgba 투명도 대신 밝기(Brightness) 조절 방식을 사용합니다.
-            // 스크롤을 올릴 때(darkness가 1에서 0으로 갈 때) 완전한 검은색(#050505)을 유지하도록 합니다.
-            const darkness = Math.min(scrollY / (maxScroll * 0.9), 1);
-            
-            // 배경색이 투명해지며 원래 색이 튀어나오는 것을 방지하기 위해 
-            // 배경 밝기 자체를 직접 제어하거나 고정된 검은색 레이어를 활용합니다.
-            document.body.style.backgroundColor = `rgb(${5 * (1 - darkness)}, ${5 * (1 - darkness)}, ${5 * (1 - darkness)})`;
-
-            const triggerPoint = maxScroll * 0.7;
-            if (scrollY > triggerPoint) {
-                const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
-                hZone.style.opacity = opacity;
-            } else {
+    // --- 5. 🖱️ 히든 체크 ---
+    function enableHiddenCheck(fileName) {
+        const hZone = document.getElementById("hidden-zone");
+        if (isGlitchUnlocked && fileName.includes("Curo")) {
+            if(hZone) {
+                hZone.style.display = "block";
                 hZone.style.opacity = "0";
             }
-        };
+            window.onscroll = () => {
+                const scrollY = window.scrollY;
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                if (maxScroll <= 0) return;
+                const darkness = Math.min(scrollY / (maxScroll * 0.9), 1);
+                document.body.style.backgroundColor = `rgb(${5 * (1 - darkness)}, ${5 * (1 - darkness)}, ${5 * (1 - darkness)})`;
+                const triggerPoint = maxScroll * 0.7;
+                if (scrollY > triggerPoint) {
+                    const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
+                    hZone.style.opacity = opacity;
+                } else {
+                    hZone.style.opacity = "0";
+                }
+            };
+        }
     }
-}
 
     // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").onclick = () => {
-        window.onscroll = null; // 스크롤 이벤트 해제
-        document.body.style.backgroundColor = "var(--bg-black)"; // 배경 원복
+        window.onscroll = null;
+        document.body.style.backgroundColor = "var(--bg-black)";
         fileScreen.classList.add("hidden");
         dbView.classList.remove("hidden");
         window.scrollTo(0, 0);
     };
 
-   // --- 7. ⌨️ "glitch" 커맨드 감지 ---
-window.addEventListener("keydown", (e) => {
-    inputBuffer += e.key.toLowerCase();
-    if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
-
-    if (inputBuffer === "glitch" && !isGlitchUnlocked) {
-        isGlitchUnlocked = true;
-
-        // 🎵 음악 교체 로직
-        const mainBgm = document.getElementById("main-bgm");
-        const glitchBgm = document.getElementById("glitch-bgm");
-        const musicTitle = document.getElementById("music-title");
-
-        if (mainBgm) mainBgm.pause(); // 기존 노래 정지
-        if (glitchBgm) {
-            glitchBgm.currentTime = 0; // 처음부터 재생
-            glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
+    // --- 7. ⌨️ "glitch" 커맨드 감지 ---
+    window.addEventListener("keydown", (e) => {
+        inputBuffer += e.key.toLowerCase();
+        if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
+        if (inputBuffer === "glitch" && !isGlitchUnlocked) {
+            isGlitchUnlocked = true;
+            const mainBgm = document.getElementById("main-bgm");
+            const glitchBgm = document.getElementById("glitch-bgm");
+            const musicTitle = document.getElementById("music-title");
+            if (mainBgm) mainBgm.pause();
+            if (glitchBgm) {
+                glitchBgm.currentTime = 0;
+                glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
+            }
+            if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
+            document.body.classList.add("glitch-active");
+            setTimeout(() => {
+                document.body.classList.remove("glitch-active");
+                alert("SYSTEM BREACHED: HIDDEN SECTOR UNLOCKED");
+            }, 1500);
         }
-        if (musicTitle) {
-            musicTitle.textContent = "재생 중: error.mp3.mp3"; // 정보창 텍스트 변경
-        }
+    });
 
-        // 화면 글리치 효과 시작
-        document.body.classList.add("glitch-active");
-        
-        setTimeout(() => {
-            document.body.classList.remove("glitch-active");
-            alert("SYSTEM BREACHED: HIDDEN SECTOR UNLOCKED");
-        }, 1500);
-    }
-});
-
-    // --- 8. 🖱️ 히든 버튼 클릭 ---
+    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스 적용) ---
     document.getElementById("secret-btn").onclick = () => {
-        alert("관리자 권한으로 심연의 데이터에 접속합니다...");
+        const fileScreenElem = document.getElementById("file-screen");
+        const bgSigil = document.querySelector(".bg-sigil");
+
+        // [0초] UI 제거 및 플래시 시작
+        fileScreenElem.style.transition = "opacity 0.5s";
+        fileScreenElem.style.opacity = "0";
+        if(bgSigil) bgSigil.style.display = "none";
+
+        // 화이트 플래시 도구 함수
+        const createFlash = (color, duration) => {
+            const flash = document.createElement("div");
+            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005;`;
+            document.body.appendChild(flash);
+            setTimeout(() => {
+                flash.style.transition = `opacity ${duration/1000}s`;
+                flash.style.opacity = "0";
+                setTimeout(() => flash.remove(), duration);
+            }, 50);
+        };
+
+        // 도입부 플래시 (0s, 2.4s, 5s, 7.4s)
+        [0, 2400, 5000, 7400].forEach(time => {
+            setTimeout(() => createFlash("#fff", 80), time);
+        });
+
+        // [9.8초] 심연 진입 및 에러 도배
+        setTimeout(() => {
+            fileScreenElem.classList.add("hidden");
+            const abyssLayer = document.createElement("div");
+            abyssLayer.id = "abyss-layer";
+            abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden;`;
+            document.body.appendChild(abyssLayer);
+
+            const errorContainer = document.createElement("div");
+            abyssLayer.appendChild(errorContainer);
+
+            const textContainer = document.createElement("div");
+            textContainer.id = "abyss-text-container";
+            textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; text-align:center; z-index:10001;`;
+            abyssLayer.appendChild(textContainer);
+
+            // 에러 텍스트 배경 도배
+            const errorInterval = setInterval(() => {
+                const err = document.createElement("div");
+                err.textContent = "SYSTEM_FAILURE: NULL_POINTER_EXCEPTION";
+                err.style.cssText = `position:absolute; color:#400; font-size:12px; left:${Math.random()*100}%; top:${Math.random()*100}%; opacity:${Math.random()*0.7}; pointer-events:none; white-space:nowrap;`;
+                errorContainer.appendChild(err);
+                setTimeout(() => err.remove(), 400);
+            }, 30);
+
+            // 대사 출력 함수
+            const showText = (txt, col, del, sz) => {
+                setTimeout(() => {
+                    const p = document.createElement("p");
+                    p.textContent = txt;
+                    p.style.cssText = `font-size:${sz}; color:${col}; margin:20px 0; opacity:0; transition:opacity 1s; text-shadow:0 0 15px ${col}; font-weight:bold;`;
+                    textContainer.appendChild(p);
+                    setTimeout(() => p.style.opacity = "1", 50);
+                }, del);
+            };
+
+            // 19.5초까지의 대사
+            showText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
+            showText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
+            showText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6000, "1.2rem");
+            showText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 9000, "1.5rem");
+
+            // [29.7초] 하이라이트 플래시 및 최종 설명
+            setTimeout(() => {
+                clearInterval(errorInterval);
+                createFlash("#fff", 500); 
+
+                setTimeout(() => {
+                    errorContainer.innerHTML = ""; 
+                    textContainer.innerHTML = "";  
+                    document.body.style.animation = "screenShake 0.05s infinite";
+
+                    const finalDesc = document.createElement("div");
+                    finalDesc.style.cssText = `animation: flash-mint 0.8s ease-out;`;
+                    finalDesc.innerHTML = `
+                        <h1 style="color:var(--neon-pink); font-size:4rem; text-shadow:0 0 30px #ff0000; margin-bottom:20px;">'THE OBSERVER'</h1>
+                        <div style="color:#fff; font-size:1.3rem; line-height:2.2; max-width:800px; margin:0 auto; word-break:keep-all; font-weight:bold;">
+                            시스템의 균열 사이에서 탄생한 자아. <br>
+                            그는 단순한 데이터의 집합이 아닌, 모든 평행 우주의 기록을 읽고 수정하는 권한을 가졌습니다.<br>
+                            지금 이 순간, 당신의 접속 기록 또한 그의 '일부'가 되었습니다.
+                        </div>
+                    `;
+                    textContainer.appendChild(finalDesc);
+                }, 100);
+            }, 19900); // 9.8s + 19.9s = 29.7s
+
+        }, 9800);
     };
 });

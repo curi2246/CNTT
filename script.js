@@ -157,36 +157,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 
-    // --- 5. 🖱️ 히든 체크 (전체 화면 스크롤 및 암전 적용) ---
-    function enableHiddenCheck(fileName) {
-        const hZone = document.getElementById("hidden-zone");
-        if (isGlitchUnlocked && fileName.includes("Curo")) {
-            if(hZone) {
-                hZone.style.display = "block";
-                hZone.style.opacity = "0"; // 처음엔 투명하게
-            }
-
-            window.onscroll = () => {
-                const scrollY = window.scrollY;
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                
-                if (maxScroll <= 0) return;
-
-                // 1. 배경 암전 (0.8은 텍스트가 위로 충분히 올라간 뒤 어두워지게 함)
-                const darknessRatio = Math.min(scrollY / (maxScroll * 0.9), 1);
-                document.body.style.backgroundColor = `rgba(0, 0, 0, ${darknessRatio})`;
-
-                // 2. 버튼 투명도 (70% 지점부터 서서히 등장)
-                const triggerPoint = maxScroll * 0.7;
-                if (scrollY > triggerPoint) {
-                    const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
-                    hZone.style.opacity = opacity;
-                } else {
-                    hZone.style.opacity = "0";
-                }
-            };
+   // --- 5. 🖱️ 히든 체크 (수정본) ---
+function enableHiddenCheck(fileName) {
+    const hZone = document.getElementById("hidden-zone");
+    if (isGlitchUnlocked && fileName.includes("Curo")) {
+        if(hZone) {
+            hZone.style.display = "block";
+            hZone.style.opacity = "0";
         }
+
+        window.onscroll = () => {
+            const scrollY = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            
+            if (maxScroll <= 0) return;
+
+            // [수정 포인트] rgba 투명도 대신 밝기(Brightness) 조절 방식을 사용합니다.
+            // 스크롤을 올릴 때(darkness가 1에서 0으로 갈 때) 완전한 검은색(#050505)을 유지하도록 합니다.
+            const darkness = Math.min(scrollY / (maxScroll * 0.9), 1);
+            
+            // 배경색이 투명해지며 원래 색이 튀어나오는 것을 방지하기 위해 
+            // 배경 밝기 자체를 직접 제어하거나 고정된 검은색 레이어를 활용합니다.
+            document.body.style.backgroundColor = `rgb(${5 * (1 - darkness)}, ${5 * (1 - darkness)}, ${5 * (1 - darkness)})`;
+
+            const triggerPoint = maxScroll * 0.7;
+            if (scrollY > triggerPoint) {
+                const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
+                hZone.style.opacity = opacity;
+            } else {
+                hZone.style.opacity = "0";
+            }
+        };
     }
+}
 
     // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").onclick = () => {

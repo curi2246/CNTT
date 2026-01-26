@@ -219,19 +219,21 @@ body {
     animation: screenGlitch 0.15s infinite !important;
 }
 
+/* 🚨 [수정] 박스 스크롤 해제: 전체 화면 스크롤 암전을 위해 높이 제한 제거 */
 #file-scroll-container {
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 15px;
-    scroll-behavior: smooth;
+    width: 100%;
+    overflow: visible; /* 박스 내부 스크롤이 아닌 페이지 전체 스크롤 사용 */
 }
 
+/* 🚨 [수정] 히든 존: 텍스트 종료 후 한 화면(100vh)만큼 더 내려가도록 여백 설정 */
 .hidden-trigger-zone {
     display: none; 
-    margin-top: 400px; 
-    padding: 60px 0;
+    margin-top: 50px; 
+    padding-top: 100vh; /* 이 공간이 확보되어야 아래로 내릴수록 어두워집니다 */
+    padding-bottom: 200px;
     text-align: center;
-    border-top: 1px dashed rgba(255, 0, 0, 0.3);
+    transition: opacity 0.5s;
+    opacity: 0;
 }
 
 .glitch-text {

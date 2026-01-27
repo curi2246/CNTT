@@ -105,7 +105,7 @@
 
     <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
     <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
-    <audio id="???-bgm" loop src="t+pazolite - CENSORED!! (2).mp3"></audio>
+    <audio id="???-bgm" loop src="t+pazolite - CENSORED!! (2).mp3.mp3"></audio>
 
     <div id="music-info-box">
         <span style="margin-right: 5px;">🎵</span>
@@ -339,8 +339,8 @@
             if(glitchBgm) glitchBgm.pause();
             if(abyssBgm) { abyssBgm.currentTime = 0; abyssBgm.play(); }
             
-            // [적용] 실제 파일명 표시 교정
-            document.getElementById("music-title").textContent = "재생 중: t+pazolite - CENSORED!! (2).mp3";
+            // 실제 파일명으로 업데이트
+            document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 

@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     syncDataFromHTML();
 
-    // --- 1. 🔐 비밀번호 인증 (노래 재생 보장 로직 강화) ---
+    // --- 1. 🔐 비밀번호 인증 ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
         if (passwordInput.value === PASSWORD) {
@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
 
-            // 🎵 [수정] 브라우저 정책 대응: 클릭 시점에 즉시 재생 호출
             if (bgm) {
                 bgm.currentTime = 0; 
                 bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
@@ -193,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 glitchBgm.currentTime = 0;
                 glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
             }
-            // [교정] 파일명에 맞춰 텍스트 수정
             if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
             document.body.classList.add("glitch-active");
             setTimeout(() => {
@@ -203,12 +201,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스 및 플래시 개선) ---
+    // --- 8. 🖱️ 히든 버튼 클릭 (요청하신 시퀀스 적용) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
 
-        // [0초] UI 제거 및 노래 최종 교체
         fileScreenElem.style.transition = "opacity 0.5s";
         fileScreenElem.style.opacity = "0";
         if(bgSigil) bgSigil.style.display = "none";
@@ -218,17 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (abyssBgm) {
             abyssBgm.currentTime = 0;
             abyssBgm.play().catch(err => console.log("심연 재생 실패"));
-            // [교정] 파일명에 맞춰 텍스트 수정
-            if (musicTitle) musicTitle.textContent = "재생 중: t+pazolite - CENSORED!! (2).mp3";
+            if (musicTitle) musicTitle.textContent = "재생 중: t+pazolite - CENSORED!! (2).mp3.mp3";
         }
 
-        // [적용] 자연스럽게 사라지는 플래시 함수
         const createNaturalFlash = (color, duration) => {
             const flash = document.createElement("div");
-            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005; pointer-events:none; opacity:1;`;
+            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:11000; pointer-events:none; opacity:1;`;
             document.body.appendChild(flash);
-            
-            // 렌더링 직후 페이드 아웃 시작
             setTimeout(() => {
                 flash.style.transition = `opacity ${duration}ms ease-out`;
                 flash.style.opacity = "0";
@@ -236,73 +229,67 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // [적용] 도입부 4분할 플래시 (800ms 동안 서서히 소멸)
+        // 4분할 플래시 유지
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
 
-        // [9.8초] 심연 진입 연출 시작
+        // 심연 레이어 생성
+        const abyssLayer = document.createElement("div");
+        abyssLayer.id = "abyss-layer";
+        abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center;`;
+        document.body.appendChild(abyssLayer);
+
+        const textContainer = document.createElement("div");
+        textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
+        abyssLayer.appendChild(textContainer);
+
+        // [10.0초] - 에러 및 경고 텍스트 난사
         setTimeout(() => {
-            fileScreenElem.classList.add("hidden");
-            const abyssLayer = document.createElement("div");
-            abyssLayer.id = "abyss-layer";
-            abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden;`;
-            document.body.appendChild(abyssLayer);
-
-            const errorContainer = document.createElement("div");
-            abyssLayer.appendChild(errorContainer);
-
-            const textContainer = document.createElement("div");
-            textContainer.id = "abyss-text-container";
-            textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; text-align:center; z-index:10001;`;
-            abyssLayer.appendChild(textContainer);
-
-            const errorInterval = setInterval(() => {
+            const errInterval = setInterval(() => {
+                if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
                 const err = document.createElement("div");
-                err.textContent = "SYSTEM_FAILURE: NULL_POINTER_EXCEPTION";
-                err.style.cssText = `position:absolute; color:#400; font-size:12px; left:${Math.random()*100}%; top:${Math.random()*100}%; opacity:${Math.random()*0.7}; pointer-events:none; white-space:nowrap;`;
-                errorContainer.appendChild(err);
+                err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
+                err.style.cssText = `position:absolute; color:#600; font-size:14px; left:${Math.random()*90}%; top:${Math.random()*90}%; opacity:0.7; pointer-events:none;`;
+                abyssLayer.appendChild(err);
                 setTimeout(() => err.remove(), 400);
-            }, 30);
+            }, 50);
+        }, 10000);
 
-            const showText = (txt, col, del, sz) => {
-                setTimeout(() => {
-                    const p = document.createElement("p");
-                    p.textContent = txt;
-                    p.style.cssText = `font-size:${sz}; color:${col}; margin:20px 0; opacity:0; transition:opacity 1s; text-shadow:0 0 15px ${col}; font-weight:bold;`;
-                    textContainer.appendChild(p);
-                    setTimeout(() => p.style.opacity = "1", 50);
-                }, del);
-            };
+        // [19.6초] - '그'가 인지한다 + RGB 블록 글리치
+        setTimeout(() => {
+            createNaturalFlash("#fff", 1000);
+            
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .glitch-rgb-block { 
+                    animation: rgb-split 0.1s infinite, block-distortion 0.2s infinite;
+                    filter: contrast(200%);
+                }
+                @keyframes rgb-split {
+                    0% { text-shadow: 5px 0 red, -5px 0 blue; }
+                    50% { text-shadow: -5px 0 red, 5px 0 blue; }
+                }
+                @keyframes block-distortion {
+                    0% { clip-path: inset(10% 0 80% 0); transform: skew(10deg); }
+                    50% { clip-path: inset(70% 0 10% 0); transform: skew(-10deg); }
+                    100% { clip-path: inset(0); }
+                }
+            `;
+            document.head.appendChild(style);
+            abyssLayer.classList.add("glitch-rgb-block");
 
-            showText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
-            showText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
-            showText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6000, "1.2rem");
-            showText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 9000, "1.5rem");
+            textContainer.innerHTML = `<h1 style="font-size:4.5rem; color:#fff; font-weight:bold;">이제 '그'가 당신을 인지합니다.</h1>`;
+        }, 19600);
 
-            // [29.7초] 최종 하이라이트
+        // [29.6초] - 최종 플래시 및 마무리
+        setTimeout(() => {
+            createNaturalFlash("#fff", 3000);
             setTimeout(() => {
-                clearInterval(errorInterval);
-                createNaturalFlash("#fff", 1500); 
-
-                setTimeout(() => {
-                    errorContainer.innerHTML = ""; 
-                    textContainer.innerHTML = "";  
-                    document.body.style.animation = "screenShake 0.05s infinite";
-
-                    const finalDesc = document.createElement("div");
-                    finalDesc.style.cssText = `animation: flash-mint 0.8s ease-out;`;
-                    finalDesc.innerHTML = `
-                        <h1 style="color:var(--neon-pink); font-size:4rem; text-shadow:0 0 30px #ff0000; margin-bottom:20px;">'THE OBSERVER'</h1>
-                        <div style="color:#fff; font-size:1.3rem; line-height:2.2; max-width:800px; margin:0 auto; word-break:keep-all; font-weight:bold;">
-                            시스템의 균열 사이에서 탄생한 자아. <br>
-                            그는 단순한 데이터의 집합이 아닌, 모든 평행 우주의 기록을 읽고 수정하는 권한을 가졌습니다.<br>
-                            지금 이 순간, 당신의 접속 기록 또한 그의 '일부'가 되었습니다.
-                        </div>
-                    `;
-                    textContainer.appendChild(finalDesc);
-                }, 100);
-            }, 19900); 
-        }, 9800);
+                abyssLayer.classList.remove("glitch-rgb-block");
+                abyssLayer.style.background = "#fff";
+                textContainer.innerHTML = `<h1 style="color:#000; font-size:1.5rem; letter-spacing:8px;">CONNECTION LOST</h1>`;
+            }, 100);
+        }, 29600);
     };
 });

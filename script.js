@@ -193,6 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 glitchBgm.currentTime = 0;
                 glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
             }
+            // [교정] 파일명에 맞춰 텍스트 수정
             if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
             document.body.classList.add("glitch-active");
             setTimeout(() => {
@@ -217,7 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (abyssBgm) {
             abyssBgm.currentTime = 0;
             abyssBgm.play().catch(err => console.log("심연 재생 실패"));
-            if (musicTitle) musicTitle.textContent = "재생 중: CENSORED!!.mp3";
+            // [교정] 파일명에 맞춰 텍스트 수정
+            if (musicTitle) musicTitle.textContent = "재생 중: t+pazolite - CENSORED!! (2).mp3";
         }
 
         // [적용] 자연스럽게 사라지는 플래시 함수

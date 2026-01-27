@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     syncDataFromHTML();
 
-    // --- 1. 🔐 비밀번호 인증 (노래 재생 보장) ---
+    // --- 1. 🔐 비밀번호 인증 (노래 재생 보장 로직 강화) ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
         if (passwordInput.value === PASSWORD) {
@@ -39,8 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
 
-            // 🎵 [적용] 메인 BGM 시작
+            // 🎵 [수정] 브라우저 정책 대응: 클릭 시점에 즉시 재생 호출
             if (bgm) {
+                bgm.currentTime = 0; 
                 bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
             }
 
@@ -201,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스) ---
+    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스 및 플래시 개선) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -219,13 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if (musicTitle) musicTitle.textContent = "재생 중: CENSORED!!.mp3";
         }
 
-        // [적용] 자연스럽게 사라지는 플래시 도구 함수
+        // [적용] 자연스럽게 사라지는 플래시 함수
         const createNaturalFlash = (color, duration) => {
             const flash = document.createElement("div");
             flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005; pointer-events:none; opacity:1;`;
             document.body.appendChild(flash);
             
-            // 자연스러운 페이드 아웃을 위해 transition 적용
+            // 렌더링 직후 페이드 아웃 시작
             setTimeout(() => {
                 flash.style.transition = `opacity ${duration}ms ease-out`;
                 flash.style.opacity = "0";
@@ -233,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // [적용] 도입부 4분할 플래시 (각 800ms 동안 서서히 소멸)
+        // [적용] 도입부 4분할 플래시 (800ms 동안 서서히 소멸)
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
@@ -280,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // [29.7초] 최종 하이라이트
             setTimeout(() => {
                 clearInterval(errorInterval);
-                createNaturalFlash("#fff", 1500); // 마지막 플래시는 더 길고 부드럽게
+                createNaturalFlash("#fff", 1500); 
 
                 setTimeout(() => {
                     errorContainer.innerHTML = ""; 

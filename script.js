@@ -8,13 +8,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileScreen = document.getElementById("file-screen");
     const fileScrollContainer = document.getElementById("file-scroll-container");
 
-    // --- [추가] 배경음악 요소 가져오기 ---
+    // --- [교정] 모든 배경음악 요소 풀 네임 매칭 ---
     const bgm = document.getElementById("main-bgm");
+    const glitchBgm = document.getElementById("glitch-bgm");
+    const abyssBgm = document.getElementById("???-bgm"); // 심연 구간 노래
+    const musicTitle = document.getElementById("music-title");
 
     const PASSWORD = "1234";
     let inputBuffer = "";      
     let isGlitchUnlocked = false; 
-    const fileSystem = {}; // HTML에서 읽어온 데이터 저장소
+    const fileSystem = {}; 
 
     // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
@@ -27,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     syncDataFromHTML();
 
-    // --- 1. 🔐 비밀번호 인증 ---
+    // --- 1. 🔐 비밀번호 인증 (노래 재생 보장) ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
         if (passwordInput.value === PASSWORD) {
@@ -36,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
 
+            // 🎵 [적용] 메인 BGM 시작
             if (bgm) {
                 bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
             }
@@ -183,10 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
         if (inputBuffer === "glitch" && !isGlitchUnlocked) {
             isGlitchUnlocked = true;
-            const mainBgm = document.getElementById("main-bgm");
-            const glitchBgm = document.getElementById("glitch-bgm");
-            const musicTitle = document.getElementById("music-title");
-            if (mainBgm) mainBgm.pause();
+            if (bgm) bgm.pause();
             if (glitchBgm) {
                 glitchBgm.currentTime = 0;
                 glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
@@ -200,34 +201,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스 적용) ---
+    // --- 8. 🖱️ 히든 버튼 클릭 (심연의 최종 시퀀스) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
 
-        // [0초] UI 제거 및 플래시 시작
+        // [0초] UI 제거 및 노래 최종 교체
         fileScreenElem.style.transition = "opacity 0.5s";
         fileScreenElem.style.opacity = "0";
         if(bgSigil) bgSigil.style.display = "none";
+        
+        if (bgm) bgm.pause();
+        if (glitchBgm) glitchBgm.pause();
+        if (abyssBgm) {
+            abyssBgm.currentTime = 0;
+            abyssBgm.play().catch(err => console.log("심연 재생 실패"));
+            if (musicTitle) musicTitle.textContent = "재생 중: CENSORED!!.mp3";
+        }
 
-        // 화이트 플래시 도구 함수
-        const createFlash = (color, duration) => {
+        // [적용] 자연스럽게 사라지는 플래시 도구 함수
+        const createNaturalFlash = (color, duration) => {
             const flash = document.createElement("div");
-            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005;`;
+            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005; pointer-events:none; opacity:1;`;
             document.body.appendChild(flash);
+            
+            // 자연스러운 페이드 아웃을 위해 transition 적용
             setTimeout(() => {
-                flash.style.transition = `opacity ${duration/1000}s`;
+                flash.style.transition = `opacity ${duration}ms ease-out`;
                 flash.style.opacity = "0";
                 setTimeout(() => flash.remove(), duration);
             }, 50);
         };
 
-        // 도입부 플래시 (0s, 2.4s, 5s, 7.4s)
+        // [적용] 도입부 4분할 플래시 (각 800ms 동안 서서히 소멸)
         [0, 2400, 5000, 7400].forEach(time => {
-            setTimeout(() => createFlash("#fff", 80), time);
+            setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
 
-        // [9.8초] 심연 진입 및 에러 도배
+        // [9.8초] 심연 진입 연출 시작
         setTimeout(() => {
             fileScreenElem.classList.add("hidden");
             const abyssLayer = document.createElement("div");
@@ -243,7 +254,6 @@ document.addEventListener("DOMContentLoaded", () => {
             textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; text-align:center; z-index:10001;`;
             abyssLayer.appendChild(textContainer);
 
-            // 에러 텍스트 배경 도배
             const errorInterval = setInterval(() => {
                 const err = document.createElement("div");
                 err.textContent = "SYSTEM_FAILURE: NULL_POINTER_EXCEPTION";
@@ -252,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => err.remove(), 400);
             }, 30);
 
-            // 대사 출력 함수
             const showText = (txt, col, del, sz) => {
                 setTimeout(() => {
                     const p = document.createElement("p");
@@ -263,16 +272,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }, del);
             };
 
-            // 19.5초까지의 대사
             showText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
             showText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
             showText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6000, "1.2rem");
             showText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 9000, "1.5rem");
 
-            // [29.7초] 하이라이트 플래시 및 최종 설명
+            // [29.7초] 최종 하이라이트
             setTimeout(() => {
                 clearInterval(errorInterval);
-                createFlash("#fff", 500); 
+                createNaturalFlash("#fff", 1500); // 마지막 플래시는 더 길고 부드럽게
 
                 setTimeout(() => {
                     errorContainer.innerHTML = ""; 
@@ -291,8 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     textContainer.appendChild(finalDesc);
                 }, 100);
-            }, 19900); // 9.8s + 19.9s = 29.7s
-
+            }, 19900); 
         }, 9800);
     };
 });

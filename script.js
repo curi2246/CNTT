@@ -8,10 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileScreen = document.getElementById("file-screen");
     const fileScrollContainer = document.getElementById("file-scroll-container");
 
-    // --- [교정] 모든 배경음악 요소 풀 네임 매칭 ---
     const bgm = document.getElementById("main-bgm");
     const glitchBgm = document.getElementById("glitch-bgm");
-    const abyssBgm = document.getElementById("???-bgm"); // 심연 구간 노래
+    const abyssBgm = document.getElementById("???-bgm"); 
     const musicTitle = document.getElementById("music-title");
 
     const PASSWORD = "1234";
@@ -19,18 +18,19 @@ document.addEventListener("DOMContentLoaded", () => {
     let isGlitchUnlocked = false; 
     const fileSystem = {}; 
 
-    // --- 0. 🔄 HTML에서 데이터 자동 수집 ---
     function syncDataFromHTML() {
         const dataStore = {
             "The main character": {
-                "Leay_Full_Archive.txt": "내용 생략 (HTML 데이터를 참조합니다)",
+                "Leay_Full_Archive.txt": "명칭: 리에(Leay)...(중략)",
+                "Curo_Half_Archive.txt": "명칭: 큐로(Curo)...(중략)",
+                "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)...(중략)",
+                "Shiro_Full_Archive.txt": "명칭: 시로(Shiro)...(중략)"
             }
         };
         Object.assign(fileSystem, dataStore); 
     }
     syncDataFromHTML();
 
-    // --- 1. 🔐 비밀번호 인증 ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
         if (passwordInput.value === PASSWORD) {
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (bgm) {
                 bgm.currentTime = 0; 
-                bgm.play().catch(err => console.log("자동 재생 차단됨: ", err));
+                bgm.play().catch(err => console.log("자동 재생 차단됨"));
             }
 
             setTimeout(() => {
@@ -64,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- 2. ⌨️ 메인 화면 타이핑 효과 ---
     const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
     let lineIdx = 0, charIdx = 0;
     const cursor = document.createElement("span");
@@ -85,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 3. 📁 폴더/파일 목록 생성 ---
     function buildDirectory() {
         const dir = document.getElementById("directory");
         dir.innerHTML = "";
@@ -111,7 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- 4. 📄 파일 열기 로직 ---
     function openFile(name, content) {
         dbView.classList.add("hidden");
         fileScreen.classList.remove("hidden");
@@ -147,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 
-    // --- 5. 🖱️ 히든 체크 ---
     function enableHiddenCheck(fileName) {
         const hZone = document.getElementById("hidden-zone");
         if (isGlitchUnlocked && fileName.includes("Curo")) {
@@ -172,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 6. 🔙 뒤로가기 버튼 ---
     document.getElementById("back-btn").onclick = () => {
         window.onscroll = null;
         document.body.style.backgroundColor = "var(--bg-black)";
@@ -181,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo(0, 0);
     };
 
-    // --- 7. ⌨️ "glitch" 커맨드 감지 ---
     window.addEventListener("keydown", (e) => {
         inputBuffer += e.key.toLowerCase();
         if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
@@ -190,18 +184,16 @@ document.addEventListener("DOMContentLoaded", () => {
             if (bgm) bgm.pause();
             if (glitchBgm) {
                 glitchBgm.currentTime = 0;
-                glitchBgm.play().catch(err => console.log("글리치 재생 실패:", err));
+                glitchBgm.play().catch(err => console.log("글리치 재생 실패"));
             }
             if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
             document.body.classList.add("glitch-active");
             setTimeout(() => {
                 document.body.classList.remove("glitch-active");
-                alert("SYSTEM BREACHED: HIDDEN SECTOR UNLOCKED");
             }, 1500);
         }
     });
 
-    // --- 8. 🖱️ 히든 버튼 클릭 (요청하신 시퀀스 적용) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -229,12 +221,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // 4분할 플래시 유지
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
 
-        // 심연 레이어 생성
         const abyssLayer = document.createElement("div");
         abyssLayer.id = "abyss-layer";
         abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center;`;
@@ -244,51 +234,55 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
         abyssLayer.appendChild(textContainer);
 
-        // [10.0초] - 에러 및 경고 텍스트 난사
+        // [10.0초] - 에러 및 경고 텍스트 도배
         setTimeout(() => {
             const errInterval = setInterval(() => {
                 if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
                 const err = document.createElement("div");
                 err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
-                err.style.cssText = `position:absolute; color:#600; font-size:14px; left:${Math.random()*90}%; top:${Math.random()*90}%; opacity:0.7; pointer-events:none;`;
+                err.style.cssText = `position:absolute; color:#600; font-size:16px; left:${Math.random()*90}%; top:${Math.random()*90}%; opacity:0.8; pointer-events:none; font-weight:bold; z-index:10000;`;
                 abyssLayer.appendChild(err);
                 setTimeout(() => err.remove(), 400);
             }, 50);
         }, 10000);
 
-        // [19.6초] - '그'가 인지한다 + RGB 블록 글리치
+        // [19.6초] - 플래시 + '그'가 인지한다 + 배경 RGB 블록 글리치
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             
             const style = document.createElement('style');
             style.innerHTML = `
                 .glitch-rgb-block { 
-                    animation: rgb-split 0.1s infinite, block-distortion 0.2s infinite;
-                    filter: contrast(200%);
+                    animation: rgb-split 0.1s infinite, block-distortion 0.15s infinite;
                 }
                 @keyframes rgb-split {
-                    0% { text-shadow: 5px 0 red, -5px 0 blue; }
-                    50% { text-shadow: -5px 0 red, 5px 0 blue; }
+                    0% { box-shadow: 10px 0 rgba(255,0,0,0.4), -10px 0 rgba(0,0,255,0.4); filter: hue-rotate(0deg); }
+                    50% { box-shadow: -10px 0 rgba(255,0,0,0.4), 10px 0 rgba(0,0,255,0.4); filter: hue-rotate(90deg); }
                 }
                 @keyframes block-distortion {
-                    0% { clip-path: inset(10% 0 80% 0); transform: skew(10deg); }
-                    50% { clip-path: inset(70% 0 10% 0); transform: skew(-10deg); }
+                    0% { clip-path: inset(20% 0 50% 0); transform: translate(-5px); }
+                    30% { clip-path: inset(80% 0 1% 0); transform: translate(5px); }
+                    60% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 5px); }
                     100% { clip-path: inset(0); }
+                }
+                .認知텍스트 {
+                    text-shadow: 0 0 20px #fff, 3px 0 red, -3px 0 blue;
+                    color: #fff; font-size: 4.5rem; font-weight: bold;
                 }
             `;
             document.head.appendChild(style);
             abyssLayer.classList.add("glitch-rgb-block");
 
-            textContainer.innerHTML = `<h1 style="font-size:4.5rem; color:#fff; font-weight:bold;">이제 '그'가 당신을 인지합니다.</h1>`;
+            textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 
-        // [29.6초] - 최종 플래시 및 마무리
+        // [29.6초] - 최종 화이트아웃 및 마무리
         setTimeout(() => {
             createNaturalFlash("#fff", 3000);
             setTimeout(() => {
                 abyssLayer.classList.remove("glitch-rgb-block");
                 abyssLayer.style.background = "#fff";
-                textContainer.innerHTML = `<h1 style="color:#000; font-size:1.5rem; letter-spacing:8px;">CONNECTION LOST</h1>`;
+                textContainer.innerHTML = `<h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold;">CONNECTION LOST</h1>`;
             }, 100);
         }, 29600);
     };

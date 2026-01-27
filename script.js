@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
         abyssLayer.appendChild(textContainer);
 
-        // [10.0초] - 에러 및 경고 텍스트 도배
+        // [10.0초] - 백그라운드 에러 및 경고 텍스트 도배
         setTimeout(() => {
             const errInterval = setInterval(() => {
                 if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
@@ -246,33 +246,39 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         }, 10000);
 
-        // [19.6초] - 플래시 + '그'가 인지한다 + 배경 RGB 블록 글리치
+        // [19.6초] - 플래시 + '그'가 인지한다 + 배경 RGB 블록 글리치 (배경 전체가 깨짐)
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             
             const style = document.createElement('style');
             style.innerHTML = `
                 .glitch-rgb-block { 
-                    animation: rgb-split 0.1s infinite, block-distortion 0.15s infinite;
+                    animation: rgb-split 0.1s infinite, block-distortion 0.1s infinite;
                 }
                 @keyframes rgb-split {
-                    0% { box-shadow: 10px 0 rgba(255,0,0,0.4), -10px 0 rgba(0,0,255,0.4); filter: hue-rotate(0deg); }
-                    50% { box-shadow: -10px 0 rgba(255,0,0,0.4), 10px 0 rgba(0,0,255,0.4); filter: hue-rotate(90deg); }
+                    0% { box-shadow: 15px 0 rgba(255,0,0,0.5), -15px 0 rgba(0,0,255,0.5); background: rgba(255,0,0,0.1); }
+                    50% { box-shadow: -15px 0 rgba(255,0,0,0.5), 15px 0 rgba(0,0,255,0.5); background: rgba(0,0,255,0.1); }
                 }
                 @keyframes block-distortion {
-                    0% { clip-path: inset(20% 0 50% 0); transform: translate(-5px); }
-                    30% { clip-path: inset(80% 0 1% 0); transform: translate(5px); }
-                    60% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 5px); }
+                    0% { clip-path: inset(10% 0 80% 0); transform: translate(-10px, 5px); }
+                    25% { clip-path: inset(70% 0 10% 0); transform: translate(10px, -5px); }
+                    50% { clip-path: inset(30% 0 40% 0); transform: translate(-5px, 10px); }
                     100% { clip-path: inset(0); }
                 }
                 .認知텍스트 {
-                    text-shadow: 0 0 20px #fff, 3px 0 red, -3px 0 blue;
+                    text-shadow: 0 0 25px #fff, 5px 0 red, -5px 0 blue;
                     color: #fff; font-size: 4.5rem; font-weight: bold;
+                    animation: text-vibrate 0.05s infinite;
+                }
+                @keyframes text-vibrate {
+                    0% { transform: translate(2px); }
+                    100% { transform: translate(-2px); }
                 }
             `;
             document.head.appendChild(style);
+            
+            // 텍스트와 배경(abyssLayer)에 동시 글리치 적용
             abyssLayer.classList.add("glitch-rgb-block");
-
             textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 

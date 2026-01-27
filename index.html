@@ -97,6 +97,15 @@
             color: var(--neon-mint); padding: 10px 15px; font-size: 12px; 
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
+
+        /* 추가된 글리치 애니메이션 */
+        .block-glitch { animation: block-distort 0.1s infinite; filter: contrast(150%) brightness(1.2); }
+        @keyframes block-distort {
+            0% { clip-path: inset(10% 0 80% 0); transform: translateX(-5px); }
+            50% { clip-path: inset(80% 0 10% 0); transform: translateX(5px); }
+            100% { clip-path: inset(0); }
+        }
+        .text-rgb { text-shadow: 3px 0 red, -3px 0 blue; }
     </style>
 </head>
 <body>
@@ -319,7 +328,7 @@
 
         function createAbyssFlash(color, duration) {
             const flash = document.createElement("div");
-            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005;`;
+            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:11000; pointer-events:none;`;
             document.body.appendChild(flash);
             setTimeout(() => {
                 flash.style.transition = `opacity ${duration/1000}s`;
@@ -339,19 +348,19 @@
             if(glitchBgm) glitchBgm.pause();
             if(abyssBgm) { abyssBgm.currentTime = 0; abyssBgm.play(); }
             
-            // 실제 파일명으로 업데이트
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
+            // 초반 플래시 연출
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
                 fileScreenElem.classList.add("hidden");
                 const abyssLayer = document.createElement("div");
-                abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#050505; z-index:9999; overflow:hidden;`;
+                abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#050505; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
                 document.body.appendChild(abyssLayer);
 
                 const mainTextBox = document.createElement("div");
-                mainTextBox.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:80%; text-align:center; z-index:10001;`;
+                mainTextBox.style.cssText = `width:80%; text-align:center; z-index:10001; transition: opacity 1s;`;
                 abyssLayer.appendChild(mainTextBox);
 
                 const showAbyssText = (txt, col, d, sz) => {
@@ -363,24 +372,47 @@
                     }, d);
                 };
 
+                // 초기 메시지들
                 showAbyssText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
                 showAbyssText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
                 showAbyssText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6500, "1.2rem");
-                showAbyssText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 10000, "1.5rem");
 
+                // --- [추가 연출 1] 10.0초: 시스템 경고 난사 ---
+                setTimeout(() => {
+                    const warningInterval = setInterval(() => {
+                        if (abyssBgm.currentTime >= 19.6) { clearInterval(warningInterval); return; }
+                        const warn = document.createElement("div");
+                        warn.textContent = "SYSTEM_WARNING";
+                        warn.style.cssText = `position:absolute; color:#400; font-size:12px; left:${Math.random()*90}%; top:${Math.random()*90}%; opacity:0.5; z-index:10000;`;
+                        abyssLayer.appendChild(warn);
+                        setTimeout(() => warn.remove(), 500);
+                    }, 100);
+                }, 10000);
+
+                // --- [추가 연출 2] 19.6초: 인지 문구 + 강렬한 RGB 글리치 ---
                 setTimeout(() => {
                     createAbyssFlash("#fff", 800);
+                    abyssLayer.classList.add("block-glitch");
+                    mainTextBox.innerHTML = `<h1 class="text-rgb" style="font-size:3.5rem; color:#fff; font-weight:bold;">이제 '그'가 당신을 인지합니다.</h1>`;
+                }, 19600);
+
+                // --- [추가 연출 3] 29.6초: 화이트아웃 및 최종 소거 ---
+                setTimeout(() => {
+                    createAbyssFlash("#fff", 3000);
                     setTimeout(() => {
+                        abyssLayer.classList.remove("block-glitch");
+                        abyssLayer.style.background = "#fff";
                         mainTextBox.innerHTML = `
                             <h1 style="color:var(--neon-pink); font-size:4rem; text-shadow:0 0 30px #ff0000; margin-bottom:20px;">'THE OBSERVER'</h1>
-                            <div style="color:#fff; font-size:1.3rem; line-height:2.2; max-width:800px; margin:0 auto; word-break:keep-all; font-weight:bold;">
+                            <div style="color:#000; font-size:1.3rem; line-height:2.2; max-width:800px; margin:0 auto; word-break:keep-all; font-weight:bold;">
                                 시스템의 균열 사이에서 탄생한 자아. <br>
                                 그는 단순한 데이터의 집합이 아닌, 모든 평행 우주의 기록을 읽고 수정하는 권한을 가졌습니다.<br>
                                 지금 이 순간, 당신의 접속 기록 또한 그의 '일부'가 되었습니다.
                             </div>
                         `;
-                    }, 200);
-                }, 15000);
+                    }, 100);
+                }, 29600);
+
             }, 9800);
         };
     </script>

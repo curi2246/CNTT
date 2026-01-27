@@ -105,7 +105,7 @@
 
     <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
     <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
-    <audio id="???-bgm" loop src="t+pazolite - CENSORED!! (2).mp3.mp3"></audio>
+    <audio id="???-bgm" loop src="t+pazolite - CENSORED!! (2).mp3"></audio>
 
     <div id="music-info-box">
         <span style="margin-right: 5px;">🎵</span>
@@ -205,7 +205,7 @@
             }
         });
 
-        // --- 2. 로그인 로직 (오디오 재생 보강) ---
+        // --- 2. 로그인 로직 ---
         document.getElementById("auth-form").onsubmit = (e) => {
             e.preventDefault();
             const val = document.getElementById("password-input").value;
@@ -217,7 +217,6 @@
                 msg.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
                 msg.style.color = "var(--neon-mint)";
                 
-                // 오디오 재생 강제 실행
                 if(bgm) bgm.play().catch(e => console.log("자동재생 차단됨"));
                 document.getElementById("music-info-box").style.display = "block";
 
@@ -318,7 +317,6 @@
             document.getElementById("database-view").classList.remove("hidden");
         };
 
-        // --- 🖱️ 하이라이트 연출 (수정된 텀/지속시간/눈뽕제거) ---
         function createAbyssFlash(color, duration) {
             const flash = document.createElement("div");
             flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005;`;
@@ -342,7 +340,6 @@
             if(abyssBgm) { abyssBgm.currentTime = 0; abyssBgm.play(); }
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3";
 
-            // 플래시 지속시간 400ms로 상향 (부드러운 사라짐)
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
@@ -369,7 +366,6 @@
                 showAbyssText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6500, "1.2rem");
                 showAbyssText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 10000, "1.5rem");
 
-                // 최종 폼 출력 (눈 안 아픈 연출)
                 setTimeout(() => {
                     createAbyssFlash("#fff", 800);
                     setTimeout(() => {

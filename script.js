@@ -194,6 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // --- 히든 시퀀스 (secret-btn) 로직 ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -221,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // 초기 4분할 플래시
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
@@ -235,7 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
         abyssLayer.appendChild(textContainer);
 
-        // [10.0초] - 백그라운드 에러 및 경고 텍스트 도배
         setTimeout(() => {
             const errInterval = setInterval(() => {
                 if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
@@ -247,15 +246,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         }, 10000);
 
-        // [19.6초] - 플래시 + '그' 인지 + RGB 블록 글리치
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
-            
             const style = document.createElement('style');
             style.innerHTML = `
-                .glitch-rgb-block { 
-                    animation: rgb-split 0.1s infinite, block-distortion 0.1s infinite;
-                }
+                .glitch-rgb-block { animation: rgb-split 0.1s infinite, block-distortion 0.1s infinite; }
                 @keyframes rgb-split {
                     0% { box-shadow: 15px 0 rgba(255,0,0,0.5), -15px 0 rgba(0,0,255,0.5); background: rgba(255,0,0,0.1); }
                     50% { box-shadow: -15px 0 rgba(255,0,0,0.5), 15px 0 rgba(0,0,255,0.5); background: rgba(0,0,255,0.1); }
@@ -277,21 +272,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             `;
             document.head.appendChild(style);
-            
             abyssLayer.classList.add("glitch-rgb-block");
             textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 
-        // [28.5초] - 텍스트 지우고 글리치 효과만 유지
-        setTimeout(() => {
-            textContainer.innerHTML = "";
-        }, 28500);
+        setTimeout(() => { textContainer.innerHTML = ""; }, 28500);
 
-        // [29.6초] - 최종 플래시와 함께 설명 등장
         setTimeout(() => {
             createNaturalFlash("#fff", 3000);
             setTimeout(() => {
-                // 글리치 유지 여부는 기획에 따라 remove하거나 두셔도 됩니다. 여기선 설명 가독성을 위해 해제 후 배경 전환합니다.
                 abyssLayer.classList.remove("glitch-rgb-block");
                 abyssLayer.style.background = "#fff";
                 textContainer.innerHTML = `

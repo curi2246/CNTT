@@ -1,234 +1,977 @@
-/* --- 기본 레이아웃 및 폰트 설정 --- */
-* { 
-    box-sizing: border-box; 
-    font-family: 'Courier New', monospace; 
-}
+<!DOCTYPE html>
 
-:root {
-    --neon-pink: #ff5e5e;
-    --neon-mint: #5effeb;
-    --bg-black: #050505;
-    --folder-gold: #ffca28;
-}
+<html lang="ko" style="background-color: #050505;"> <head>
 
-/* 🚨 스크롤바 디자인 */
-::-webkit-scrollbar { width: 12px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; border: 3px solid #0a0a0a; }
-::-webkit-scrollbar-thumb:hover { background: #444; }
+    <meta charset="UTF-8" />
 
-body {
-    margin: 0;
-    background-color: #050505 !important;
-    color: var(--neon-pink);
-    overflow-x: hidden; 
-    overflow-y: auto; 
-    transition: background-color 0.3s ease;
-}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-.screen {
-    position: relative;
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; 
-    padding: 5vh 0 10vh 0;
-    transition: filter 0.8s ease;
-    z-index: 2;
-}
+    <title>CENTRAL DATABASE - SYSTEM ERROR</title>
 
-/* 🔍 배경 거대 심볼 */
-.bg-sigil {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); 
-    font-size: 80vh; 
-    color: rgba(94, 255, 235, 0.05); 
-    text-shadow: 0 0 50px rgba(94, 255, 235, 0.1);
-    z-index: 1; 
-    pointer-events: none;
-    user-select: none;
-    animation: sigilPulse 6s ease-in-out infinite;
-    line-height: 1;
-}
+    <style>
 
-/* --- 메인 컨테이너 너비 제어 (날씬해지지 않게 원본 유지) --- */
-.header, .terminal, .directory, #back-btn {
-    position: relative;
-    z-index: 10;
-    width: 90%;
-    max-width: 650px; 
-}
+        /* --- 제공받은 CSS 적용 --- */
 
-.header h1 {
-    font-size: 2rem;
-    letter-spacing: 8px;
-    text-shadow: 0 0 15px var(--neon-pink);
-    color: #fff;
-    margin: 15px 0;
-    text-align: center;
-}
+        * { box-sizing: border-box; font-family: 'Courier New', monospace; }
 
-.terminal {
-    border: 1px solid var(--neon-pink);
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 30px rgba(255, 94, 94, 0.15);
-    padding: 30px;
-    margin-bottom: 25px;
-}
 
-#file-text { white-space: pre-wrap; color: #fff; line-height: 1.8; font-size: 0.95rem; }
-#terminal-text { white-space: pre-wrap; color: var(--neon-pink); font-size: 0.95rem; }
 
-#password-input {
-    width: 100%;
-    margin-top: 20px;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--neon-mint);
-    color: var(--neon-mint);
-    font-size: 1.5rem;
-    padding: 10px;
-    outline: none;
-    text-align: center;
-    letter-spacing: 10px;
-}
+        :root {
 
-/* --- 폴더 및 파일 리스트 디자인 --- */
-.folder {
-    border: 1px solid var(--neon-mint);
-    color: var(--neon-mint);
-    padding: 15px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    background: rgba(94, 255, 235, 0.05);
-    font-weight: bold;
-    text-align: center;
-    transition: 0.3s;
-}
-.folder:hover { 
-    background: rgba(94, 255, 235, 0.2); 
-    box-shadow: 0 0 15px var(--neon-mint); 
-}
+            --neon-pink: #ff5e5e;
 
-.file {
-    cursor: pointer;
-    padding: 10px 20px;
-    color: #ffffff;
-    border-left: 2px solid #333;
-    margin: 5px 0 5px 20px;
-    transition: all 0.3s ease;
-    display: block;
-}
-.file:hover {
-    color: var(--neon-mint) !important;
-    background: rgba(94, 255, 235, 0.1);
-    text-shadow: 0 0 10px var(--neon-mint);
-    border-left: 2px solid var(--neon-mint);
-    padding-left: 30px;
-}
+            --neon-mint: #5effeb;
 
-/* --- 애니메이션 및 상태 관련 --- */
-@keyframes blink { 50% { opacity: 0; } }
-.typing-cursor::after { content: "|"; animation: blink 0.8s infinite; color: var(--neon-mint); }
+            --bg-black: #050505;
 
-@keyframes sigilPulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
-    50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.12; }
-}
+            --folder-gold: #ffca28;
 
-.auth-success-flash { background-color: #0a2424 !important; }
-.auth-error-flash { background-color: #240a0a !important; }
+        }
 
-#back-btn {
-    background: transparent;
-    border: 1px solid var(--neon-mint);
-    color: var(--neon-mint);
-    padding: 12px 25px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: 0.3s;
-    letter-spacing: 2px;
-}
-#back-btn:hover { background: var(--neon-mint); color: #000; }
 
-.hidden { display: none !important; }
 
-@keyframes screenGlitch {
-    0% { transform: translate(0); }
-    10% { transform: translate(-5px, 2px) skewX(2deg); filter: hue-rotate(90deg); }
-    20% { transform: translate(5px, -2px) skewX(-2deg); }
-    30% { transform: translate(-2px, 5px); filter: invert(0.1); }
-    100% { transform: translate(0); }
-}
-.glitch-active { animation: screenGlitch 0.15s infinite !important; }
+        /* 🚨 다크한 스크롤바 디자인 */
 
-/* --- 스페셜 하이라이트/글리치 연출용 CSS --- */
-#file-scroll-container { width: 100%; overflow: visible; }
+        ::-webkit-scrollbar { width: 12px; }
 
-.hidden-trigger-zone {
-    display: none; 
-    margin-top: 50px; 
-    padding-top: 100vh;
-    padding-bottom: 200px;
-    text-align: center;
-    transition: opacity 0.5s;
-    opacity: 0;
-}
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
 
-.glitch-text {
-    color: #ff0000;
-    font-weight: bold;
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    margin-bottom: 25px;
-    text-shadow: 2px 2px #000;
-    animation: blink 0.2s infinite;
-}
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; border: 3px solid #0a0a0a; }
 
-.hidden-button {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: radial-gradient(circle, #ff0000, #440000);
-    border: 2px solid #fff; cursor: pointer; margin: 0 auto;
-    box-shadow: 0 0 20px #ff0000, inset 0 0 15px #000;
-    transition: all 0.3s ease;
-}
-.hidden-button:hover {
-    transform: scale(1.2) rotate(10deg);
-    box-shadow: 0 0 40px #ff0000;
-    background: radial-gradient(circle, #ff4444, #660000);
-}
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
 
-#music-info-box {
-    position: fixed; bottom: 20px; right: 20px;
-    background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint);
-    color: var(--neon-mint); padding: 10px 15px; font-size: 12px;
-    z-index: 100; display: none;
-    box-shadow: 0 0 15px rgba(94, 255, 235, 0.2);
-    border-radius: 4px;
-}
 
-/* --- 4분할 시퀀스 전용 CSS --- */
-.split-container {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-    z-index: 10000; background: #000;
-}
-.split-pane {
-    position: relative; border: 1px solid rgba(255, 0, 0, 0.3); overflow: hidden;
-    background: #000;
-}
-.wall-of-text {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    font-size: 10px; line-height: 1.2; color: rgba(255, 0, 0, 0.4);
-    word-break: break-all; user-select: none; pointer-events: none;
-    padding: 5px; opacity: 0; transition: opacity 0.5s;
-}
-.center-warning {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: 10001; text-align: center; pointer-events: none;
-}
+
+        body {
+
+            margin: 0;
+
+            background-color: #050505 !important;
+
+            color: var(--neon-pink);
+
+            overflow-x: hidden; 
+
+            overflow-y: auto; 
+
+            transition: background-color 0.3s ease;
+
+        }
+
+
+
+        .screen {
+
+            position: relative;
+
+            width: 100%;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: flex-start; 
+
+            padding: 5vh 0 10vh 0;
+
+            transition: filter 0.8s ease;
+
+            z-index: 2;
+
+        }
+
+
+
+        /* 🔍 배경 거대 심볼 */
+
+        .bg-sigil {
+
+            position: fixed;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform: translate(-50%, -50%); 
+
+            font-size: 80vh; 
+
+            color: rgba(94, 255, 235, 0.05); 
+
+            text-shadow: 0 0 50px rgba(94, 255, 235, 0.1);
+
+            z-index: 1; 
+
+            pointer-events: none;
+
+            user-select: none;
+
+            animation: sigilPulse 6s ease-in-out infinite;
+
+            line-height: 1;
+
+        }
+
+
+
+        .header, .terminal, .directory, #back-btn {
+
+            position: relative;
+
+            z-index: 10;
+
+            width: 90%;
+
+            max-width: 650px; 
+
+        }
+
+
+
+        .header h1 {
+
+            font-size: 2rem;
+
+            letter-spacing: 8px;
+
+            text-shadow: 0 0 15px var(--neon-pink);
+
+            color: #fff;
+
+            margin: 15px 0;
+
+            text-align: center;
+
+        }
+
+
+
+        .terminal {
+
+            border: 1px solid var(--neon-pink);
+
+            background: rgba(0, 0, 0, 0.85);
+
+            backdrop-filter: blur(8px);
+
+            box-shadow: 0 0 30px rgba(255, 94, 94, 0.15);
+
+            padding: 30px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+
+        #file-text { white-space: pre-wrap; color: #fff; line-height: 1.8; font-size: 0.95rem; }
+
+        #terminal-text { white-space: pre-wrap; color: var(--neon-pink); font-size: 0.95rem; }
+
+
+
+        #password-input {
+
+            width: 100%;
+
+            margin-top: 20px;
+
+            background: transparent;
+
+            border: none;
+
+            border-bottom: 2px solid var(--neon-mint);
+
+            color: var(--neon-mint);
+
+            font-size: 1.5rem;
+
+            padding: 10px;
+
+            outline: none;
+
+            text-align: center;
+
+            letter-spacing: 10px;
+
+        }
+
+
+
+        .folder {
+
+            border: 1px solid var(--neon-mint);
+
+            color: var(--neon-mint);
+
+            padding: 15px;
+
+            margin-bottom: 12px;
+
+            cursor: pointer;
+
+            background: rgba(94, 255, 235, 0.05);
+
+            font-weight: bold;
+
+            text-align: center;
+
+            transition: 0.3s;
+
+        }
+
+        .folder:hover { background: rgba(94, 255, 235, 0.2); box-shadow: 0 0 15px var(--neon-mint); }
+
+
+
+        .file {
+
+            cursor: pointer;
+
+            padding: 10px 20px;
+
+            color: #ffffff;
+
+            border-left: 2px solid #333;
+
+            margin: 5px 0 5px 20px;
+
+            transition: all 0.3s ease;
+
+            display: block;
+
+        }
+
+        .file:hover {
+
+            color: var(--neon-mint) !important;
+
+            background: rgba(94, 255, 235, 0.1);
+
+            text-shadow: 0 0 10px var(--neon-mint);
+
+            border-left: 2px solid var(--neon-mint);
+
+            padding-left: 30px;
+
+        }
+
+
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .typing-cursor::after { content: "|"; animation: blink 0.8s infinite; color: var(--neon-mint); }
+
+
+
+        @keyframes sigilPulse {
+
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
+
+            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.12; }
+
+        }
+
+
+
+        .auth-success-flash { background-color: #0a2424 !important; }
+
+        .auth-error-flash { background-color: #240a0a !important; }
+
+
+
+        #back-btn {
+
+            background: transparent;
+
+            border: 1px solid var(--neon-mint);
+
+            color: var(--neon-mint);
+
+            padding: 12px 25px;
+
+            cursor: pointer;
+
+            margin-top: 20px;
+
+            transition: 0.3s;
+
+            letter-spacing: 2px;
+
+        }
+
+        #back-btn:hover { background: var(--neon-mint); color: #000; }
+
+
+
+        .hidden { display: none !important; }
+
+
+
+        @keyframes screenGlitch {
+
+            0% { transform: translate(0); }
+
+            10% { transform: translate(-5px, 2px) skewX(2deg); filter: hue-rotate(90deg); }
+
+            20% { transform: translate(5px, -2px) skewX(-2deg); }
+
+            30% { transform: translate(-2px, 5px); filter: invert(0.1); }
+
+            100% { transform: translate(0); }
+
+        }
+
+        .glitch-active { animation: screenGlitch 0.15s infinite !important; }
+
+
+
+        #file-scroll-container { width: 100%; overflow: visible; }
+
+
+
+        .hidden-trigger-zone {
+
+            display: none; 
+
+            margin-top: 50px; 
+
+            padding-top: 100vh;
+
+            padding-bottom: 200px;
+
+            text-align: center;
+
+            transition: opacity 0.5s;
+
+            opacity: 0;
+
+        }
+
+
+
+        .glitch-text {
+
+            color: #ff0000;
+
+            font-weight: bold;
+
+            font-size: 1.1rem;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 25px;
+
+            text-shadow: 2px 2px #000;
+
+            animation: blink 0.2s infinite;
+
+        }
+
+
+
+        .hidden-button {
+
+            width: 60px; height: 60px; border-radius: 50%;
+
+            background: radial-gradient(circle, #ff0000, #440000);
+
+            border: 2px solid #fff; cursor: pointer; margin: 0 auto;
+
+            box-shadow: 0 0 20px #ff0000, inset 0 0 15px #000;
+
+            transition: all 0.3s ease;
+
+        }
+
+        .hidden-button:hover {
+
+            transform: scale(1.2) rotate(10deg);
+
+            box-shadow: 0 0 40px #ff0000;
+
+            background: radial-gradient(circle, #ff4444, #660000);
+
+        }
+
+
+
+        #music-info-box {
+
+            position: fixed; bottom: 20px; right: 20px;
+
+            background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint);
+
+            color: var(--neon-mint); padding: 10px 15px; font-size: 12px;
+
+            z-index: 100; display: none;
+
+            box-shadow: 0 0 15px rgba(94, 255, 235, 0.2);
+
+            border-radius: 4px;
+
+        }
+
+
+
+        /* --- 4분할 및 텍스트 도배 관련 추가 CSS --- */
+
+        .split-container {
+
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+
+            z-index: 10000; background: #000;
+
+        }
+
+        .split-pane {
+
+            position: relative; border: 1px solid rgba(255, 0, 0, 0.3); overflow: hidden;
+
+            background: #000;
+
+        }
+
+        .wall-of-text {
+
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+
+            font-size: 10px; line-height: 1.2; color: rgba(255, 0, 0, 0.4);
+
+            word-break: break-all; user-select: none; pointer-events: none;
+
+            padding: 5px; opacity: 0; transition: opacity 0.5s;
+
+        }
+
+        .center-warning {
+
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+
+            z-index: 10001; text-align: center; pointer-events: none;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <div class="bg-sigil">⟡</div>
+
+
+
+    <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
+
+    <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
+
+
+
+    <div id="music-info-box">
+
+        <span style="margin-right: 5px;">🎵</span>
+
+        <span id="music-title">재생 중: SYSTEM_MAIN.mp3</span>
+
+    </div>
+
+
+
+    <div id="auth-screen" class="screen">
+
+        <div class="header"><h1>SECURITY CHECK</h1></div>
+
+        <div id="auth-message" style="margin-bottom: 10px; text-align: center;">ENTER ACCESS KEY</div>
+
+        <div class="terminal">
+
+            <form id="auth-form">
+
+                <input id="password-input" type="password" placeholder="••••" autocomplete="off">
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="main-screen" class="screen hidden">
+
+        <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+            <div class="header"><h1>CENTRAL DATABASE</h1></div>
+
+            <div class="terminal"><div id="terminal-text"></div></div>
+
+            <div class="directory" id="directory"></div>
+
+        </div>
+
+
+
+        <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+            <div class="header"><h1 id="file-title">FILE</h1></div>
+
+            <div class="terminal">
+
+                <div id="file-scroll-container">
+
+                    <div id="file-text"></div>
+
+                    <div id="hidden-zone" class="hidden-trigger-zone">
+
+                        <p class="glitch-text">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>
+
+                        <div id="secret-btn" class="hidden-button"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button id="back-btn">← BACK TO SYSTEM</button>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        /* --- 로직 유지 (건드리지 않음) --- */
+
+        const PASSWORD = "1234";
+
+        let isGlitchUnlocked = false; 
+
+        let inputBuffer = ""; 
+
+
+
+        const fileSystem = {
+
+            "The main character": {
+
+                "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n\n[종족]\n인간(human),노에인(Noein)\n\n[성별]\n여성\n\n[프로필]\n키: 169cm\n몸무게: 51.2kg]\n성격: 친절하면서도 이기주의 성향의 소유자이며 때때로 이익을 따지기도 한다.\n외형: 흰색 머리카락에 약간 왜소한 체형을 하고있고 밝은 회색에 후드티를 입고 다니며 대부분 모자를 쓰고 다니며 활동한다.",
+
+                "Curo_Half_Archive.txt": "명칭: 큐로(Curo)\n\n[종족]\n요괴(yokai), 구미호(nine tail)\n\n[성별]남성\n\n[프로필]\n키: 180cm\n몸무게: 72.1kg\n성격: 품어주면서도 어느정도 냉정하게 상대를 대하는 이익주의자 성격의 소유자\n\n[능력]\n기본적으로 푸른색에 글리치로 일렁이는 포탈과 블래스터를 사용하고 있다. 블러스터의 형태는 명확한 총신이나 포신으로 고정되지 않고...",
+
+                "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)\n\n[종족]\n악마(pure demon)\n\n[성별]\n여성\n\n[프로필]\n키: 158cm\n몸무게: 46.6kg\n성격: 악마라는 것이 무색하게 매우 친절하지만 악마는 악마인지라 살생을 하지 말아야할 이유를 모르며 무조건 자기가 정당하다는 자기 주장이 강한 성격",
+
+                "Shiro_Full_Archive.txt": "명칭: 시로(Shiro)\n\n[종족]\n천사(angel), 노에인?(Noein?)\n\n[성별]\n남성\n\n[프로필]\n키: 187cm\n몸무게: 77.9kg\n성격: 매우 진중하지만 때때로 어디로 튈지 모르는 미친 성격의 소유자."
+
+            },
+
+            "The enemy": {
+
+                "enemies.txt": "여태까지 큐로, 키스네, 리에가 상대하던 적들...",
+
+                "Ekis_Full_Archive.txt": "명칭: 애키스(Ekis)\n\n[종족]\n???\n\n[성별]\n\n[프로필]\n키: 190cm\n몸무게: 84kg\n성격: 어디로 튈지 모르는 미치광이 싸이코 패스"
+
+            },
+
+            "Principle": {
+
+                "Principle_Full_Archive.txt": "의 역할 혹은 그 개념으로 부르고 다닌다.\n\n[개념들의 능력]\n각각 계약, 오만, 오류 등등 가장 핵심으로 있는 개념들이 개인적으로 현상으로 나타나거나 인격체로 형상되어 나타나는 존재들이다.",
+
+                "Principle_legacy.txt": "과거 이 개념들이 나타나던 시기는 알 수 없으며..."
+
+            }
+
+        };
+
+
+
+        window.addEventListener('keydown', (e) => {
+
+            inputBuffer += e.key.toLowerCase();
+
+            if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
+
+            if (inputBuffer === "glitch" && !isGlitchUnlocked) {
+
+                isGlitchUnlocked = true;
+
+                const mainBgm = document.getElementById("main-bgm");
+
+                const glitchBgm = document.getElementById("glitch-bgm");
+
+                const musicTitle = document.getElementById("music-title");
+
+                if (mainBgm) mainBgm.pause();
+
+                if (glitchBgm) { glitchBgm.currentTime = 0; glitchBgm.play(); }
+
+                if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
+
+                document.body.classList.add('glitch-active');
+
+                setTimeout(() => { document.body.classList.remove('glitch-active'); alert("SYSTEM BREACHED: HIDDEN DATA UNLOCKED"); }, 1500);
+
+            }
+
+        });
+
+
+
+        document.getElementById("auth-form").onsubmit = (e) => {
+
+            e.preventDefault();
+
+            const val = document.getElementById("password-input").value;
+
+            if(val === PASSWORD) {
+
+                document.body.classList.add("auth-success-flash");
+
+                document.getElementById("main-bgm").play();
+
+                document.getElementById("music-info-box").style.display = "block";
+
+                setTimeout(() => {
+
+                    document.body.classList.remove("auth-success-flash");
+
+                    document.getElementById("auth-screen").classList.add("hidden");
+
+                    document.getElementById("main-screen").classList.remove("hidden");
+
+                    buildDirectory();
+
+                    startMainTyping();
+
+                }, 800);
+
+            } else {
+
+                document.body.classList.add("auth-error-flash");
+
+                setTimeout(() => { document.body.classList.remove("auth-error-flash"); document.getElementById("password-input").value = ""; }, 500);
+
+            }
+
+        };
+
+
+
+        function startMainTyping() {
+
+            const term = document.getElementById("terminal-text");
+
+            const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
+
+            let lIdx = 0, cIdx = 0;
+
+            function type() {
+
+                if(lIdx >= lines.length) return;
+
+                let p = term.querySelectorAll("p")[lIdx];
+
+                if(!p) { p = document.createElement("p"); term.appendChild(p); }
+
+                p.textContent = lines[lIdx].slice(0, cIdx + 1);
+
+                cIdx++;
+
+                if(cIdx === lines[lIdx].length) { cIdx = 0; lIdx++; setTimeout(type, 600); } else { setTimeout(type, 40); }
+
+            }
+
+            type();
+
+        }
+
+
+
+        function buildDirectory() {
+
+            const dir = document.getElementById("directory");
+
+            dir.innerHTML = "";
+
+            Object.keys(fileSystem).forEach(folder => {
+
+                const fDiv = document.createElement("div");
+
+                fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
+
+                const list = document.createElement("div");
+
+                list.className = "hidden";
+
+                fDiv.onclick = () => list.classList.toggle("hidden");
+
+                Object.keys(fileSystem[folder]).forEach(file => {
+
+                    const fi = document.createElement("div");
+
+                    fi.className = "file"; fi.textContent = "📄 " + file;
+
+                    fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
+
+                    list.appendChild(fi);
+
+                });
+
+                dir.appendChild(fDiv); dir.appendChild(list);
+
+            });
+
+        }
+
+
+
+        function openFile(name, content) {
+
+            window.scrollTo(0, 0); 
+
+            document.getElementById("database-view").classList.add("hidden");
+
+            document.getElementById("file-screen").classList.remove("hidden");
+
+            document.getElementById("file-title").textContent = "FILE: " + name;
+
+            const textTarget = document.getElementById("file-text");
+
+            const hZone = document.getElementById("hidden-zone");
+
+            textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
+
+            const sysMsg = document.createElement("p");
+
+            sysMsg.style.color = "var(--neon-mint)";
+
+            sysMsg.className = "typing-cursor";
+
+            sysMsg.textContent = "> 기록 열람을 시작합니다...";
+
+            textTarget.appendChild(sysMsg);
+
+
+
+            setTimeout(() => {
+
+                sysMsg.classList.remove("typing-cursor");
+
+                const bodyMsg = document.createElement("div");
+
+                textTarget.appendChild(bodyMsg);
+
+                let charIdx = 0;
+
+                function typeBody() {
+
+                    if(charIdx < content.length) {
+
+                        bodyMsg.textContent += content[charIdx]; charIdx++;
+
+                        setTimeout(typeBody, 1); 
+
+                    } else {
+
+                        if (name.includes("Curo") && isGlitchUnlocked) {
+
+                            hZone.style.display = "block";
+
+                            window.onscroll = () => {
+
+                                const scrollY = window.scrollY;
+
+                                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+                                const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
+
+                                document.body.style.backgroundColor = `rgb(${Math.floor(5*(1-ratio))}, ${Math.floor(5*(1-ratio))}, ${Math.floor(5*(1-ratio))})`;
+
+                                if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
+
+                            };
+
+                        }
+
+                    }
+
+                }
+
+                typeBody();
+
+            }, 800);
+
+        }
+
+
+
+        document.getElementById("back-btn").onclick = () => {
+
+            window.onscroll = null;
+
+            document.body.style.backgroundColor = "var(--bg-black)";
+
+            document.getElementById("file-screen").classList.add("hidden");
+
+            document.getElementById("database-view").classList.remove("hidden");
+
+            window.scrollTo(0, 0);
+
+        };
+
+
+
+        // --- 하이라이트 시퀀스 ---
+
+        function createFlash(color, dur) {
+
+            const f = document.createElement("div");
+
+            f.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005; pointer-events:none;`;
+
+            document.body.appendChild(f);
+
+            setTimeout(() => { f.style.transition = `opacity ${dur/1000}s`; f.style.opacity = "0"; setTimeout(() => f.remove(), dur); }, 50);
+
+        }
+
+
+
+        document.getElementById("secret-btn").onclick = () => {
+
+            const fileScreen = document.getElementById("file-screen");
+
+            fileScreen.style.opacity = "0";
+
+            
+
+            // 1. 4분할 화면 생성
+
+            const splitContainer = document.createElement("div");
+
+            splitContainer.className = "split-container";
+
+            for(let i=0; i<4; i++) {
+
+                const pane = document.createElement("div");
+
+                pane.className = "split-pane";
+
+                const wall = document.createElement("div");
+
+                wall.className = "wall-of-text";
+
+                // 텍스트 복제 도배 (요청사항)
+
+                wall.textContent = "CRITICAL ERROR ".repeat(1000);
+
+                pane.appendChild(wall);
+
+                splitContainer.appendChild(pane);
+
+            }
+
+            document.body.appendChild(splitContainer);
+
+
+
+            // 2. 연출 타이머 시작
+
+            [0, 500, 1000, 1500].forEach(t => setTimeout(() => createFlash("#fff", 80), t));
+
+
+
+            setTimeout(() => {
+
+                // 텍스트 도배 보이기
+
+                document.querySelectorAll(".wall-of-text").forEach(w => w.style.opacity = "1");
+
+                
+
+                // 3. 중앙 경고 텍스트
+
+                const warning = document.createElement("div");
+
+                warning.className = "center-warning";
+
+                document.body.appendChild(warning);
+
+
+
+                const showText = (txt, col, d, sz) => {
+
+                    setTimeout(() => {
+
+                        const p = document.createElement("p"); p.textContent = txt;
+
+                        p.style.cssText = `font-size:${sz}; color:${col}; opacity:0; transition:opacity 1s; font-weight:bold; margin:15px; text-shadow:0 0 20px ${col};`;
+
+                        warning.appendChild(p); setTimeout(() => p.style.opacity = "1", 50);
+
+                    }, d);
+
+                };
+
+
+
+                showText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
+
+                showText("모든 기록이 소거되었습니다.", "#fff", 2000, "1.2rem");
+
+                showText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 4000, "1.2rem");
+
+                showText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 6500, "1.5rem");
+
+
+
+                // 4. 하이라이트 (플래시와 함께 인물 설명)
+
+                setTimeout(() => {
+
+                    createFlash("#fff", 800);
+
+                    setTimeout(() => {
+
+                        warning.innerHTML = "";
+
+                        document.body.style.animation = "screenGlitch 0.05s infinite";
+
+                        warning.innerHTML = `
+
+                            <h1 style="color:var(--neon-pink); font-size:3.5rem; text-shadow:0 0 30px #f00;">'THE OBSERVER'</h1>
+
+                            <p style="color:#fff; font-size:1.2rem; line-height:2; font-weight:bold; background:rgba(0,0,0,0.7); padding:20px;">
+
+                                시스템의 균열 사이에서 탄생한 자아... <br>
+
+                                모든 우주를 수정하는 권한을 가졌습니다.
+
+                            </p>`;
+
+                    }, 100);
+
+                }, 9000);
+
+
+
+            }, 2000);
+
+        };
+
+    </script>
+
+</body>
+
+</html>

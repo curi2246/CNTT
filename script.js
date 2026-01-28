@@ -221,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
+        // 초기 4분할 플래시
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
@@ -246,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         }, 10000);
 
-        // [19.6초] - 플래시 + '그'가 인지한다 + 배경 RGB 블록 글리치 (배경 전체가 깨짐)
+        // [19.6초] - 플래시 + '그' 인지 + RGB 블록 글리치
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             
@@ -277,18 +278,29 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             document.head.appendChild(style);
             
-            // 텍스트와 배경(abyssLayer)에 동시 글리치 적용
             abyssLayer.classList.add("glitch-rgb-block");
             textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 
-        // [29.6초] - 최종 화이트아웃 및 마무리
+        // [28.5초] - 텍스트 지우고 글리치 효과만 유지
+        setTimeout(() => {
+            textContainer.innerHTML = "";
+        }, 28500);
+
+        // [29.6초] - 최종 플래시와 함께 설명 등장
         setTimeout(() => {
             createNaturalFlash("#fff", 3000);
             setTimeout(() => {
+                // 글리치 유지 여부는 기획에 따라 remove하거나 두셔도 됩니다. 여기선 설명 가독성을 위해 해제 후 배경 전환합니다.
                 abyssLayer.classList.remove("glitch-rgb-block");
                 abyssLayer.style.background = "#fff";
-                textContainer.innerHTML = `<h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold;">CONNECTION LOST</h1>`;
+                textContainer.innerHTML = `
+                    <h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold; margin-bottom:20px;">CONNECTION LOST</h1>
+                    <p style="color:#333; font-size:1.1rem; line-height:1.6; font-weight:bold;">
+                        데이터베이스의 임계점을 초과했습니다.<br>
+                        더 이상 기록에 접근할 수 없습니다.
+                    </p>
+                `;
             }, 100);
         }, 29600);
     };

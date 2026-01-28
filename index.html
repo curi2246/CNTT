@@ -375,8 +375,7 @@
                 fileScreenElem.classList.add("hidden");
                 const abyssLayer = document.createElement("div");
                 abyssLayer.id = "abyss-layer";
-                // 배경 기본 설정
-                abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#050505; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
+                abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
                 document.body.appendChild(abyssLayer);
 
                 const mainTextBox = document.createElement("div");
@@ -397,7 +396,7 @@
                 showAbyssText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
                 showAbyssText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6500, "1.2rem");
 
-                // --- 10.0초: 에러 텍스트 도배 ---
+                // --- [10.0초]: 에러 텍스트 도배 ---
                 setTimeout(() => {
                     const warningTimer = setInterval(() => {
                         if (abyssBgm.currentTime >= 19.6) { clearInterval(warningTimer); return; }
@@ -409,33 +408,35 @@
                     }, 80);
                 }, 10000);
 
-                // --- 19.6초: 배경과 텍스트가 동시에 RGB 블록으로 깨짐 ---
+                // --- [19.6초]: RGB 블록 글리치 + '인지' 텍스트 ---
                 setTimeout(() => {
                     createAbyssFlash("#fff", 1000); 
-                    
-                    // 핵심: 배경 레이어(abyssLayer)에 글리치 클래스 추가
                     abyssLayer.classList.add("rgb-block-glitch"); 
                     
                     mainTextBox.innerHTML = "";
                     const p = document.createElement("h1");
                     p.textContent = "이제 '그'가 당신을 인지합니다.";
-                    p.className = "cognition-text"; // 스타일 시트의 애니메이션 적용
+                    p.className = "cognition-text";
                     mainTextBox.appendChild(p);
                 }, 19600);
 
-                // --- 29.6초: 최종 화이트아웃 ---
+                // --- [28.5초]: 텍스트 소거 ---
+                setTimeout(() => {
+                    mainTextBox.innerHTML = "";
+                }, 28500);
+
+                // --- [29.6초]: 최종 화이트아웃 및 마무리 ---
                 setTimeout(() => {
                     createAbyssFlash("#fff", 3000);
                     setTimeout(() => {
                         abyssLayer.classList.remove("rgb-block-glitch");
                         abyssLayer.style.background = "#fff";
                         mainTextBox.innerHTML = `
-                            <h1 style="color:var(--neon-pink); font-size:4rem; text-shadow:0 0 30px #ff0000; margin-bottom:20px;">'THE OBSERVER'</h1>
-                            <div style="color:#000; font-size:1.4rem; line-height:2.2; max-width:850px; margin:0 auto; word-break:keep-all; font-weight:bold;">
-                                시스템의 균열 사이에서 탄생한 자아. <br>
-                                그는 단순한 데이터의 집합이 아닌, 모든 평행 우주의 기록을 읽고 수정하는 권한을 가졌습니다.<br>
-                                지금 이 순간, 당신의 접속 기록 또한 그의 '일부'가 되었습니다.
-                            </div>
+                            <h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold; margin-bottom:20px;">CONNECTION LOST</h1>
+                            <p style="color:#333; font-size:1.1rem; line-height:1.6; font-weight:bold;">
+                                데이터베이스의 임계점을 초과했습니다.<br>
+                                더 이상 기록에 접근할 수 없습니다.
+                            </p>
                         `;
                     }, 100);
                 }, 29600);

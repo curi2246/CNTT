@@ -4,252 +4,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE - SYSTEM ERROR</title>
     <style>
-        /* --- 제공받은 CSS 적용 --- */
+        /* --- 원본 CSS 유지 --- */
         * { box-sizing: border-box; font-family: 'Courier New', monospace; }
-
-        :root {
-            --neon-pink: #ff5e5e;
-            --neon-mint: #5effeb;
-            --bg-black: #050505;
-            --folder-gold: #ffca28;
-        }
-
-        /* 🚨 다크한 스크롤바 디자인 */
+        :root { --neon-pink: #ff5e5e; --neon-mint: #5effeb; --bg-black: #050505; --folder-gold: #ffca28; }
         ::-webkit-scrollbar { width: 12px; }
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; border: 3px solid #0a0a0a; }
         ::-webkit-scrollbar-thumb:hover { background: #444; }
 
-        body {
-            margin: 0;
-            background-color: #050505 !important;
-            color: var(--neon-pink);
-            overflow-x: hidden; 
-            overflow-y: auto; 
-            transition: background-color 0.3s ease;
-        }
-
-        .screen {
-            position: relative;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; 
-            padding: 5vh 0 10vh 0;
-            transition: filter 0.8s ease;
-            z-index: 2;
-        }
-
-        /* 🔍 배경 거대 심볼 */
-        .bg-sigil {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); 
-            font-size: 80vh; 
-            color: rgba(94, 255, 235, 0.05); 
-            text-shadow: 0 0 50px rgba(94, 255, 235, 0.1);
-            z-index: 1; 
-            pointer-events: none;
-            user-select: none;
-            animation: sigilPulse 6s ease-in-out infinite;
-            line-height: 1;
-        }
-
-        .header, .terminal, .directory, #back-btn {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 650px; 
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            letter-spacing: 8px;
-            text-shadow: 0 0 15px var(--neon-pink);
-            color: #fff;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .terminal {
-            border: 1px solid var(--neon-pink);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 30px rgba(255, 94, 94, 0.15);
-            padding: 30px;
-            margin-bottom: 25px;
-        }
-
+        body { margin: 0; background-color: #050505 !important; color: var(--neon-pink); overflow-x: hidden; overflow-y: auto; transition: background-color 0.3s ease; }
+        .screen { position: relative; width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 5vh 0 10vh 0; transition: filter 0.8s ease; z-index: 2; }
+        .bg-sigil { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80vh; color: rgba(94, 255, 235, 0.05); text-shadow: 0 0 50px rgba(94, 255, 235, 0.1); z-index: 1; pointer-events: none; user-select: none; animation: sigilPulse 6s ease-in-out infinite; line-height: 1; }
+        .header, .terminal, .directory, #back-btn { position: relative; z-index: 10; width: 90%; max-width: 650px; }
+        .header h1 { font-size: 2rem; letter-spacing: 8px; text-shadow: 0 0 15px var(--neon-pink); color: #fff; margin: 15px 0; text-align: center; }
+        .terminal { border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); box-shadow: 0 0 30px rgba(255, 94, 94, 0.15); padding: 30px; margin-bottom: 25px; }
         #file-text { white-space: pre-wrap; color: #fff; line-height: 1.8; font-size: 0.95rem; }
         #terminal-text { white-space: pre-wrap; color: var(--neon-pink); font-size: 0.95rem; }
-
-        #password-input {
-            width: 100%;
-            margin-top: 20px;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--neon-mint);
-            color: var(--neon-mint);
-            font-size: 1.5rem;
-            padding: 10px;
-            outline: none;
-            text-align: center;
-            letter-spacing: 10px;
-        }
-
-        .folder {
-            border: 1px solid var(--neon-mint);
-            color: var(--neon-mint);
-            padding: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            background: rgba(94, 255, 235, 0.05);
-            font-weight: bold;
-            text-align: center;
-            transition: 0.3s;
-        }
+        #password-input { width: 100%; margin-top: 20px; background: transparent; border: none; border-bottom: 2px solid var(--neon-mint); color: var(--neon-mint); font-size: 1.5rem; padding: 10px; outline: none; text-align: center; letter-spacing: 10px; }
+        .folder { border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 15px; margin-bottom: 12px; cursor: pointer; background: rgba(94, 255, 235, 0.05); font-weight: bold; text-align: center; transition: 0.3s; }
         .folder:hover { background: rgba(94, 255, 235, 0.2); box-shadow: 0 0 15px var(--neon-mint); }
-
-        .file {
-            cursor: pointer;
-            padding: 10px 20px;
-            color: #ffffff;
-            border-left: 2px solid #333;
-            margin: 5px 0 5px 20px;
-            transition: all 0.3s ease;
-            display: block;
-        }
-        .file:hover {
-            color: var(--neon-mint) !important;
-            background: rgba(94, 255, 235, 0.1);
-            text-shadow: 0 0 10px var(--neon-mint);
-            border-left: 2px solid var(--neon-mint);
-            padding-left: 30px;
-        }
-
+        .file { cursor: pointer; padding: 10px 20px; color: #ffffff; border-left: 2px solid #333; margin: 5px 0 5px 20px; transition: all 0.3s ease; display: block; }
+        .file:hover { color: var(--neon-mint) !important; background: rgba(94, 255, 235, 0.1); text-shadow: 0 0 10px var(--neon-mint); border-left: 2px solid var(--neon-mint); padding-left: 30px; }
         @keyframes blink { 50% { opacity: 0; } }
         .typing-cursor::after { content: "|"; animation: blink 0.8s infinite; color: var(--neon-mint); }
-
-        @keyframes sigilPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; }
-            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.12; }
-        }
-
+        @keyframes sigilPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; } 50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.12; } }
         .auth-success-flash { background-color: #0a2424 !important; }
         .auth-error-flash { background-color: #240a0a !important; }
-
-        #back-btn {
-            background: transparent;
-            border: 1px solid var(--neon-mint);
-            color: var(--neon-mint);
-            padding: 12px 25px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-            letter-spacing: 2px;
-        }
+        #back-btn { background: transparent; border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 12px 25px; cursor: pointer; margin-top: 20px; transition: 0.3s; letter-spacing: 2px; }
         #back-btn:hover { background: var(--neon-mint); color: #000; }
-
         .hidden { display: none !important; }
-
         @keyframes screenGlitch {
             0% { transform: translate(0); }
-            10% { transform: translate(-5px, 2px) skewX(2deg); filter: hue-rotate(90deg); }
-            20% { transform: translate(5px, -2px) skewX(-2deg); }
-            30% { transform: translate(-2px, 5px); filter: invert(0.1); }
+            20% { transform: translate(-3px, 1px) skewX(2deg); filter: hue-rotate(90deg); clip-path: inset(10% 0 20% 0); }
+            40% { transform: translate(3px, -1px) skewX(-2deg); filter: contrast(150%); }
+            60% { transform: translate(-1px, 3px); filter: invert(0.1); clip-path: inset(30% 0 10% 0); }
             100% { transform: translate(0); }
         }
-        .glitch-active { animation: screenGlitch 0.15s infinite !important; }
+        .glitch-active { animation: screenGlitch 0.1s infinite !important; }
+        .hidden-trigger-zone { display: none; margin-top: 50px; padding-top: 100vh; padding-bottom: 200px; text-align: center; transition: opacity 0.5s; opacity: 0; }
+        .glitch-text { color: #ff0000; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 25px; text-shadow: 2px 2px #000; animation: blink 0.2s infinite; }
+        .hidden-button { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #ff0000, #440000); border: 2px solid #fff; cursor: pointer; margin: 0 auto; box-shadow: 0 0 20px #ff0000, inset 0 0 15px #000; transition: all 0.3s ease; }
+        #music-info-box { position: fixed; bottom: 20px; right: 20px; background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 10px 15px; font-size: 12px; z-index: 100; display: none; box-shadow: 0 0 15px rgba(94, 255, 235, 0.2); border-radius: 4px; }
 
-        #file-scroll-container { width: 100%; overflow: visible; }
-
-        .hidden-trigger-zone {
-            display: none; 
-            margin-top: 50px; 
-            padding-top: 100vh;
-            padding-bottom: 200px;
-            text-align: center;
-            transition: opacity 0.5s;
-            opacity: 0;
-        }
-
-        .glitch-text {
-            color: #ff0000;
-            font-weight: bold;
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            margin-bottom: 25px;
-            text-shadow: 2px 2px #000;
-            animation: blink 0.2s infinite;
-        }
-
-        .hidden-button {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: radial-gradient(circle, #ff0000, #440000);
-            border: 2px solid #fff; cursor: pointer; margin: 0 auto;
-            box-shadow: 0 0 20px #ff0000, inset 0 0 15px #000;
-            transition: all 0.3s ease;
-        }
-        .hidden-button:hover {
-            transform: scale(1.2) rotate(10deg);
-            box-shadow: 0 0 40px #ff0000;
-            background: radial-gradient(circle, #ff4444, #660000);
-        }
-
-        #music-info-box {
-            position: fixed; bottom: 20px; right: 20px;
-            background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint);
-            color: var(--neon-mint); padding: 10px 15px; font-size: 12px;
-            z-index: 100; display: none;
-            box-shadow: 0 0 15px rgba(94, 255, 235, 0.2);
-            border-radius: 4px;
-        }
-
-        /* --- 4분할 및 텍스트 도배 관련 추가 CSS --- */
-        .split-container {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-            z-index: 10000; background: #000;
-        }
-        .split-pane {
-            position: relative; border: 1px solid rgba(255, 0, 0, 0.3); overflow: hidden;
-            background: #000;
-        }
-        .wall-of-text {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            font-size: 10px; line-height: 1.2; color: rgba(255, 0, 0, 0.4);
-            word-break: break-all; user-select: none; pointer-events: none;
-            padding: 5px; opacity: 0; transition: opacity 0.5s;
-        }
-        .center-warning {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 10001; text-align: center; pointer-events: none;
-        }
+        /* --- 시퀀스 전용 효과 --- */
+        #error-wall { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; color: rgba(255, 0, 0, 0.4); font-size: 10px; word-break: break-all; overflow: hidden; z-index: 9000; display: none; line-height: 1.1; }
+        .center-warning { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10001; text-align: center; pointer-events: none; width: 90%; }
+        .rgb-glitch { animation: screenGlitch 0.15s infinite; text-shadow: 3px 0 red, -3px 0 blue; }
     </style>
 </head>
 <body>
 
     <div class="bg-sigil">⟡</div>
-
     <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
     <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
 
-    <div id="music-info-box">
-        <span style="margin-right: 5px;">🎵</span>
-        <span id="music-title">재생 중: SYSTEM_MAIN.mp3</span>
-    </div>
+    <div id="music-info-box"><span style="margin-right: 5px;">🎵</span><span id="music-title">재생 중: SYSTEM_MAIN.mp3</span></div>
 
     <div id="auth-screen" class="screen">
         <div class="header"><h1>SECURITY CHECK</h1></div>
         <div id="auth-message" style="margin-bottom: 10px; text-align: center;">ENTER ACCESS KEY</div>
-        <div class="terminal">
-            <form id="auth-form">
-                <input id="password-input" type="password" placeholder="••••" autocomplete="off">
-            </form>
-        </div>
+        <div class="terminal"><form id="auth-form"><input id="password-input" type="password" placeholder="••••" autocomplete="off"></form></div>
     </div>
 
     <div id="main-screen" class="screen hidden">
@@ -258,24 +72,17 @@
             <div class="terminal"><div id="terminal-text"></div></div>
             <div class="directory" id="directory"></div>
         </div>
-
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div class="terminal">
-                <div id="file-scroll-container">
-                    <div id="file-text"></div>
-                    <div id="hidden-zone" class="hidden-trigger-zone">
-                        <p class="glitch-text">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>
-                        <div id="secret-btn" class="hidden-button"></div>
-                    </div>
-                </div>
-            </div>
+            <div class="terminal"><div id="file-scroll-container"><div id="file-text"></div><div id="hidden-zone" class="hidden-trigger-zone"><p class="glitch-text">CRITICAL ERROR: HIDDEN SECTOR FOUND</p><div id="secret-btn" class="hidden-button"></div></div></div></div>
             <button id="back-btn">← BACK TO SYSTEM</button>
         </div>
     </div>
 
+    <div id="error-wall"></div>
+    <div id="warning-layer" class="center-warning"></div>
+
     <script>
-        /* --- 로직 유지 (건드리지 않음) --- */
         const PASSWORD = "1234";
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
@@ -415,74 +222,56 @@
             window.scrollTo(0, 0);
         };
 
-        // --- 하이라이트 시퀀스 ---
-        function createFlash(color, dur) {
+        // --- 수정된 하이라이트 시퀀스 (요청 타임라인 적용) ---
+        function createFlash() {
             const f = document.createElement("div");
-            f.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:10005; pointer-events:none;`;
+            f.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#fff; z-index:11000; pointer-events:none;`;
             document.body.appendChild(f);
-            setTimeout(() => { f.style.transition = `opacity ${dur/1000}s`; f.style.opacity = "0"; setTimeout(() => f.remove(), dur); }, 50);
+            setTimeout(() => { f.style.transition = "opacity 0.1s"; f.style.opacity = "0"; setTimeout(() => f.remove(), 100); }, 50);
         }
 
         document.getElementById("secret-btn").onclick = () => {
             const fileScreen = document.getElementById("file-screen");
+            const wall = document.getElementById("error-wall");
+            const warning = document.getElementById("warning-layer");
             fileScreen.style.opacity = "0";
-            
-            // 1. 4분할 화면 생성
-            const splitContainer = document.createElement("div");
-            splitContainer.className = "split-container";
-            for(let i=0; i<4; i++) {
-                const pane = document.createElement("div");
-                pane.className = "split-pane";
-                const wall = document.createElement("div");
-                wall.className = "wall-of-text";
-                // 텍스트 복제 도배 (요청사항)
-                wall.textContent = "CRITICAL ERROR ".repeat(1000);
-                pane.appendChild(wall);
-                splitContainer.appendChild(pane);
-            }
-            document.body.appendChild(splitContainer);
 
-            // 2. 연출 타이머 시작
-            [0, 500, 1000, 1500].forEach(t => setTimeout(() => createFlash("#fff", 80), t));
+            // 1. 플래시 타이밍 (0초, 2.5초, 5초, 7.4초)
+            createFlash(); // 0초
+            setTimeout(createFlash, 2500); 
+            setTimeout(createFlash, 5000); 
+            setTimeout(createFlash, 7400); 
 
+            // 2. 9.8초: 에러 도배 및 중앙 경고 시작
             setTimeout(() => {
-                // 텍스트 도배 보이기
-                document.querySelectorAll(".wall-of-text").forEach(w => w.style.opacity = "1");
-                
-                // 3. 중앙 경고 텍스트
-                const warning = document.createElement("div");
-                warning.className = "center-warning";
-                document.body.appendChild(warning);
+                wall.style.display = "block";
+                wall.textContent = "CRITICAL_ERROR_SYSTEM_BREACH_".repeat(2000);
+                warning.innerHTML = `<h2 style="color:red; font-size:2rem; text-shadow:0 0 15px red;">CRITICAL SYSTEM FAILURE</h2>`;
+            }, 9800);
 
-                const showText = (txt, col, d, sz) => {
-                    setTimeout(() => {
-                        const p = document.createElement("p"); p.textContent = txt;
-                        p.style.cssText = `font-size:${sz}; color:${col}; opacity:0; transition:opacity 1s; font-weight:bold; margin:15px; text-shadow:0 0 20px ${col};`;
-                        warning.appendChild(p); setTimeout(() => p.style.opacity = "1", 50);
-                    }, d);
-                };
+            // 3. 19.7초: 인지 메시지 + RGB 글리치
+            setTimeout(() => {
+                warning.innerHTML = `<h2 class="rgb-glitch" style="color:var(--neon-mint); font-size:2.2rem;">이제 '그'가 당신을 인지합니다.</h2>`;
+            }, 19700);
 
-                showText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
-                showText("모든 기록이 소거되었습니다.", "#fff", 2000, "1.2rem");
-                showText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 4000, "1.2rem");
-                showText("이제 '그'가 당신을 인지합니다.", "var(--neon-mint)", 6500, "1.5rem");
+            // 4. 28.4초: 인지 메시지 삭제 (배경 글리치는 유지)
+            setTimeout(() => {
+                warning.innerHTML = "";
+            }, 28400);
 
-                // 4. 하이라이트 (플래시와 함께 인물 설명)
-                setTimeout(() => {
-                    createFlash("#fff", 800);
-                    setTimeout(() => {
-                        warning.innerHTML = "";
-                        document.body.style.animation = "screenGlitch 0.05s infinite";
-                        warning.innerHTML = `
-                            <h1 style="color:var(--neon-pink); font-size:3.5rem; text-shadow:0 0 30px #f00;">'THE OBSERVER'</h1>
-                            <p style="color:#fff; font-size:1.2rem; line-height:2; font-weight:bold; background:rgba(0,0,0,0.7); padding:20px;">
-                                시스템의 균열 사이에서 탄생한 자아... <br>
-                                모든 우주를 수정하는 권한을 가졌습니다.
-                            </p>`;
-                    }, 100);
-                }, 9000);
-
-            }, 2000);
+            // 5. 29.6초: 마지막 플래시 + 캐릭터 하이라이트
+            setTimeout(() => {
+                createFlash();
+                document.body.classList.add('glitch-active');
+                warning.innerHTML = `
+                    <div class="rgb-glitch">
+                        <h1 style="color:var(--neon-pink); font-size:3.5rem; text-shadow:0 0 30px #f00;">'THE OBSERVER'</h1>
+                        <p style="color:#fff; font-size:1.2rem; line-height:2; font-weight:bold; background:rgba(0,0,0,0.8); padding:20px; border:1px solid var(--neon-pink);">
+                            시스템의 균열 사이에서 탄생한 자아... <br>
+                            모든 우주를 수정하는 권한을 가졌습니다.
+                        </p>
+                    </div>`;
+            }, 29600);
         };
     </script>
 </body>

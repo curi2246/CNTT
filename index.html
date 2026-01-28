@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko" style="background-color: #020d0d;"> <head>
+<html lang="ko" style="background-color: #020d0d;">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE - SYSTEM ERROR</title>
@@ -98,7 +99,7 @@
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
 
-        /* 🔥 [수정됨] 배경+텍스트 통합 RGB 블록 글리치 효과 */
+        /* 🔥 RGB 블록 글리치 효과 */
         .rgb-block-glitch {
             animation: rgb-bg-shift 0.1s infinite, block-bg-shatter 0.1s infinite !important;
             filter: contrast(150%) brightness(1.2);
@@ -114,11 +115,11 @@
             60% { clip-path: inset(30% 0 45% 0); transform: translate(-15px, 15px); }
             100% { clip-path: inset(0); transform: translate(0); }
         }
-        /* 인지 텍스트 전용 스타일 */
         .cognition-text {
-            font-size: 4rem; color: #fff; font-weight: 900;
+            font-size: 3rem; color: #fff; font-weight: 900;
             text-shadow: 5px 0 red, -5px 0 blue, 0 0 20px #fff;
             animation: text-vibrate 0.05s infinite;
+            line-height: 1.2;
         }
         @keyframes text-vibrate {
             0% { transform: translate(2px, -2px); }
@@ -321,6 +322,7 @@
                         bodyMsg.textContent += content[charIdx]; charIdx++;
                         setTimeout(typeBody, 1); 
                     } else {
+                        // 큐로 아카이브 + 글리치 해제 상태일 때만 히든 존 활성화
                         if (name.includes("Curo") && isGlitchUnlocked) {
                             hZone.style.display = "block";
                             window.onscroll = () => {
@@ -392,13 +394,15 @@
                     }, d);
                 };
 
+                // 서사 텍스트 등장
                 showAbyssText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
                 showAbyssText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
                 showAbyssText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6500, "1.2rem");
 
-                // --- [10.0초]: 에러 텍스트 도배 ---
+                // --- 10.0초: 에러 텍스트 도배 시작 ---
                 setTimeout(() => {
                     const warningTimer = setInterval(() => {
+                        // 19.6초가 되면 도배 중단
                         if (abyssBgm.currentTime >= 19.6) { clearInterval(warningTimer); return; }
                         const warn = document.createElement("div");
                         warn.textContent = "SYSTEM_WARNING: ACCESS_VIOLATION";
@@ -408,7 +412,7 @@
                     }, 80);
                 }, 10000);
 
-                // --- [19.6초]: RGB 블록 글리치 + '인지' 텍스트 ---
+                // --- 🔥 [19.6초]: 그가 인지하는 타이밍 (RGB 블록 글리치) ---
                 setTimeout(() => {
                     createAbyssFlash("#fff", 1000); 
                     abyssLayer.classList.add("rgb-block-glitch"); 
@@ -420,12 +424,12 @@
                     mainTextBox.appendChild(p);
                 }, 19600);
 
-                // --- [28.5초]: 텍스트 소거 ---
+                // --- 28.5초: 모든 텍스트 소거 ---
                 setTimeout(() => {
                     mainTextBox.innerHTML = "";
                 }, 28500);
 
-                // --- [29.6초]: 최종 화이트아웃 및 마무리 ---
+                // --- 29.6초: 최종 연결 종료 (화이트아웃) ---
                 setTimeout(() => {
                     createAbyssFlash("#fff", 3000);
                     setTimeout(() => {

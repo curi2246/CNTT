@@ -427,10 +427,9 @@
                     }
                     
                     // 28.5초에 텍스트 소거
-                     if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
+                    if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
                         abyssLayer.dataset.ended = "true";
                         clearInterval(warningInterval); // 인터벌 종료
-                        
                         createAbyssFlash("#fff", 3000);
                         setTimeout(() => {
                             abyssLayer.classList.remove("rgb-block-glitch");
@@ -440,6 +439,12 @@
                                 <p style="color:#333; font-size:1.1rem; line-height:1.6; font-weight:bold;">
                                     데이터베이스의 임계점을 초과했습니다.<br>
                                     더 이상 기록에 접근할 수 없습니다.
+                                </p>
+                            `;
+                        }, 100);
+                    }
+                }, 100); // 100ms마다 음악 시간 체크
+            }, 9800);
                                  };
     </script>
 </body>

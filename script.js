@@ -18,17 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let isGlitchUnlocked = false; 
     const fileSystem = {}; 
 
-    function syncDataFromHTML() {
-        const dataStore = {
-            "The main character": {
-                "Leay_Full_Archive.txt": "명칭: 리에(Leay)...(중략)",
-                "Curo_Half_Archive.txt": "명칭: 큐로(Curo)...(중략)",
-                "Kisune_Full_Archive.txt": "명칭: 키스네(Kisune)...(중략)",
-                "Shiro_Full_Archive.txt": "명칭: 시로(Shiro)...(중략)"
-            }
-        };
-        Object.assign(fileSystem, dataStore); 
-    }
+  <div id="html-data-storage" style="display: none;">
+    <section data-folder="The main character">
+        <article data-file="Leay_Full_Archive.txt">명칭: 리에(Leay)... 여기에 긴 설명을 적으세요.</article>
+        <article data-file="Curo_Half_Archive.txt">명칭: 큐로(Curo)... 여기에 설명을 적으세요.</article>
+        <article data-file="Kisune_Full_Archive.txt">명칭: 키스네(Kisune)... 내용을 입력하세요.</article>
+        <article data-file="Shiro_Full_Archive.txt">명칭: 시로(Shiro)... 데이터를 입력하세요.</article>
+    </section>
+</div>
     syncDataFromHTML();
 
     document.getElementById("auth-form").onsubmit = (e) => {

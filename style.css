@@ -1,4 +1,4 @@
-/* --- 제공받은 CSS (순수 추출본 및 19.6s 엔딩 로직 포함) --- */
+/* --- 원본 유지 및 요청 연출 타임라인 적용 --- */
 * { box-sizing: border-box; font-family: 'Courier New', monospace; }
 
 :root {
@@ -22,6 +22,13 @@ body {
     overflow-y: auto; 
     transition: background-color 0.3s ease;
 }
+
+/* 🚨 0, 2.4, 5, 7.4초 플래시 애니메이션 */
+@keyframes screenFlashSequence {
+    0%, 2.4s, 5s, 7.4s { background-color: #fff !important; }
+    0.1s, 2.5s, 5.1s, 7.5s { background-color: #050505 !important; }
+}
+.flash-active { animation: screenFlashSequence 8s forwards; }
 
 .screen {
     position: relative;
@@ -157,7 +164,22 @@ body {
 }
 .glitch-active { animation: screenGlitch 0.15s infinite !important; }
 
-#file-scroll-container { width: 100%; overflow: visible; }
+/* 🚨 19.6초 RGB 날카로운 깨짐 효과 */
+@keyframes sharpRGBGlitch {
+    0% { filter: none; transform: translate(0); }
+    19.6s { 
+        filter: drop-shadow(-8px 0 #f00) drop-shadow(8px 0 #0ff);
+        transform: translate(15px, -15px) skewX(20deg);
+        clip-path: inset(10% 0 80% 0);
+    }
+    19.7s { 
+        filter: hue-rotate(180deg) brightness(2);
+        transform: translate(-20px, 15px);
+        clip-path: inset(50% 0 20% 0);
+    }
+    19.8s { filter: none; transform: translate(0); clip-path: inset(0); }
+}
+.rgb-glitch-active { animation: sharpRGBGlitch 0.2s infinite; animation-delay: 19.6s; }
 
 .hidden-trigger-zone {
     display: none; 
@@ -192,7 +214,6 @@ body {
     background: radial-gradient(circle, #ff4444, #660000);
 }
 
-/* --- 🚨 19.6초 인지 텍스트 도배 및 에러 레이아웃 추가 --- */
 .split-container {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
@@ -202,28 +223,49 @@ body {
     position: relative; border: 1px solid rgba(255, 0, 0, 0.3); overflow: hidden;
     background: #000;
 }
+
+/* 🚨 10초 배경 에러 도배 -> 19.6초 삭제 */
 .wall-of-text {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     font-size: 10px; line-height: 1.2; color: rgba(255, 0, 0, 0.6);
     word-break: break-all; user-select: none; pointer-events: none;
-    padding: 5px; opacity: 0; transition: opacity 0.5s;
+    padding: 5px; opacity: 0;
 }
-
-/* 인지 부호화 에러 도배 애니메이션 */
-@keyframes floodError {
-    0% { transform: translateY(0); opacity: 0.8; }
-    100% { transform: translateY(-10px); opacity: 1; }
+@keyframes floodDisplay {
+    0% { opacity: 1; }
+    100% { opacity: 0; display: none; }
 }
-
-.error-flood-active .wall-of-text {
+.wall-of-text-active {
     opacity: 1 !important;
-    animation: floodError 0.1s steps(2) infinite;
-    color: #ff0000;
-    text-shadow: 0 0 5px #ff0000;
+    animation: floodDisplay 0.1s forwards;
+    animation-delay: 19.6s; /* 19.6초에 삭제 */
 }
 
+/* 🚨 텍스트 전환 시퀀스 */
 .center-warning {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
     z-index: 10001; text-align: center; pointer-events: none;
-    font-size: 2.5rem; color: #fff; text-shadow: 0 0 20px #f00;
+    opacity: 0;
+}
+
+/* '그가 인지한다' (19.6s 등장 -> 28.5s 삭제) */
+@keyframes cognizeFlow {
+    0% { opacity: 1; }
+    99% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.text-cognize {
+    animation: cognizeFlow 8.9s forwards;
+    animation-delay: 19.6s;
+    color: #fff; text-shadow: 0 0 20px #f00; font-size: 2.5rem;
+}
+
+/* '캐릭터 설명' (29.6s 등장) */
+@keyframes charDescFlow {
+    100% { opacity: 1; }
+}
+.text-char-desc {
+    animation: charDescFlow 0.5s forwards;
+    animation-delay: 29.6s;
+    color: var(--neon-mint); font-size: 1.2rem;
 }

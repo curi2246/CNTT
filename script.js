@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (secret-btn) 로직 ---
+    // --- 히든 시퀀스 (secret-btn) 연출 강화 버전 ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -222,6 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
+        // 초기 플래시 (0s, 2.4s, 5.0s, 7.4s)
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
@@ -235,17 +236,22 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
         abyssLayer.appendChild(textContainer);
 
+        // [10.0초] - 백그라운드 에러 메시지 무차별 도배
         setTimeout(() => {
             const errInterval = setInterval(() => {
                 if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
-                const err = document.createElement("div");
-                err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
-                err.style.cssText = `position:absolute; color:#600; font-size:16px; left:${Math.random()*90}%; top:${Math.random()*90}%; opacity:0.8; pointer-events:none; font-weight:bold; z-index:10000;`;
-                abyssLayer.appendChild(err);
-                setTimeout(() => err.remove(), 400);
-            }, 50);
+                // 한 틱에 3개씩 생성하여 도배 가속
+                for(let i=0; i<3; i++) {
+                    const err = document.createElement("div");
+                    err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
+                    err.style.cssText = `position:absolute; color:#800; font-family:monospace; font-size:${12 + Math.random() * 20}px; left:${Math.random() * 100}%; top:${Math.random() * 100}%; opacity:0.9; pointer-events:none; font-weight:bold; z-index:10000; white-space:nowrap;`;
+                    abyssLayer.appendChild(err);
+                    setTimeout(() => err.remove(), 400);
+                }
+            }, 30); // 0.03초마다 생성하여 도배
         }, 10000);
 
+        // [19.6초] - 인지 텍스트 및 강력한 RGB 글리치
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             const style = document.createElement('style');
@@ -258,7 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 @keyframes block-distortion {
                     0% { clip-path: inset(10% 0 80% 0); transform: translate(-10px, 5px); }
                     25% { clip-path: inset(70% 0 10% 0); transform: translate(10px, -5px); }
-                    50% { clip-path: inset(30% 0 40% 0); transform: translate(-5px, 10px); }
                     100% { clip-path: inset(0); }
                 }
                 .認知텍스트 {
@@ -276,8 +281,10 @@ document.addEventListener("DOMContentLoaded", () => {
             textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 
+        // [28.5초] - 텍스트 소멸
         setTimeout(() => { textContainer.innerHTML = ""; }, 28500);
 
+        // [29.6초] - 최종 연결 해제 화면
         setTimeout(() => {
             createNaturalFlash("#fff", 3000);
             setTimeout(() => {

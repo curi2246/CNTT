@@ -164,9 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- [최종 수정] 히든 시퀀스 (secret-btn) 타이밍 및 도배 정밀 교정 ---
+    // --- 🔥 [버그 수정] 히든 시퀀스: 음악 시간 기반 타이밍 체크 ---
     document.getElementById("secret-btn").onclick = () => {
-        const startTime = performance.now(); // Date.now()보다 정확한 고해상도 타이머
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
 
@@ -201,20 +200,38 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; text-align:center; z-index:100001; pointer-events:none;`;
         abyssLayer.appendChild(textContainer);
 
-        // 시퀀스 상태를 체크하기 위한 변수
-        let step = 0; 
+        // 초기 플래시
+        [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createNaturalFlash("#fff", 800), time));
 
-        function update() {
-            const elapsed = performance.now() - startTime;
+        // 초기 텍스트
+        setTimeout(() => {
+            const p1 = document.createElement("p");
+            p1.textContent = "CRITICAL ERROR: HIDDEN SECTOR ACCESSED";
+            p1.style.cssText = "font-size:2rem; color:#f00; margin:20px 0; opacity:0; transition:opacity 2s; font-weight:bold;";
+            textContainer.appendChild(p1);
+            setTimeout(() => p1.style.opacity = "1", 100);
+        }, 0);
 
-            // 초기 플래시 (0, 2.4, 5, 7.4초)
-            if (elapsed >= 0 && step === 0) { createNaturalFlash("#fff", 800); step = 1; }
-            if (elapsed >= 2400 && step === 1) { createNaturalFlash("#fff", 800); step = 2; }
-            if (elapsed >= 5000 && step === 2) { createNaturalFlash("#fff", 800); step = 3; }
-            if (elapsed >= 7400 && step === 3) { createNaturalFlash("#fff", 800); step = 4; }
+        setTimeout(() => {
+            const p2 = document.createElement("p");
+            p2.textContent = "모든 기록이 소거되었습니다.";
+            p2.style.cssText = "font-size:1.2rem; color:#fff; margin:20px 0; opacity:0; transition:opacity 2s; font-weight:bold;";
+            textContainer.appendChild(p2);
+            setTimeout(() => p2.style.opacity = "1", 100);
+        }, 3000);
 
-            // 1. [10.0초 ~ 19.6초] 에러 도배 (프레임마다 확률적으로 생성)
-            if (elapsed >= 10000 && elapsed < 19600) {
+        setTimeout(() => {
+            const p3 = document.createElement("p");
+            p3.textContent = "당신은 보지 말아야 할 것을 보았습니다.";
+            p3.style.cssText = "font-size:1.2rem; color:#fff; margin:20px 0; opacity:0; transition:opacity 2s; font-weight:bold;";
+            textContainer.appendChild(p3);
+            setTimeout(() => p3.style.opacity = "1", 100);
+        }, 6500);
+
+        // --- 🔥 음악 재생 시간 기반 타이밍 체크 (버그 수정 핵심 부분) ---
+        const warningInterval = setInterval(() => {
+            // 10초부터 에러 도배 시작
+            if (abyssBgm.currentTime >= 10.0 && abyssBgm.currentTime < 19.6) {
                 if (Math.random() > 0.8) {
                     const err = document.createElement("div");
                     err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
@@ -224,10 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // 2. [19.6초] 인지 텍스트 등장
-            if (elapsed >= 19600 && step === 4) {
-                step = 5;
+            // 19.6초에 인지 텍스트 등장
+            if (abyssBgm.currentTime >= 19.6 && !abyssLayer.dataset.cognized) {
+                abyssLayer.dataset.cognized = "true";
                 createNaturalFlash("#fff", 1000);
+                
                 const style = document.createElement('style');
                 style.innerHTML = `
                     .glitch-final { animation: shake-rgb 0.1s infinite; }
@@ -246,12 +264,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
             }
 
-            // 3. [28.5초] 텍스트 소멸
-            if (elapsed >= 28500 && step === 5) { step = 6; textContainer.innerHTML = ""; }
+            // 28.5초에 텍스트 소멸
+            if (abyssBgm.currentTime >= 28.5 && !abyssLayer.dataset.cleared) {
+                abyssLayer.dataset.cleared = "true";
+                textContainer.innerHTML = "";
+            }
 
-            // 4. [29.6초] 최종 엔딩
-            if (elapsed >= 29600 && step === 6) {
-                step = 7;
+            // 29.6초에 최종 엔딩
+            if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
+                abyssLayer.dataset.ended = "true";
+                clearInterval(warningInterval); // 인터벌 종료
+                
                 abyssLayer.classList.remove("glitch-final");
                 abyssLayer.style.background = "#fff";
                 textContainer.innerHTML = `
@@ -261,12 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         더 이상 기록에 접근할 수 없습니다.
                     </p>
                 `;
-                return; // 루프 종료
             }
-
-            requestAnimationFrame(update);
-        }
-
-        requestAnimationFrame(update);
+        }, 100); // 100ms마다 음악 시간 체크
     };
 });

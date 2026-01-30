@@ -164,11 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (secret-btn) 타이밍 정밀 교정 버전 ---
+    // --- [최종 수정] 히든 시퀀스 (secret-btn) 타이밍 및 도배 정밀 교정 ---
     document.getElementById("secret-btn").onclick = () => {
+        const startTime = Date.now(); // 절대적인 기준 시간
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
-        const startTime = Date.now(); // 정확한 타이밍 기준점
 
         fileScreenElem.style.transition = "opacity 0.5s";
         fileScreenElem.style.opacity = "0";
@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const createNaturalFlash = (color, duration) => {
             const flash = document.createElement("div");
-            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:11000; pointer-events:none; opacity:1;`;
+            flash.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:${color}; z-index:110000; pointer-events:none; opacity:1;`;
             document.body.appendChild(flash);
             setTimeout(() => {
                 flash.style.transition = `opacity ${duration}ms ease-out`;
@@ -193,79 +193,70 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // 초기 플래시 연출
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
 
+        // 심연 레이어를 최상위로 고정
         const abyssLayer = document.createElement("div");
-        abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center;`;
+        abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:99999; overflow:hidden;`;
         document.body.appendChild(abyssLayer);
 
         const textContainer = document.createElement("div");
-        textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
+        textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; text-align:center; z-index:100001; pointer-events:none;`;
         abyssLayer.appendChild(textContainer);
 
-        // [10.0초] - 에러 메시지 폭포수 도배 시작
+        // 1. [10.0초] - 에러 메시지 강제 도배 (좌표 fixed로 수정하여 화면 가림 방지)
         setTimeout(() => {
             const errInterval = setInterval(() => {
-                // 19.6초(텍스트 등장 시점)가 되면 도배 중단
-                if (Date.now() - startTime >= 19600) { clearInterval(errInterval); return; }
+                const elapsed = Date.now() - startTime;
+                if (elapsed >= 19600) { clearInterval(errInterval); return; } // 인지 텍스트 등장 시 중단
                 
-                for(let i=0; i<5; i++) {
+                for(let i=0; i<8; i++) {
                     const err = document.createElement("div");
                     err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
-                    err.style.cssText = `position:absolute; color:#800; font-family:monospace; font-size:${14 + Math.random() * 24}px; left:${Math.random() * 100}%; top:${Math.random() * 100}%; opacity:0.9; pointer-events:none; font-weight:bold; z-index:10000; white-space:nowrap;`;
+                    err.style.cssText = `position:fixed; color:#f00; font-family:monospace; font-size:${14 + Math.random() * 26}px; left:${Math.random() * 100}vw; top:${Math.random() * 100}vh; opacity:0.9; font-weight:bold; z-index:100000; white-space:nowrap;`;
                     abyssLayer.appendChild(err);
                     setTimeout(() => err.remove(), 400);
                 }
-            }, 20); // 0.02초 간격으로 생성 (진짜 도배)
+            }, 30);
         }, 10000);
 
-        // [19.6초] - 인지 텍스트 등장 (정확한 타이밍)
+        // 2. [19.6초] - 인지 텍스트 등장
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             const style = document.createElement('style');
             style.innerHTML = `
-                .glitch-rgb-block { animation: rgb-split 0.1s infinite, block-distortion 0.1s infinite; }
-                @keyframes rgb-split {
-                    0% { box-shadow: 20px 0 rgba(255,0,0,0.6), -20px 0 rgba(0,0,255,0.6); background: rgba(255,0,0,0.1); }
-                    50% { box-shadow: -20px 0 rgba(255,0,0,0.6), 20px 0 rgba(0,0,255,0.6); background: rgba(0,0,255,0.1); }
-                }
-                @keyframes block-distortion {
-                    0% { clip-path: inset(15% 0 70% 0); transform: translate(-15px, 10px); }
-                    50% { clip-path: inset(60% 0 15% 0); transform: translate(15px, -10px); }
-                    100% { clip-path: inset(0); }
+                .glitch-final { animation: shake-rgb 0.1s infinite; }
+                @keyframes shake-rgb {
+                    0% { transform: translate(5px, -5px); filter: hue-rotate(90deg); }
+                    50% { transform: translate(-5px, 5px); filter: hue-rotate(180deg); }
+                    100% { transform: translate(0); }
                 }
                 .認知텍스트 {
                     text-shadow: 0 0 30px #fff, 10px 0 red, -10px 0 blue;
-                    color: #fff; font-size: 5rem; font-weight: 900;
-                    animation: text-vibrate 0.03s infinite;
+                    color: #fff; font-size: 4.8rem; font-weight: 900;
                 }
-                @keyframes text-vibrate { 0% { transform: translate(4px); } 100% { transform: translate(-4px); } }
             `;
             document.head.appendChild(style);
-            abyssLayer.classList.add("glitch-rgb-block");
+            abyssLayer.classList.add("glitch-final");
             textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
         }, 19600);
 
-        // [28.5초] - 텍스트 소멸
+        // 3. [28.5초] - 텍스트 소멸
         setTimeout(() => { textContainer.innerHTML = ""; }, 28500);
 
-        // [29.6초] - 최종 화이트 아웃 엔딩
+        // 4. [29.6초] - 최종 엔딩
         setTimeout(() => {
-            createNaturalFlash("#fff", 3000);
-            setTimeout(() => {
-                abyssLayer.classList.remove("glitch-rgb-block");
-                abyssLayer.style.background = "#fff";
-                textContainer.innerHTML = `
-                    <h1 style="color:#000; font-size:2.2rem; letter-spacing:15px; font-weight:900; margin-bottom:30px;">CONNECTION LOST</h1>
-                    <p style="color:#111; font-size:1.3rem; line-height:1.8; font-weight:bold;">
-                        데이터베이스의 임계점을 초과했습니다.<br>
-                        더 이상 기록에 접근할 수 없습니다.
-                    </p>
-                `;
-            }, 100);
+            abyssLayer.classList.remove("glitch-final");
+            abyssLayer.style.background = "#fff";
+            textContainer.innerHTML = `
+                <h1 style="color:#000; font-size:2.2rem; letter-spacing:15px; font-weight:900; margin-bottom:30px;">CONNECTION LOST</h1>
+                <p style="color:#111; font-size:1.3rem; line-height:1.8; font-weight:bold;">
+                    데이터베이스의 임계점을 초과했습니다.<br>
+                    더 이상 기록에 접근할 수 없습니다.
+                </p>
+            `;
         }, 29600);
     };
 });

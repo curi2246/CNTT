@@ -426,26 +426,60 @@
                         mainTextBox.appendChild(p);
                     }
                     
-                    // 28.5초에 텍스트 소거
+                    // --- 29.6초 최종 엔딩 시퀀스 (HTML용 스크립트) ---
                     if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
                         abyssLayer.dataset.ended = "true";
-                        clearInterval(warningInterval); // 인터벌 종료
-                        createAbyssFlash("#fff", 3000);
+                        if (typeof warningInterval !== 'undefined') clearInterval(warningInterval); 
+
+                        // 1. 화이트 플래시 (텍스트 없이 강렬한 연출)
+                        if (typeof createAbyssFlash === 'function') {
+                            createAbyssFlash("#fff", 3000);
+                        } else if (typeof createNaturalFlash === 'function') {
+                            createNaturalFlash("#fff", 3000);
+                        }
+                        
+                        // 화면 중앙의 텍스트 박스 초기화
+                        if (typeof mainTextBox !== 'undefined') {
+                            mainTextBox.innerHTML = "";
+                        } else if (textContainer) {
+                            textContainer.innerHTML = "";
+                        }
+
                         setTimeout(() => {
-                            abyssLayer.classList.remove("rgb-block-glitch");
-                            abyssLayer.style.background = "#fff";
-                            mainTextBox.innerHTML = `
-                                <h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold; margin-bottom:20px;">CONNECTION LOST</h1>
-                                <p style="color:#333; font-size:1.1rem; line-height:1.6; font-weight:bold;">
-                                    데이터베이스의 임계점을 초과했습니다.<br>
-                                    더 이상 기록에 접근할 수 없습니다.
-                                </p>
-                            `;
-                        }, 100);
+                            // 2. 검정 화면 반전 및 RGB 글리치 효과 유지
+                            abyssLayer.style.background = "#000";
+                            abyssLayer.classList.add("glitch-final"); 
+
+                            // 3. HTML 데이터 인식 (큐로의 Half Archive 데이터 가져오기)
+                            const curoData = (typeof fileSystem !== 'undefined' && fileSystem["The main character"]) 
+                                ? fileSystem["The main character"]["Curo_Half_Archive.txt"] 
+                                : "CURO_THE_HALF_ARCHIVE: 데이터를 불러올 수 없습니다.";
+
+                            // 4. 중앙 UI 레이아웃 설정
+                            const target = (typeof mainTextBox !== 'undefined') ? mainTextBox : textContainer;
+                            if (target) {
+                                target.innerHTML = `
+                                    <div style="text-align:center; width:100%;">
+                                        <h1 class="認知텍스트" style="font-size:2.2rem; letter-spacing:8px; margin-bottom:30px; color:#fff; text-shadow: 0 0 20px #fff;">
+                                            CURO_THE_HALF_ARCHIVE
+                                        </h1>
+                                        <p id="curo-typing-area" style="color:#f00; font-size:1.2rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p>
+                                    </div>
+                                `;
+
+                                const typingArea = document.getElementById("curo-typing-area");
+                                let charIdx = 0;
+
+                                // 5. 캐릭터 설명을 한 글자씩 써 내려가는 타이핑 연출
+                                function typeCuroContent() {
+                                    if (charIdx < curoData.length) {
+                                        typingArea.textContent += curoData[charIdx++];
+                                        setTimeout(typeCuroContent, 40); 
+                                    }
+                                }
+                                typeCuroContent();
+                            }
+                        }, 500); 
                     }
-                }, 100); // 100ms마다 음악 시간 체크
-            }, 9800);
-                                 };
-    </script>
-</body>
-</html>
+                }, 100); // 100ms 체크 종료
+            }, 9800); // 9.8초 지연 종료

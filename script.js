@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- [최종 수정] 히든 시퀀스 (secret-btn) 타이밍 및 도배 정밀 교정 ---
     document.getElementById("secret-btn").onclick = () => {
-        const startTime = Date.now(); // 절대적인 기준 시간
+        const startTime = performance.now(); // Date.now()보다 정확한 고해상도 타이머
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
 
@@ -193,11 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        [0, 2400, 5000, 7400].forEach(time => {
-            setTimeout(() => createNaturalFlash("#fff", 800), time);
-        });
-
-        // 심연 레이어를 최상위로 고정
         const abyssLayer = document.createElement("div");
         abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:99999; overflow:hidden;`;
         document.body.appendChild(abyssLayer);
@@ -206,57 +201,72 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; text-align:center; z-index:100001; pointer-events:none;`;
         abyssLayer.appendChild(textContainer);
 
-        // 1. [10.0초] - 에러 메시지 강제 도배 (좌표 fixed로 수정하여 화면 가림 방지)
-        setTimeout(() => {
-            const errInterval = setInterval(() => {
-                const elapsed = Date.now() - startTime;
-                if (elapsed >= 19600) { clearInterval(errInterval); return; } // 인지 텍스트 등장 시 중단
-                
-                for(let i=0; i<8; i++) {
+        // 시퀀스 상태를 체크하기 위한 변수
+        let step = 0; 
+
+        function update() {
+            const elapsed = performance.now() - startTime;
+
+            // 초기 플래시 (0, 2.4, 5, 7.4초)
+            if (elapsed >= 0 && step === 0) { createNaturalFlash("#fff", 800); step = 1; }
+            if (elapsed >= 2400 && step === 1) { createNaturalFlash("#fff", 800); step = 2; }
+            if (elapsed >= 5000 && step === 2) { createNaturalFlash("#fff", 800); step = 3; }
+            if (elapsed >= 7400 && step === 3) { createNaturalFlash("#fff", 800); step = 4; }
+
+            // 1. [10.0초 ~ 19.6초] 에러 도배 (프레임마다 확률적으로 생성)
+            if (elapsed >= 10000 && elapsed < 19600) {
+                if (Math.random() > 0.8) {
                     const err = document.createElement("div");
                     err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
                     err.style.cssText = `position:fixed; color:#f00; font-family:monospace; font-size:${14 + Math.random() * 26}px; left:${Math.random() * 100}vw; top:${Math.random() * 100}vh; opacity:0.9; font-weight:bold; z-index:100000; white-space:nowrap;`;
                     abyssLayer.appendChild(err);
                     setTimeout(() => err.remove(), 400);
                 }
-            }, 30);
-        }, 10000);
+            }
 
-        // 2. [19.6초] - 인지 텍스트 등장
-        setTimeout(() => {
-            createNaturalFlash("#fff", 1000);
-            const style = document.createElement('style');
-            style.innerHTML = `
-                .glitch-final { animation: shake-rgb 0.1s infinite; }
-                @keyframes shake-rgb {
-                    0% { transform: translate(5px, -5px); filter: hue-rotate(90deg); }
-                    50% { transform: translate(-5px, 5px); filter: hue-rotate(180deg); }
-                    100% { transform: translate(0); }
-                }
-                .認知텍스트 {
-                    text-shadow: 0 0 30px #fff, 10px 0 red, -10px 0 blue;
-                    color: #fff; font-size: 4.8rem; font-weight: 900;
-                }
-            `;
-            document.head.appendChild(style);
-            abyssLayer.classList.add("glitch-final");
-            textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
-        }, 19600);
+            // 2. [19.6초] 인지 텍스트 등장
+            if (elapsed >= 19600 && step === 4) {
+                step = 5;
+                createNaturalFlash("#fff", 1000);
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .glitch-final { animation: shake-rgb 0.1s infinite; }
+                    @keyframes shake-rgb {
+                        0% { transform: translate(5px, -5px); filter: hue-rotate(90deg); }
+                        50% { transform: translate(-5px, 5px); filter: hue-rotate(180deg); }
+                        100% { transform: translate(0); }
+                    }
+                    .認知텍스트 {
+                        text-shadow: 0 0 30px #fff, 10px 0 red, -10px 0 blue;
+                        color: #fff; font-size: 4.8rem; font-weight: 900;
+                    }
+                `;
+                document.head.appendChild(style);
+                abyssLayer.classList.add("glitch-final");
+                textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
+            }
 
-        // 3. [28.5초] - 텍스트 소멸
-        setTimeout(() => { textContainer.innerHTML = ""; }, 28500);
+            // 3. [28.5초] 텍스트 소멸
+            if (elapsed >= 28500 && step === 5) { step = 6; textContainer.innerHTML = ""; }
 
-        // 4. [29.6초] - 최종 엔딩
-        setTimeout(() => {
-            abyssLayer.classList.remove("glitch-final");
-            abyssLayer.style.background = "#fff";
-            textContainer.innerHTML = `
-                <h1 style="color:#000; font-size:2.2rem; letter-spacing:15px; font-weight:900; margin-bottom:30px;">CONNECTION LOST</h1>
-                <p style="color:#111; font-size:1.3rem; line-height:1.8; font-weight:bold;">
-                    데이터베이스의 임계점을 초과했습니다.<br>
-                    더 이상 기록에 접근할 수 없습니다.
-                </p>
-            `;
-        }, 29600);
+            // 4. [29.6초] 최종 엔딩
+            if (elapsed >= 29600 && step === 6) {
+                step = 7;
+                abyssLayer.classList.remove("glitch-final");
+                abyssLayer.style.background = "#fff";
+                textContainer.innerHTML = `
+                    <h1 style="color:#000; font-size:2.2rem; letter-spacing:15px; font-weight:900; margin-bottom:30px;">CONNECTION LOST</h1>
+                    <p style="color:#111; font-size:1.3rem; line-height:1.8; font-weight:bold;">
+                        데이터베이스의 임계점을 초과했습니다.<br>
+                        더 이상 기록에 접근할 수 없습니다.
+                    </p>
+                `;
+                return; // 루프 종료
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
     };
 });

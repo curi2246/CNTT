@@ -402,7 +402,6 @@
                 // --- 10.0초: 에러 텍스트 도배 시작 ---
                 setTimeout(() => {
                     const warningTimer = setInterval(() => {
-                        // 19.6초가 되면 도배 중단
                         if (abyssBgm.currentTime >= 19.6) { clearInterval(warningTimer); return; }
                         const warn = document.createElement("div");
                         warn.textContent = "SYSTEM_WARNING: ACCESS_VIOLATION";

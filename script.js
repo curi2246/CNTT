@@ -38,12 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
             authMessage.style.color = "var(--neon-mint)";
             authMessage.textContent = "> ACCESS GRANTED. SYNCHRONIZING...";
             passwordInput.disabled = true;
-
             if (bgm) {
                 bgm.currentTime = 0; 
                 bgm.play().catch(err => console.log("자동 재생 차단됨"));
             }
-
             setTimeout(() => {
                 document.body.classList.remove("auth-success-flash");
                 authScreen.classList.add("hidden");
@@ -88,24 +86,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const dir = document.getElementById("directory");
         dir.innerHTML = "";
         Object.keys(fileSystem).forEach(folder => {
-            const fDiv = document.createElement("div"); 
-            fDiv.className = "folder"; 
-            fDiv.textContent = "📁 " + folder;
-            const list = document.createElement("div"); 
-            list.className = "hidden";
+            const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
+            const list = document.createElement("div"); list.className = "hidden";
             fDiv.onclick = () => list.classList.toggle("hidden");
             Object.keys(fileSystem[folder]).forEach(file => {
-                const fi = document.createElement("div"); 
-                fi.className = "file"; 
-                fi.textContent = "📄 " + file;
-                fi.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    openFile(file, fileSystem[folder][file]); 
-                };
+                const fi = document.createElement("div"); fi.className = "file"; fi.textContent = "📄 " + file;
+                fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
                 list.appendChild(fi);
             });
-            dir.appendChild(fDiv); 
-            dir.appendChild(list);
+            dir.appendChild(fDiv); dir.appendChild(list);
         });
     }
 
@@ -115,20 +104,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("file-title").textContent = "FILE: " + name;
         window.scrollTo(0, 0);
         const textTarget = document.getElementById("file-text");
-        textTarget.innerHTML = ""; 
-        window.onscroll = null;
+        textTarget.innerHTML = ""; window.onscroll = null;
         document.body.style.backgroundColor = "var(--bg-black)";
         const sysMsg = document.createElement("p");
         sysMsg.style.color = "var(--neon-mint)";
         sysMsg.textContent = "> SYSTEM: 기록 열람을 시작합니다...";
         textTarget.appendChild(sysMsg);
-
         setTimeout(() => {
             sysMsg.remove(); 
             const bodyMsg = document.createElement("p");
-            bodyMsg.style.color = "#fff";
-            bodyMsg.style.whiteSpace = "pre-wrap";
-            bodyMsg.style.lineHeight = "1.6";
+            bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
             textTarget.appendChild(bodyMsg);
             let mainIdx = 0;
             function typeBody() {
@@ -136,9 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
                     setTimeout(typeBody, 2); 
-                } else {
-                    enableHiddenCheck(name);
-                }
+                } else { enableHiddenCheck(name); }
             }
             typeBody();
         }, 800);
@@ -147,10 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function enableHiddenCheck(fileName) {
         const hZone = document.getElementById("hidden-zone");
         if (isGlitchUnlocked && fileName.includes("Curo")) {
-            if(hZone) {
-                hZone.style.display = "block";
-                hZone.style.opacity = "0";
-            }
+            if(hZone) { hZone.style.display = "block"; hZone.style.opacity = "0"; }
             window.onscroll = () => {
                 const scrollY = window.scrollY;
                 const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -161,19 +141,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (scrollY > triggerPoint) {
                     const opacity = (scrollY - triggerPoint) / (maxScroll - triggerPoint);
                     hZone.style.opacity = opacity;
-                } else {
-                    hZone.style.opacity = "0";
-                }
+                } else { hZone.style.opacity = "0"; }
             };
         }
     }
 
     document.getElementById("back-btn").onclick = () => {
-        window.onscroll = null;
-        document.body.style.backgroundColor = "var(--bg-black)";
-        fileScreen.classList.add("hidden");
-        dbView.classList.remove("hidden");
-        window.scrollTo(0, 0);
+        window.onscroll = null; document.body.style.backgroundColor = "var(--bg-black)";
+        fileScreen.classList.add("hidden"); dbView.classList.remove("hidden"); window.scrollTo(0, 0);
     };
 
     window.addEventListener("keydown", (e) => {
@@ -182,22 +157,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (inputBuffer === "glitch" && !isGlitchUnlocked) {
             isGlitchUnlocked = true;
             if (bgm) bgm.pause();
-            if (glitchBgm) {
-                glitchBgm.currentTime = 0;
-                glitchBgm.play().catch(err => console.log("글리치 재생 실패"));
-            }
+            if (glitchBgm) { glitchBgm.currentTime = 0; glitchBgm.play().catch(err => console.log("글리치 재생 실패")); }
             if (musicTitle) musicTitle.textContent = "재생 중: error.mp3.mp3";
             document.body.classList.add("glitch-active");
-            setTimeout(() => {
-                document.body.classList.remove("glitch-active");
-            }, 1500);
+            setTimeout(() => { document.body.classList.remove("glitch-active"); }, 1500);
         }
     });
 
-    // --- 히든 시퀀스 (secret-btn) 연출 강화 버전 ---
+    // --- 히든 시퀀스 (secret-btn) 타이밍 정밀 교정 버전 ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
+        const startTime = Date.now(); // 정확한 타이밍 기준점
 
         fileScreenElem.style.transition = "opacity 0.5s";
         fileScreenElem.style.opacity = "0";
@@ -222,13 +193,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 50);
         };
 
-        // 초기 플래시 (0s, 2.4s, 5.0s, 7.4s)
+        // 초기 플래시 연출
         [0, 2400, 5000, 7400].forEach(time => {
             setTimeout(() => createNaturalFlash("#fff", 800), time);
         });
 
         const abyssLayer = document.createElement("div");
-        abyssLayer.id = "abyss-layer";
         abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center;`;
         document.body.appendChild(abyssLayer);
 
@@ -236,45 +206,43 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `width:90%; text-align:center; z-index:10001;`;
         abyssLayer.appendChild(textContainer);
 
-        // [10.0초] - 백그라운드 에러 메시지 무차별 도배
+        // [10.0초] - 에러 메시지 폭포수 도배 시작
         setTimeout(() => {
             const errInterval = setInterval(() => {
-                if (abyssBgm.currentTime >= 19.6) { clearInterval(errInterval); return; }
-                // 한 틱에 3개씩 생성하여 도배 가속
-                for(let i=0; i<3; i++) {
+                // 19.6초(텍스트 등장 시점)가 되면 도배 중단
+                if (Date.now() - startTime >= 19600) { clearInterval(errInterval); return; }
+                
+                for(let i=0; i<5; i++) {
                     const err = document.createElement("div");
                     err.textContent = Math.random() > 0.5 ? "SYSTEM_FAILURE" : "CRITICAL_ERROR";
-                    err.style.cssText = `position:absolute; color:#800; font-family:monospace; font-size:${12 + Math.random() * 20}px; left:${Math.random() * 100}%; top:${Math.random() * 100}%; opacity:0.9; pointer-events:none; font-weight:bold; z-index:10000; white-space:nowrap;`;
+                    err.style.cssText = `position:absolute; color:#800; font-family:monospace; font-size:${14 + Math.random() * 24}px; left:${Math.random() * 100}%; top:${Math.random() * 100}%; opacity:0.9; pointer-events:none; font-weight:bold; z-index:10000; white-space:nowrap;`;
                     abyssLayer.appendChild(err);
                     setTimeout(() => err.remove(), 400);
                 }
-            }, 30); // 0.03초마다 생성하여 도배
+            }, 20); // 0.02초 간격으로 생성 (진짜 도배)
         }, 10000);
 
-        // [19.6초] - 인지 텍스트 및 강력한 RGB 글리치
+        // [19.6초] - 인지 텍스트 등장 (정확한 타이밍)
         setTimeout(() => {
             createNaturalFlash("#fff", 1000);
             const style = document.createElement('style');
             style.innerHTML = `
                 .glitch-rgb-block { animation: rgb-split 0.1s infinite, block-distortion 0.1s infinite; }
                 @keyframes rgb-split {
-                    0% { box-shadow: 15px 0 rgba(255,0,0,0.5), -15px 0 rgba(0,0,255,0.5); background: rgba(255,0,0,0.1); }
-                    50% { box-shadow: -15px 0 rgba(255,0,0,0.5), 15px 0 rgba(0,0,255,0.5); background: rgba(0,0,255,0.1); }
+                    0% { box-shadow: 20px 0 rgba(255,0,0,0.6), -20px 0 rgba(0,0,255,0.6); background: rgba(255,0,0,0.1); }
+                    50% { box-shadow: -20px 0 rgba(255,0,0,0.6), 20px 0 rgba(0,0,255,0.6); background: rgba(0,0,255,0.1); }
                 }
                 @keyframes block-distortion {
-                    0% { clip-path: inset(10% 0 80% 0); transform: translate(-10px, 5px); }
-                    25% { clip-path: inset(70% 0 10% 0); transform: translate(10px, -5px); }
+                    0% { clip-path: inset(15% 0 70% 0); transform: translate(-15px, 10px); }
+                    50% { clip-path: inset(60% 0 15% 0); transform: translate(15px, -10px); }
                     100% { clip-path: inset(0); }
                 }
                 .認知텍스트 {
-                    text-shadow: 0 0 25px #fff, 5px 0 red, -5px 0 blue;
-                    color: #fff; font-size: 4.5rem; font-weight: bold;
-                    animation: text-vibrate 0.05s infinite;
+                    text-shadow: 0 0 30px #fff, 10px 0 red, -10px 0 blue;
+                    color: #fff; font-size: 5rem; font-weight: 900;
+                    animation: text-vibrate 0.03s infinite;
                 }
-                @keyframes text-vibrate {
-                    0% { transform: translate(2px); }
-                    100% { transform: translate(-2px); }
-                }
+                @keyframes text-vibrate { 0% { transform: translate(4px); } 100% { transform: translate(-4px); } }
             `;
             document.head.appendChild(style);
             abyssLayer.classList.add("glitch-rgb-block");
@@ -284,15 +252,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // [28.5초] - 텍스트 소멸
         setTimeout(() => { textContainer.innerHTML = ""; }, 28500);
 
-        // [29.6초] - 최종 연결 해제 화면
+        // [29.6초] - 최종 화이트 아웃 엔딩
         setTimeout(() => {
             createNaturalFlash("#fff", 3000);
             setTimeout(() => {
                 abyssLayer.classList.remove("glitch-rgb-block");
                 abyssLayer.style.background = "#fff";
                 textContainer.innerHTML = `
-                    <h1 style="color:#000; font-size:1.8rem; letter-spacing:10px; font-weight:bold; margin-bottom:20px;">CONNECTION LOST</h1>
-                    <p style="color:#333; font-size:1.1rem; line-height:1.6; font-weight:bold;">
+                    <h1 style="color:#000; font-size:2.2rem; letter-spacing:15px; font-weight:900; margin-bottom:30px;">CONNECTION LOST</h1>
+                    <p style="color:#111; font-size:1.3rem; line-height:1.8; font-weight:bold;">
                         데이터베이스의 임계점을 초과했습니다.<br>
                         더 이상 기록에 접근할 수 없습니다.
                     </p>

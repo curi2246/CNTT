@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let fileSystem = {}; // JSON에서 데이터를 받아올 빈 객체
     let isAuthenticating = false; // 로그인 버그 방지용 플래그
 
-    // --- [수정] JSON 데이터 인식 로직 ---
+    // --- [추가] JSON 데이터 인식 로직 ---
     async function loadDatabase() {
         try {
             const response = await fetch('data.json');
@@ -32,10 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 로그인 로직 ---
+    // --- 로그인 로직 (버그 수정) ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
-        if (isAuthenticating) return; 
+        if (isAuthenticating) return; // 이미 승인 중이면 클릭 무시
 
         if (passwordInput.value === PASSWORD) {
             isAuthenticating = true;
@@ -98,11 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fDiv.onclick = () => list.classList.toggle("hidden");
             Object.keys(fileSystem[folder]).forEach(file => {
                 const fi = document.createElement("div"); fi.className = "file"; fi.textContent = "📄 " + file;
-                fi.onclick = (e) => { 
-                    e.stopPropagation(); 
-                    // [경로 수정] 폴더 하위의 파일 내용(content)을 정확히 전달
-                    openFile(file, fileSystem[folder][file]); 
-                };
+                fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
                 list.appendChild(fi);
             });
             dir.appendChild(fDiv); dir.appendChild(list);
@@ -126,14 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const bodyMsg = document.createElement("p");
             bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
             textTarget.appendChild(bodyMsg);
-            
-            // 데이터가 객체 형태인 경우(예: 히든 데이터) content 문자열만 추출
-            const targetText = (typeof content === 'object' && content !== null) ? content.content : content;
-            
             let mainIdx = 0;
             function typeBody() {
-                if(targetText && mainIdx < targetText.length) {
-                    bodyMsg.textContent += targetText[mainIdx];
+                if(mainIdx < content.length) {
+                    bodyMsg.textContent += content[mainIdx];
                     mainIdx++;
                     setTimeout(typeBody, 2); 
                 } else { enableHiddenCheck(name); }
@@ -179,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (원본 유지 + 인식 경로 수정) ---
+    // --- 히든 시퀀스 (기존 연출 100% 유지) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -284,7 +276,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 abyssLayer.dataset.ended = "true";
                 clearInterval(warningInterval);
                 createNaturalFlash("#fff", 1000);
-                
                 setTimeout(() => {
                     const glitchStyle = document.createElement('style');
                     glitchStyle.innerHTML = `
@@ -296,23 +287,29 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     `;
                     document.head.appendChild(glitchStyle);
-
-                    // --- [데이터 인식 경로 수정] 이미지 분석 결과 반영 ---
-                    // data.json의 최상위 키 "THE_CURO_HALF_ARCHIVE" 내부의 "content"를 가져옵니다.
-                    const hiddenContent = fileSystem["THE_CURO_HALF_ARCHIVE"]?.["content"] 
-                                       || "데이터를 불러오는 데 실패했습니다.";
-
                     textContainer.innerHTML = `
                         <h1 class="title-glitch" style="color:#fff; font-size:2.5rem; letter-spacing:8px; font-weight:900; margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1>
                         <p style="color:#fff; font-size:1.1rem; line-height:1.6; font-weight:bold; margin-bottom:30px;">
                             WARNING: An unpredictable and unidentified personality change
                         </p>
-                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto; padding: 20px;">${hiddenContent}</div>
+                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">명칭: 큐로?(curo?)
+
+[여기에 캐릭터 설명을 작성하세요]
+
+종족: ???
+성별: ???
+상태: 불안정
+
+[추가 정보]
+- 인격 변화 감지됨
+- 기록 불완전
+- 접근 제한 권장</div>
                     `;
                 }, 500);
             }
         }, 100);
     };
 
+    // 시스템 시작 시 데이터 로드 실행
     loadDatabase();
 });

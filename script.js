@@ -290,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.head.appendChild(glitchStyle);
 
                     // --- [데이터 인식] JSON에서 실제 히든 설명 가져오기 ---
-                    const hiddenContent = fileSystem["The main character"]?.["Curo_REAL_Hidden_Content"] 
+                    const hiddenContent = fileSystem["The main character"]?.["THE_CURO_HALF_ARCHIVE"] 
                                        || "데이터를 불러오는 데 실패했습니다.";
 
                     textContainer.innerHTML = `

@@ -276,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 abyssLayer.dataset.ended = "true";
                 clearInterval(warningInterval);
                 createNaturalFlash("#fff", 1000);
+                
                 setTimeout(() => {
                     const glitchStyle = document.createElement('style');
                     glitchStyle.innerHTML = `
@@ -287,23 +288,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     `;
                     document.head.appendChild(glitchStyle);
+
+                    // --- [변경됨] JSON에서 실제 히든 설명 가져오기 ---
+                    // 만약 데이터가 없으면 기본값 출력
+                    const hiddenContent = fileSystem["The main character"]?.["Curo_REAL_Hidden_Content"] 
+                                       || "데이터를 불러오는 데 실패했습니다. 관리자에게 문의하십시오.";
+
                     textContainer.innerHTML = `
                         <h1 class="title-glitch" style="color:#fff; font-size:2.5rem; letter-spacing:8px; font-weight:900; margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1>
                         <p style="color:#fff; font-size:1.1rem; line-height:1.6; font-weight:bold; margin-bottom:30px;">
                             WARNING: An unpredictable and unidentified personality change
                         </p>
-                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">명칭: 큐로?(curo?)
-
-[여기에 캐릭터 설명을 작성하세요]
-
-종족: ???
-성별: ???
-상태: 불안정
-
-[추가 정보]
-- 인격 변화 감지됨
-- 기록 불완전
-- 접근 제한 권장</div>
+                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">${hiddenContent}</div>
                     `;
                 }, 500);
             }

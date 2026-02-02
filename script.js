@@ -192,14 +192,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 🔥 [버그 수정] 히든 시퀀스: 음악 시간 기반 타이밍 체크 ---
+    // --- 히든 시퀀스 ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
 
-        fileScreenElem.style.transition = "opacity 0.5s";
-        fileScreenElem.style.opacity = "0";
-        if(bgSigil) bgSigil.style.display = "none";
+        if (fileScreenElem) {
+            fileScreenElem.style.transition = "opacity 0.5s";
+            fileScreenElem.style.opacity = "0";
+        }
+        if (bgSigil) bgSigil.style.display = "none";
         
         if (bgm) bgm.pause();
         if (glitchBgm) glitchBgm.pause();
@@ -228,10 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
         textContainer.style.cssText = `position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:90%; text-align:center; z-index:100001; pointer-events:none;`;
         abyssLayer.appendChild(textContainer);
 
-        // 초기 플래시
         [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createNaturalFlash("#fff", 800), time));
 
-        // 초기 텍스트
         setTimeout(() => {
             const p1 = document.createElement("p");
             p1.textContent = "CRITICAL ERROR: HIDDEN SECTOR ACCESSED";
@@ -256,9 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => p3.style.opacity = "1", 100);
         }, 6500);
 
-        // --- 🔥 음악 재생 시간 기반 타이밍 체크 (버그 수정 핵심 부분) ---
         const warningInterval = setInterval(() => {
-            // 10초부터 에러 도배 시작
             if (abyssBgm.currentTime >= 10.0 && abyssBgm.currentTime < 19.6) {
                 if (Math.random() > 0.8) {
                     const err = document.createElement("div");
@@ -269,11 +267,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // 19.6초에 인지 텍스트 등장
             if (abyssBgm.currentTime >= 19.6 && !abyssLayer.dataset.cognized) {
                 abyssLayer.dataset.cognized = "true";
                 createNaturalFlash("#fff", 1000);
-                
                 const style = document.createElement('style');
                 style.innerHTML = `
                     .glitch-final { animation: shake-rgb 0.1s infinite; }
@@ -292,54 +288,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 textContainer.innerHTML = `<h1 class="認知텍스트">이제 '그'가 당신을 인지합니다.</h1>`;
             }
 
-            // 28.5초에 텍스트 소멸
             if (abyssBgm.currentTime >= 28.5 && !abyssLayer.dataset.cleared) {
                 abyssLayer.dataset.cleared = "true";
                 textContainer.innerHTML = "";
             }
 
-            // 29.6초에 최종 엔딩
             if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
                 abyssLayer.dataset.ended = "true";
-                clearInterval(warningInterval); // 인터벌 종료
-                
-                createNaturalFlash("#fff", 1000); // 플래시만
-                // 글리치 효과 유지 (classList 제거 안 함)
-                
+                clearInterval(warningInterval);
+                createNaturalFlash("#fff", 1000);
                 setTimeout(() => {
-                    // RGB 글리치 스타일 추가
                     const glitchStyle = document.createElement('style');
                     glitchStyle.innerHTML = `
-                        .title-glitch {
-                            animation: rgb-split 0.3s infinite;
-                            position: relative;
-                            display: inline-block;
-                        }
+                        .title-glitch { animation: rgb-split 0.3s infinite; position: relative; display: inline-block; }
                         @keyframes rgb-split {
-                            0% { 
-                                text-shadow: -3px 0 #ff0000, 3px 0 #00ffff;
-                                transform: translate(0);
-                            }
-                            25% { 
-                                text-shadow: -6px 0 #ff0000, 6px 0 #00ffff;
-                                transform: translate(2px, -2px);
-                            }
-                            50% { 
-                                text-shadow: 3px 0 #ff0000, -3px 0 #00ffff;
-                                transform: translate(-2px, 2px);
-                            }
-                            75% { 
-                                text-shadow: -4px 0 #00ff00, 4px 0 #ff00ff;
-                                transform: translate(3px, -1px);
-                            }
-                            100% { 
-                                text-shadow: -3px 0 #ff0000, 3px 0 #00ffff;
-                                transform: translate(0);
-                            }
+                            0% { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translate(0); }
+                            50% { text-shadow: 3px 0 #ff0000, -3px 0 #00ffff; transform: translate(-2px, 2px); }
+                            100% { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translate(0); }
                         }
                     `;
                     document.head.appendChild(glitchStyle);
-                    
                     textContainer.innerHTML = `
                         <h1 class="title-glitch" style="color:#fff; font-size:2.5rem; letter-spacing:8px; font-weight:900; margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1>
                         <p style="color:#fff; font-size:1.1rem; line-height:1.6; font-weight:bold; margin-bottom:30px;">
@@ -360,6 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                 }, 500);
             }
-        }, 100); // 100ms마다 음악 시간 체크
+        }, 100);
     };
 });

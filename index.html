@@ -100,6 +100,7 @@
         .abyss-glitch-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 9998; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .glitch-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -116,7 +117,7 @@
             text-shadow: 4px 0 #bc13fe, -4px 0 #00ff41;
             animation: sharp-shake 0.08s infinite;
             line-height: 1.2; text-align: center;
-            word-break: keep-all;
+            word-break: keep-all; margin: 0;
         }
         @keyframes sharp-shake {
             0% { transform: translate(5px, -2px) skew(2deg); }
@@ -187,6 +188,7 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
+        // 원본 fileSystem 구조 유지 (인식용)
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "데이터가 비어있습니다. 업데이트가 필요합니다.",
@@ -361,7 +363,7 @@
             }, 50);
         }
 
-        // --- 히든 이벤트: 최종 연출 적용 ---
+        // --- 히든 이벤트 (JSON 데이터 인식 적용) ---
         document.getElementById("secret-btn").onclick = () => {
             const fileScreenElem = document.getElementById("file-screen");
             const bgSigil = document.querySelector(".bg-sigil");
@@ -375,49 +377,43 @@
             
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
-            // 긴장감 넘치는 섬광 연출
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
                 fileScreenElem.classList.add("hidden");
                 
-                // 1. 심연 배경 생성
                 const abyssLayer = document.createElement("div");
                 abyssLayer.className = "abyss-glitch-bg";
                 document.body.appendChild(abyssLayer);
 
-                // 2. 글리치 노이즈 오버레이
                 const noise = document.createElement("div");
                 noise.className = "glitch-overlay";
                 abyssLayer.appendChild(noise);
 
-                // 3. 색상 간섭 레이어
                 const flashLayer = document.createElement("div");
                 flashLayer.className = "color-flash-layer";
                 abyssLayer.appendChild(flashLayer);
 
-                // 4. 메인 텍스트 컨테이너
                 const mainTextBox = document.createElement("div");
                 mainTextBox.style.cssText = `width:85%; text-align:center; z-index:10001; position:relative; display:flex; flex-direction:column; align-items:center;`;
                 abyssLayer.appendChild(mainTextBox);
 
-                // 5. 날카롭게 흔들리는 거대 제목
                 const title = document.createElement("h1");
                 title.className = "cognition-text-new";
                 title.textContent = "이제 '그'가 당신을 인지합니다.";
                 mainTextBox.appendChild(title);
 
-             // 6. 상세 정보 타이핑 구역 (JSON 로드 방식)
                 const typingArea = document.createElement("div");
                 typingArea.id = "abyss-typing-final";
                 typingArea.style.cssText = "color:#00ff41; font-size:1.3rem; margin-top:40px; white-space:pre-wrap; text-align:left; max-width:800px; text-shadow: 0 0 10px rgba(0,255,65,0.5); font-weight:bold; line-height:1.5;";
                 mainTextBox.appendChild(typingArea);
 
-                // JSON 파일에서 데이터 가져오기
+                // --- [수정] JSON 데이터 인식 로직 ---
                 fetch('data.json')
                     .then(response => response.json())
                     .then(data => {
-                        const curoHiddenInfo = data.THE_CURO_HALF_ARCHIVE; // JSON 내 content 필드 인식
+                        // 당신의 JSON 구조에 맞춰 THE_CURO_HALF_ARCHIVE 내부의 content를 가져옴
+                        const curoHiddenInfo = data.THE_CURO_HALF_ARCHIVE.content; 
                         let tIdx = 0;
 
                         function typeAbyss() {
@@ -427,7 +423,6 @@
                                 setTimeout(typeAbyss, Math.random() * 50 + 20);
                             }
                         }
-                        
                         setTimeout(typeAbyss, 2000); 
                     })
                     .catch(err => {

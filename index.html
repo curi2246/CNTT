@@ -24,7 +24,6 @@
             transition: none; 
         }
 
-        /* 💓 심장 박동 애니메이션 */
         .bg-sigil {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.05);
@@ -37,7 +36,6 @@
             50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.2; text-shadow: 0 0 40px rgba(94, 255, 235, 0.5); }
         }
 
-        /* ✨ 인증 효과 */
         .auth-success-flash { animation: flash-mint 0.8s ease-out forwards; }
         @keyframes flash-mint {
             0% { background-color: var(--neon-mint); filter: brightness(2); }
@@ -70,7 +68,6 @@
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
-        /* 🌑 심연 구역 */
         .hidden-trigger-zone { 
             margin-top: 50px; 
             padding-top: 100vh; 
@@ -99,7 +96,6 @@
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
 
-        /* 🔥 RGB 블록 글리치 효과 */
         .rgb-block-glitch {
             animation: rgb-bg-shift 0.1s infinite, block-bg-shatter 0.1s infinite !important;
             filter: contrast(150%) brightness(1.2);
@@ -177,7 +173,6 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
-        // --- 원본 텍스트 데이터 (완전 유지) ---
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "명칭: 리에(Leay)\n\n[종족]\n인간(human),노에인(Noein)\n\n[성별]\n여성\n\n[프로필]\n키: 169cm\n몸무게: 51.2kg]\n성격: 친절하면서도 이기주의 성향의 소유자이며 때때로 이익을 따지기도 한다.\n외형: 흰색 머리카락에 약간 왜소한 체형을 하고있고 밝은 회색에 후드티를 입고 다니며 대부분 모자를 쓰고 다니며 활동한다. 중간중간 모자를 벗고 다양한 패션을 보여준 적도 있지만 대부분 몸을 어느정도 가리고 다닌다.\n\n[능력]\n기본적인 여성의 근력과 능력을 가졌지만 리셋에서도 잃지않는 기억들과 끈기, 무엇보다 여러 일들을 겹쳐 겪은 여파로 모든 생물들 중에서 가장 뒤어난 동체시력을 가지고 있다.\n\n[일행]\n큐로,키스네와 대부분 함께 지내며 어디에서 잠과 식사를 해결하는지는 미지수이다.\n\n[만난 적 있음, 혹은 접점이 있던 존재들]\n아레인(Arein), 토리(tory), 시로(shiro), 실크(silk), 애키스(ekis), 키스네 코든(kisune_Corden) 등등 대부분의 인물들과 전부 접점이 있던 것으로 알려져 있으며 대부분 친분이 어느정도 있는 것으로 추정되고 있다.",
@@ -327,7 +322,6 @@
                             window.onscroll = () => {
                                 const scrollY = window.scrollY;
                                 const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                                const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
                                 if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
                                 else hZone.style.opacity = "0";
                             };

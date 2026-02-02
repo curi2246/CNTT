@@ -407,24 +407,33 @@
                 title.textContent = "이제 '그'가 당신을 인지합니다.";
                 mainTextBox.appendChild(title);
 
-                // 6. 상세 정보 타이핑 구역
+             // 6. 상세 정보 타이핑 구역 (JSON 로드 방식)
                 const typingArea = document.createElement("div");
                 typingArea.id = "abyss-typing-final";
                 typingArea.style.cssText = "color:#00ff41; font-size:1.3rem; margin-top:40px; white-space:pre-wrap; text-align:left; max-width:800px; text-shadow: 0 0 10px rgba(0,255,65,0.5); font-weight:bold; line-height:1.5;";
                 mainTextBox.appendChild(typingArea);
 
-                const curoHiddenInfo = "명칭: 큐로(Curo) [HIDDEN]\n종족: 요괴(Yokai), 구미호(Nine Tail)\n성별: 남성\n키: 180cm / 몸무게: 72.1kg\n\n[비인가 아카이브 분석 결과]:\n그의 왼쪽 루비빛 눈은 단순한 신체 부위가 아닌 공간의 좌표 고정 장치입니다.\n매 순간 초록과 보라의 글리치 파장을 내뿜으며 현실을 침식하고 있습니다.\n그를 인지하는 순간, 당신의 데이터 또한 심연으로 동기화됩니다.";
+                // JSON 파일에서 데이터 가져오기
+                fetch('data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        const curoHiddenInfo = data.curo_hidden.content; // JSON 내 content 필드 인식
+                        let tIdx = 0;
 
-                let tIdx = 0;
-                function typeAbyss() {
-                    if(tIdx < curoHiddenInfo.length) {
-                        typingArea.textContent += curoHiddenInfo[tIdx++];
-                        noise.style.opacity = Math.random() * 0.8 + 0.2; // 타이핑 시 화면 지직거림
-                        setTimeout(typeAbyss, Math.random() * 50 + 20);
-                    }
-                }
-                
-                setTimeout(typeAbyss, 2000); // 제목 노출 후 타이핑 시작
+                        function typeAbyss() {
+                            if(tIdx < curoHiddenInfo.length) {
+                                typingArea.textContent += curoHiddenInfo[tIdx++];
+                                noise.style.opacity = Math.random() * 0.8 + 0.2;
+                                setTimeout(typeAbyss, Math.random() * 50 + 20);
+                            }
+                        }
+                        
+                        setTimeout(typeAbyss, 2000); 
+                    })
+                    .catch(err => {
+                        typingArea.textContent = "CRITICAL ERROR: DATA SOURCE NOT FOUND.";
+                        console.error(err);
+                    });
 
             }, 9800);
         };

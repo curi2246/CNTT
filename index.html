@@ -96,30 +96,43 @@
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
 
-        .rgb-block-glitch {
-            animation: rgb-bg-shift 0.1s infinite, block-bg-shatter 0.1s infinite !important;
-            filter: contrast(150%) brightness(1.2);
+        /* --- 새롭게 추가된 날카로운 글리치 효과 --- */
+        .abyss-glitch-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 9998; overflow: hidden;
         }
-        @keyframes rgb-bg-shift {
-            0% { background: rgba(255,0,0,0.15); box-shadow: inset 50px 0 100px rgba(0,0,255,0.2); }
-            50% { background: rgba(0,0,255,0.15); box-shadow: inset -50px 0 100px rgba(255,0,0,0.2); }
-            100% { background: rgba(0,255,0,0.05); }
+        .glitch-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,255,65,0.05) 0px, rgba(188,19,254,0.05) 1px, transparent 2px);
+            background-size: 100% 3px; animation: noise-scan 0.1s infinite;
         }
-        @keyframes block-bg-shatter {
-            0% { clip-path: inset(15% 0 60% 0); transform: translate(-10px, 5px); }
-            30% { clip-path: inset(70% 0 5% 0); transform: translate(15px, -10px); }
-            60% { clip-path: inset(30% 0 45% 0); transform: translate(-15px, 15px); }
-            100% { clip-path: inset(0); transform: translate(0); }
+        @keyframes noise-scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(3px); }
         }
-        .cognition-text {
-            font-size: 3rem; color: #fff; font-weight: 900;
-            text-shadow: 5px 0 red, -5px 0 blue, 0 0 20px #fff;
-            animation: text-vibrate 0.05s infinite;
-            line-height: 1.2;
+
+        .cognition-text-new {
+            font-size: 4rem; color: #fff; font-weight: 900;
+            text-shadow: 4px 0 #bc13fe, -4px 0 #00ff41;
+            animation: sharp-shake 0.08s infinite;
+            line-height: 1.2; text-align: center;
         }
-        @keyframes text-vibrate {
-            0% { transform: translate(2px, -2px); }
-            100% { transform: translate(-2px, 2px); }
+        @keyframes sharp-shake {
+            0% { transform: translate(5px, -2px) skew(2deg); }
+            25% { transform: translate(-5px, 2px) skew(-2deg); }
+            50% { transform: translate(7px, 0) skew(5deg); }
+            100% { transform: translate(0); }
+        }
+
+        .color-flash-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            mix-blend-mode: screen; pointer-events: none;
+            animation: color-moment 0.15s infinite;
+        }
+        @keyframes color-moment {
+            0% { background: rgba(188, 19, 254, 0.1); clip-path: inset(10% 0 80% 0); }
+            50% { background: rgba(0, 255, 65, 0.1); clip-path: inset(60% 0 10% 0); }
+            100% { background: rgba(188, 19, 254, 0.1); }
         }
     </style>
 </head>
@@ -173,7 +186,6 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
-        // --- JSON 기반 데이터 시스템 (설명 제거 완료) ---
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "데이터가 비어있습니다. 업데이트가 필요합니다.",
@@ -210,8 +222,6 @@
                 "Glitch.log": "로그 기록이 덮어씌워졌습니다."
             }
         };
-
-        // --- 기능 로직 ---
 
         window.addEventListener('keydown', (e) => {
             inputBuffer += e.key.toLowerCase();
@@ -318,7 +328,6 @@
                         bodyMsg.textContent += content[charIdx]; charIdx++;
                         setTimeout(typeBody, 1); 
                     } else {
-                        // Curo 아카이브이고 Glitch가 활성화된 경우만 히든 구역 노출
                         if (name.includes("Curo") && isGlitchUnlocked) {
                             hZone.style.display = "block";
                             window.onscroll = () => {
@@ -351,6 +360,7 @@
             }, 50);
         }
 
+        // --- 히든 이벤트: 원본 유지 및 스타일 적용 ---
         document.getElementById("secret-btn").onclick = () => {
             const fileScreenElem = document.getElementById("file-screen");
             const bgSigil = document.querySelector(".bg-sigil");
@@ -364,66 +374,59 @@
             
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
+            // 섬광 연출 유지
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
                 fileScreenElem.classList.add("hidden");
+                
+                // 새로운 글리치 배경 레이어 생성
                 const abyssLayer = document.createElement("div");
-                abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
+                abyssLayer.className = "abyss-glitch-bg";
                 document.body.appendChild(abyssLayer);
 
+                // 초록/보라 글리치 오버레이 추가
+                const noise = document.createElement("div");
+                noise.className = "glitch-overlay";
+                abyssLayer.appendChild(noise);
+
+                const flashLayer = document.createElement("div");
+                flashLayer.className = "color-flash-layer";
+                abyssLayer.appendChild(flashLayer);
+
                 const mainTextBox = document.createElement("div");
-                mainTextBox.style.cssText = `width:80%; text-align:center; z-index:10001; position:relative;`;
+                mainTextBox.style.cssText = `width:85%; text-align:center; z-index:10001; position:relative; display:flex; flex-direction:column; align-items:center;`;
                 abyssLayer.appendChild(mainTextBox);
 
-                const showAbyssText = (txt, col, d, sz) => {
-                    setTimeout(() => {
-                        const p = document.createElement("p"); p.textContent = txt;
-                        p.style.cssText = `font-size:${sz}; color:${col}; margin:20px 0; opacity:0; transition:opacity 2s; font-weight:bold;`;
-                        mainTextBox.appendChild(p); 
-                        setTimeout(() => p.style.opacity = "1", 100);
-                    }, d);
-                };
+                // 타이핑 효과를 위한 데이터
+                const curoHiddenInfo = "명칭: 큐로(Curo) [HIDDEN]\n종족: 요괴(Yokai), 구미호(Nine Tail)\n성별: 남성\n키: 180cm / 몸무게: 72.1kg\n\n[비인가 아카이브 분석 결과]:\n그의 왼쪽 루비빛 눈은 단순한 신체 부위가 아닌 공간의 좌표 고정 장치입니다.\n매 순간 초록과 보라의 글리치 파장을 내뿜으며 현실을 침식하고 있습니다.\n그를 인지하는 순간, 당신의 데이터 또한 심연으로 동기화됩니다.";
 
-                showAbyssText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
-                showAbyssText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
-                showAbyssText("관측자의 존재가 확인되었습니다.", "#fff", 6500, "1.2rem");
+                // 날카롭게 흔들리는 거대 제목 출력
+                const title = document.createElement("h1");
+                title.className = "cognition-text-new";
+                title.textContent = "이제 '그'가 당신을 인지합니다.";
+                mainTextBox.appendChild(title);
 
-                const warningInterval = setInterval(() => {
-                    if (abyssBgm.currentTime >= 10.0 && abyssBgm.currentTime < 19.6) {
-                        const warn = document.createElement("div");
-                        warn.textContent = "SYSTEM_WARNING: ACCESS_VIOLATION";
-                        warn.style.cssText = `position:absolute; color:#300; font-size:14px; left:${Math.random()*100}%; top:${Math.random()*100}%; opacity:0.6; z-index:10000; pointer-events:none; white-space:nowrap;`;
-                        abyssLayer.appendChild(warn);
-                        setTimeout(() => warn.remove(), 800);
+                // 타이핑 구역
+                const typingArea = document.createElement("div");
+                typingArea.id = "abyss-typing-final";
+                typingArea.style.cssText = "color:#00ff41; font-size:1.5rem; margin-top:40px; white-space:pre-wrap; text-align:left; max-width:800px; text-shadow: 0 0 10px rgba(0,255,65,0.5); font-weight:bold;";
+                mainTextBox.appendChild(typingArea);
+
+                // 타이핑 실행
+                let tIdx = 0;
+                function typeAbyss() {
+                    if(tIdx < curoHiddenInfo.length) {
+                        typingArea.textContent += curoHiddenInfo[tIdx++];
+                        // 타이핑 시 배경의 노이즈 강도 랜덤 조절
+                        noise.style.opacity = Math.random() * 0.8 + 0.2;
+                        setTimeout(typeAbyss, Math.random() * 40 + 20);
                     }
-                    if (abyssBgm.currentTime >= 19.6 && !abyssLayer.dataset.cognized) {
-                        abyssLayer.dataset.cognized = "true";
-                        createAbyssFlash("#fff", 1000); 
-                        abyssLayer.classList.add("rgb-block-glitch"); 
-                        mainTextBox.innerHTML = `<h1 class="cognition-text">이제 '그'가 당신을 인지합니다.</h1>`;
-                    }
-                    if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
-                        abyssLayer.dataset.ended = "true";
-                        clearInterval(warningInterval);
-                        createAbyssFlash("#fff", 3000);
-                        setTimeout(() => {
-                            abyssLayer.style.background = "#000";
-                            mainTextBox.innerHTML = `<div id="final-typing" style="color:#f00; font-size:1.2rem; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;"></div>`;
-                            const finalArea = document.getElementById("final-typing");
-                            // 마지막 엔딩 텍스트는 시스템 변수에서 참조
-                            const finalData = "심연의 끝에 도달한 것을 환영합니다.\n모든 데이터가 초기화됩니다.\n\nGood Bye.";
-                            let fIdx = 0;
-                            function typeFinal() {
-                                if(fIdx < finalData.length) {
-                                    finalArea.textContent += finalData[fIdx++];
-                                    setTimeout(typeFinal, 50);
-                                }
-                            }
-                            typeFinal();
-                        }, 500);
-                    }
-                }, 100);
+                }
+                
+                // 2초 후 타이핑 시작 (제목이 먼저 흔들림을 인지시킨 후)
+                setTimeout(typeAbyss, 2000);
+
             }, 9800);
         };
     </script>

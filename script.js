@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (원본 연출 100% 유지 + JSON 바인딩) ---
+    // --- 히든 시퀀스 (원본 연출 100% 유지 + 데이터 인식 수정) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -289,8 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     document.head.appendChild(glitchStyle);
 
-                    // --- [데이터 인식] JSON에서 실제 히든 설명 가져오기 ---
-                    const hiddenContent = fileSystem["The main character"]?.["THE_CURO_HALF_ARCHIVE"] 
+                    // --- [데이터 인식] 변경된 JSON 구조에 맞춰 한 줄 수정 ---
+                    const hiddenContent = fileSystem["THE_CURO_HALF_ARCHIVE"]?.["content"] 
                                        || "데이터를 불러오는 데 실패했습니다.";
 
                     textContainer.innerHTML = `

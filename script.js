@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 로그인 로직 (버그 수정 및 원본 유지) ---
+    // --- 로그인 로직 ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
         if (isAuthenticating) return; 
@@ -98,7 +98,11 @@ document.addEventListener("DOMContentLoaded", () => {
             fDiv.onclick = () => list.classList.toggle("hidden");
             Object.keys(fileSystem[folder]).forEach(file => {
                 const fi = document.createElement("div"); fi.className = "file"; fi.textContent = "📄 " + file;
-                fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
+                fi.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    // [경로 수정] 폴더 하위의 파일 내용(content)을 정확히 전달
+                    openFile(file, fileSystem[folder][file]); 
+                };
                 list.appendChild(fi);
             });
             dir.appendChild(fDiv); dir.appendChild(list);
@@ -122,10 +126,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const bodyMsg = document.createElement("p");
             bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
             textTarget.appendChild(bodyMsg);
+            
+            // 데이터가 객체 형태인 경우(예: 히든 데이터) content 문자열만 추출
+            const targetText = (typeof content === 'object' && content !== null) ? content.content : content;
+            
             let mainIdx = 0;
             function typeBody() {
-                if(mainIdx < content.length) {
-                    bodyMsg.textContent += content[mainIdx];
+                if(targetText && mainIdx < targetText.length) {
+                    bodyMsg.textContent += targetText[mainIdx];
                     mainIdx++;
                     setTimeout(typeBody, 2); 
                 } else { enableHiddenCheck(name); }
@@ -171,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (원본 연출 100% 유지 + 데이터 인식 수정) ---
+    // --- 히든 시퀀스 (원본 유지 + 인식 경로 수정) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -289,7 +297,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     document.head.appendChild(glitchStyle);
 
-                    // --- [데이터 인식] 변경된 JSON 구조에 맞춰 한 줄 수정 ---
+                    // --- [데이터 인식 경로 수정] 이미지 분석 결과 반영 ---
+                    // data.json의 최상위 키 "THE_CURO_HALF_ARCHIVE" 내부의 "content"를 가져옵니다.
                     const hiddenContent = fileSystem["THE_CURO_HALF_ARCHIVE"]?.["content"] 
                                        || "데이터를 불러오는 데 실패했습니다.";
 
@@ -298,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p style="color:#fff; font-size:1.1rem; line-height:1.6; font-weight:bold; margin-bottom:30px;">
                             WARNING: An unpredictable and unidentified personality change
                         </p>
-                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">${hiddenContent}</div>
+                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto; padding: 20px;">${hiddenContent}</div>
                     `;
                 }, 500);
             }

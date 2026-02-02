@@ -15,27 +15,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const PASSWORD = "1234";
     let inputBuffer = "";      
     let isGlitchUnlocked = false; 
-    let fileSystem = {}; // JSON에서 데이터를 받아올 빈 객체
-    let isAuthenticating = false; // 로그인 버그 방지용 플래그
+    let fileSystem = {}; 
+    let isAuthenticating = false;
 
-    // --- [추가] JSON 데이터 인식 로직 ---
     async function loadDatabase() {
         try {
             const response = await fetch('data.json');
             if (!response.ok) throw new Error("데이터를 로드할 수 없습니다.");
             fileSystem = await response.json();
             console.log("Database Synchronized.");
-            buildDirectory(); // 데이터 로드 후 디렉토리 생성
+            buildDirectory();
         } catch (error) {
             console.error("실패:", error);
             authMessage.textContent = "> ERROR: DATA SYNC FAILED.";
         }
     }
 
-    // --- 로그인 로직 (버그 수정) ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
-        if (isAuthenticating) return; // 이미 승인 중이면 클릭 무시
+        if (isAuthenticating) return;
 
         if (passwordInput.value === PASSWORD) {
             isAuthenticating = true;
@@ -67,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- 터미널 및 디렉토리 기능 ---
     const lines = ["> 접속 승인. 환영합니다, 계약자님.", "> 데이터베이스 기록을 성공적으로 불러왔습니다."];
     let lineIdx = 0, charIdx = 0;
     const cursor = document.createElement("span");
@@ -171,7 +168,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (기존 연출 100% 유지) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -276,40 +272,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 abyssLayer.dataset.ended = "true";
                 clearInterval(warningInterval);
                 createNaturalFlash("#fff", 1000);
+                
                 setTimeout(() => {
                     const glitchStyle = document.createElement('style');
                     glitchStyle.innerHTML = `
                         .title-glitch { animation: rgb-split 0.3s infinite; position: relative; display: inline-block; }
                         @keyframes rgb-split {
                             0% { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translate(0); }
+                            25% { text-shadow: -6px 0 #ff0000, 6px 0 #00ffff; transform: translate(2px, -2px); }
                             50% { text-shadow: 3px 0 #ff0000, -3px 0 #00ffff; transform: translate(-2px, 2px); }
+                            75% { text-shadow: -4px 0 #00ff00, 4px 0 #ff00ff; transform: translate(3px, -1px); }
                             100% { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translate(0); }
                         }
                     `;
                     document.head.appendChild(glitchStyle);
+                    
+                    // JSON에서 히든 데이터 가져오기
+                    const hiddenData = fileSystem["The main character"]?.["Curo_REAL_Hidden_Content"] || "데이터를 불러올 수 없습니다.";
+                    
                     textContainer.innerHTML = `
                         <h1 class="title-glitch" style="color:#fff; font-size:2.5rem; letter-spacing:8px; font-weight:900; margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1>
                         <p style="color:#fff; font-size:1.1rem; line-height:1.6; font-weight:bold; margin-bottom:30px;">
                             WARNING: An unpredictable and unidentified personality change
                         </p>
-                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">명칭: 큐로?(curo?)
-
-[여기에 캐릭터 설명을 작성하세요]
-
-종족: ???
-성별: ???
-상태: 불안정
-
-[추가 정보]
-- 인격 변화 감지됨
-- 기록 불완전
-- 접근 제한 권장</div>
+                        <div id="curo-description" style="color:#5effeb; font-size:1rem; line-height:1.8; white-space:pre-wrap; text-align:left; max-width:600px; margin:0 auto;">${hiddenData}</div>
                     `;
                 }, 500);
             }
         }, 100);
     };
 
-    // 시스템 시작 시 데이터 로드 실행
     loadDatabase();
 });

@@ -100,7 +100,6 @@
         .abyss-glitch-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 9998; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .glitch-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -113,11 +112,10 @@
         }
 
         .cognition-text-new {
-            font-size: 3rem; color: #fff; font-weight: 900;
+            font-size: 4rem; color: #fff; font-weight: 900;
             text-shadow: 4px 0 #bc13fe, -4px 0 #00ff41;
             animation: sharp-shake 0.08s infinite;
             line-height: 1.2; text-align: center;
-            word-break: keep-all; margin: 0;
         }
         @keyframes sharp-shake {
             0% { transform: translate(5px, -2px) skew(2deg); }
@@ -188,7 +186,6 @@
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
 
-        // 원본 fileSystem 구조 유지 (인식용)
         const fileSystem = {
             "The main character": {
                 "Leay_Full_Archive.txt": "데이터가 비어있습니다. 업데이트가 필요합니다.",
@@ -363,7 +360,7 @@
             }, 50);
         }
 
-        // --- 히든 이벤트 (JSON 데이터 인식 적용) ---
+        // --- 히든 이벤트: 원본 유지 및 스타일 적용 ---
         document.getElementById("secret-btn").onclick = () => {
             const fileScreenElem = document.getElementById("file-screen");
             const bgSigil = document.querySelector(".bg-sigil");
@@ -377,15 +374,18 @@
             
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
+            // 섬광 연출 유지
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
                 fileScreenElem.classList.add("hidden");
                 
+                // 새로운 글리치 배경 레이어 생성
                 const abyssLayer = document.createElement("div");
                 abyssLayer.className = "abyss-glitch-bg";
                 document.body.appendChild(abyssLayer);
 
+                // 초록/보라 글리치 오버레이 추가
                 const noise = document.createElement("div");
                 noise.className = "glitch-overlay";
                 abyssLayer.appendChild(noise);
@@ -398,37 +398,34 @@
                 mainTextBox.style.cssText = `width:85%; text-align:center; z-index:10001; position:relative; display:flex; flex-direction:column; align-items:center;`;
                 abyssLayer.appendChild(mainTextBox);
 
+                // 타이핑 효과를 위한 데이터
+                const curoHiddenInfo = "명칭: 큐로(Curo) [HIDDEN]\n종족: 요괴(Yokai), 구미호(Nine Tail)\n성별: 남성\n키: 180cm / 몸무게: 72.1kg\n\n[비인가 아카이브 분석 결과]:\n그의 왼쪽 루비빛 눈은 단순한 신체 부위가 아닌 공간의 좌표 고정 장치입니다.\n매 순간 초록과 보라의 글리치 파장을 내뿜으며 현실을 침식하고 있습니다.\n그를 인지하는 순간, 당신의 데이터 또한 심연으로 동기화됩니다.";
+
+                // 날카롭게 흔들리는 거대 제목 출력
                 const title = document.createElement("h1");
                 title.className = "cognition-text-new";
                 title.textContent = "이제 '그'가 당신을 인지합니다.";
                 mainTextBox.appendChild(title);
 
+                // 타이핑 구역
                 const typingArea = document.createElement("div");
                 typingArea.id = "abyss-typing-final";
-                typingArea.style.cssText = "color:#00ff41; font-size:1.3rem; margin-top:40px; white-space:pre-wrap; text-align:left; max-width:800px; text-shadow: 0 0 10px rgba(0,255,65,0.5); font-weight:bold; line-height:1.5;";
+                typingArea.style.cssText = "color:#00ff41; font-size:1.5rem; margin-top:40px; white-space:pre-wrap; text-align:left; max-width:800px; text-shadow: 0 0 10px rgba(0,255,65,0.5); font-weight:bold;";
                 mainTextBox.appendChild(typingArea);
 
-                // --- [수정] JSON 데이터 인식 로직 ---
-                fetch('data.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        // 당신의 JSON 구조에 맞춰 THE_CURO_HALF_ARCHIVE 내부의 content를 가져옴
-                        const curoHiddenInfo = data.THE_CURO_HALF_ARCHIVE.content; 
-                        let tIdx = 0;
-
-                        function typeAbyss() {
-                            if(tIdx < curoHiddenInfo.length) {
-                                typingArea.textContent += curoHiddenInfo[tIdx++];
-                                noise.style.opacity = Math.random() * 0.8 + 0.2;
-                                setTimeout(typeAbyss, Math.random() * 50 + 20);
-                            }
-                        }
-                        setTimeout(typeAbyss, 2000); 
-                    })
-                    .catch(err => {
-                        typingArea.textContent = "CRITICAL ERROR: DATA SOURCE NOT FOUND.";
-                        console.error(err);
-                    });
+                // 타이핑 실행
+                let tIdx = 0;
+                function typeAbyss() {
+                    if(tIdx < curoHiddenInfo.length) {
+                        typingArea.textContent += curoHiddenInfo[tIdx++];
+                        // 타이핑 시 배경의 노이즈 강도 랜덤 조절
+                        noise.style.opacity = Math.random() * 0.8 + 0.2;
+                        setTimeout(typeAbyss, Math.random() * 40 + 20);
+                    }
+                }
+                
+                // 2초 후 타이핑 시작 (제목이 먼저 흔들림을 인지시킨 후)
+                setTimeout(typeAbyss, 2000);
 
             }, 9800);
         };

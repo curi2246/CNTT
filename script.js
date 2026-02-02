@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let fileSystem = {}; // JSON에서 데이터를 받아올 빈 객체
     let isAuthenticating = false; // 로그인 버그 방지용 플래그
 
-    // --- [추가] JSON 데이터 인식 로직 ---
+    // --- [수정] JSON 데이터 인식 로직 ---
     async function loadDatabase() {
         try {
             const response = await fetch('data.json');
@@ -32,10 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- 로그인 로직 (버그 수정) ---
+    // --- 로그인 로직 (버그 수정 및 원본 유지) ---
     document.getElementById("auth-form").onsubmit = (e) => {
         e.preventDefault();
-        if (isAuthenticating) return; // 이미 승인 중이면 클릭 무시
+        if (isAuthenticating) return; 
 
         if (passwordInput.value === PASSWORD) {
             isAuthenticating = true;
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 히든 시퀀스 (기존 연출 100% 유지) ---
+    // --- 히든 시퀀스 (원본 연출 100% 유지 + JSON 바인딩) ---
     document.getElementById("secret-btn").onclick = () => {
         const fileScreenElem = document.getElementById("file-screen");
         const bgSigil = document.querySelector(".bg-sigil");
@@ -289,10 +289,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                     document.head.appendChild(glitchStyle);
 
-                    // --- [변경됨] JSON에서 실제 히든 설명 가져오기 ---
-                    // 만약 데이터가 없으면 기본값 출력
+                    // --- [데이터 인식] JSON에서 실제 히든 설명 가져오기 ---
                     const hiddenContent = fileSystem["The main character"]?.["Curo_REAL_Hidden_Content"] 
-                                       || "데이터를 불러오는 데 실패했습니다. 관리자에게 문의하십시오.";
+                                       || "데이터를 불러오는 데 실패했습니다.";
 
                     textContainer.innerHTML = `
                         <h1 class="title-glitch" style="color:#fff; font-size:2.5rem; letter-spacing:8px; font-weight:900; margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1>
@@ -306,6 +305,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 100);
     };
 
-    // 시스템 시작 시 데이터 로드 실행
     loadDatabase();
 });

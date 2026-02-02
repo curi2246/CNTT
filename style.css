@@ -247,25 +247,3 @@ body {
     z-index: 10001; text-align: center; pointer-events: none;
     opacity: 0;
 }
-
-/* '그가 인지한다' (19.6s 등장 -> 28.5s 삭제) */
-@keyframes cognizeFlow {
-    0% { opacity: 1; }
-    99% { opacity: 1; }
-    100% { opacity: 0; }
-}
-.text-cognize {
-    animation: cognizeFlow 8.9s forwards;
-    animation-delay: 19.6s;
-    color: #fff; text-shadow: 0 0 20px #f00; font-size: 2.5rem;
-}
-
-/* '캐릭터 설명' (29.6s 등장) */
-@keyframes charDescFlow {
-    100% { opacity: 1; }
-}
-.text-char-desc {
-    animation: charDescFlow 0.5s forwards;
-    animation-delay: 29.6s;
-    color: var(--neon-mint); font-size: 1.2rem;
-}

@@ -12,7 +12,6 @@
             --bg-black: #020d0d; 
         }
 
-        /* 시스템 스타일 커스텀 스크롤 바 디자인 */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #010808; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 5px; border: 2px solid #010808; }
@@ -24,7 +23,6 @@
             transition: none; 
         }
 
-        /* 💓 심장 박동 애니메이션 */
         .bg-sigil {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.05);
@@ -37,7 +35,6 @@
             50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.2; text-shadow: 0 0 40px rgba(94, 255, 235, 0.5); }
         }
 
-        /* ✨ 인증 효과 */
         .auth-success-flash { animation: flash-mint 0.8s ease-out forwards; }
         @keyframes flash-mint {
             0% { background-color: var(--neon-mint); filter: brightness(2); }
@@ -70,7 +67,6 @@
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
-        /* 🌑 심연 구역 */
         .hidden-trigger-zone { 
             margin-top: 50px; 
             padding-top: 100vh; 
@@ -99,31 +95,77 @@
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
 
-        /* 🔥 RGB 블록 글리치 효과 */
-        .rgb-block-glitch {
-            animation: rgb-bg-shift 0.1s infinite, block-bg-shatter 0.1s infinite !important;
-            filter: contrast(150%) brightness(1.2);
+        /* 🔥 백그라운드 RGB 글리치 효과 (이미지 참고) */
+        .glitch-bg-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 9998; pointer-events: none;
+            background: 
+                linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.03) 25%, transparent 50%, rgba(255,0,255,0.03) 75%, transparent 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,100,0.03) 2px, rgba(0,255,100,0.03) 4px);
+            animation: bg-scan 0.1s infinite, bg-shift 0.2s infinite;
         }
-        @keyframes rgb-bg-shift {
-            0% { background: rgba(255,0,0,0.15); box-shadow: inset 50px 0 100px rgba(0,0,255,0.2); }
-            50% { background: rgba(0,0,255,0.15); box-shadow: inset -50px 0 100px rgba(255,0,0,0.2); }
-            100% { background: rgba(0,255,0,0.05); }
+        @keyframes bg-scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
         }
-        @keyframes block-bg-shatter {
-            0% { clip-path: inset(15% 0 60% 0); transform: translate(-10px, 5px); }
-            30% { clip-path: inset(70% 0 5% 0); transform: translate(15px, -10px); }
-            60% { clip-path: inset(30% 0 45% 0); transform: translate(-15px, 15px); }
-            100% { clip-path: inset(0); transform: translate(0); }
+        @keyframes bg-shift {
+            0% { background-position: 0 0; filter: hue-rotate(0deg); }
+            50% { background-position: 100% 100%; filter: hue-rotate(180deg); }
+            100% { background-position: 0 0; filter: hue-rotate(360deg); }
         }
-        .cognition-text {
-            font-size: 3rem; color: #fff; font-weight: 900;
-            text-shadow: 5px 0 red, -5px 0 blue, 0 0 20px #fff;
-            animation: text-vibrate 0.05s infinite;
-            line-height: 1.2;
+
+        /* 🔥 RGB 분리 + 날카로운 흔들림 타이틀 */
+        .title-rgb-glitch {
+            font-size: 2.5rem; 
+            letter-spacing: 12px; 
+            font-weight: 900; 
+            color: #fff;
+            position: relative;
+            display: inline-block;
+            animation: sharp-shake 0.08s infinite, rgb-chromatic 0.15s infinite;
+            text-shadow: 
+                -5px 0 #ff0000, 
+                5px 0 #00ffff,
+                -3px 0 #00ff00,
+                3px 0 #ff00ff;
         }
-        @keyframes text-vibrate {
-            0% { transform: translate(2px, -2px); }
-            100% { transform: translate(-2px, 2px); }
+        @keyframes sharp-shake {
+            0% { transform: translate(3px, -2px) skew(2deg); }
+            25% { transform: translate(-4px, 3px) skew(-3deg); }
+            50% { transform: translate(5px, -1px) skew(1deg); }
+            75% { transform: translate(-2px, 2px) skew(-2deg); }
+            100% { transform: translate(0); }
+        }
+        @keyframes rgb-chromatic {
+            0% { 
+                text-shadow: -5px 0 #ff0000, 5px 0 #00ffff, -3px 0 #00ff00, 3px 0 #ff00ff;
+                filter: hue-rotate(0deg);
+            }
+            50% { 
+                text-shadow: 5px 0 #ff0000, -5px 0 #00ffff, 3px 0 #00ff00, -3px 0 #ff00ff;
+                filter: hue-rotate(90deg);
+            }
+            100% { 
+                text-shadow: -5px 0 #ff0000, 5px 0 #00ffff, -3px 0 #00ff00, 3px 0 #ff00ff;
+                filter: hue-rotate(180deg);
+            }
+        }
+
+        /* 🔥 타이핑 텍스트 글리치 효과 */
+        .typing-glitch {
+            animation: typing-distortion 0.12s infinite;
+        }
+        @keyframes typing-distortion {
+            0% { transform: translate(1px, -1px); filter: brightness(1.2); }
+            50% { transform: translate(-1px, 1px); filter: brightness(0.8); }
+            100% { transform: translate(0); }
+        }
+
+        /* 일반 텍스트는 글리치 영향 안받음 */
+        .stable-text {
+            animation: none !important;
+            transform: none !important;
+            filter: none !important;
         }
     </style>
 </head>
@@ -215,7 +257,6 @@
             }
         };
 
-        // --- 1. 글리치 커맨드 ---
         window.addEventListener('keydown', (e) => {
             inputBuffer += e.key.toLowerCase();
             if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
@@ -234,7 +275,6 @@
             }
         });
 
-        // --- 2. 로그인 로직 ---
         document.getElementById("auth-form").onsubmit = (e) => {
             e.preventDefault();
             const val = document.getElementById("password-input").value;
@@ -323,7 +363,6 @@
                         bodyMsg.textContent += content[charIdx]; charIdx++;
                         setTimeout(typeBody, 1); 
                     } else {
-                        // 큐로 아카이브 + 글리치 해제 상태일 때만 히든 존 활성화
                         if (name.includes("Curo") && isGlitchUnlocked) {
                             hZone.style.display = "block";
                             window.onscroll = () => {
@@ -374,7 +413,6 @@
             
             document.getElementById("music-title").textContent = "재생 중: CENSORED!!.mp3.mp3";
 
-            // 초반 플래시 연출
             [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 
             setTimeout(() => {
@@ -383,6 +421,11 @@
                 abyssLayer.id = "abyss-layer";
                 abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
                 document.body.appendChild(abyssLayer);
+
+                // 🔥 백그라운드 글리치 레이어 추가
+                const bgGlitch = document.createElement("div");
+                bgGlitch.className = "glitch-bg-layer";
+                abyssLayer.appendChild(bgGlitch);
 
                 const mainTextBox = document.createElement("div");
                 mainTextBox.id = "abyss-text-box";
@@ -398,14 +441,11 @@
                     }, d);
                 };
 
-                // 서사 텍스트 등장
                 showAbyssText("CRITICAL ERROR: HIDDEN SECTOR ACCESSED", "#ff0000", 0, "2rem");
                 showAbyssText("모든 기록이 소거되었습니다.", "#fff", 3000, "1.2rem");
                 showAbyssText("당신은 보지 말아야 할 것을 보았습니다.", "#fff", 6500, "1.2rem");
 
-                // --- 🔥 [버그 수정] 음악 재생 시간 기반으로 타이밍 체크 ---
                 const warningInterval = setInterval(() => {
-                    // 10초부터 에러 텍스트 도배 시작
                     if (abyssBgm.currentTime >= 10.0 && abyssBgm.currentTime < 19.6) {
                         const warn = document.createElement("div");
                         warn.textContent = "SYSTEM_WARNING: ACCESS_VIOLATION";
@@ -414,16 +454,14 @@
                         setTimeout(() => warn.remove(), 800);
                     }
                     
-                    // 19.6초에 도달하면 인지 텍스트 등장
                     if (abyssBgm.currentTime >= 19.6 && !abyssLayer.dataset.cognized) {
-                        abyssLayer.dataset.cognized = "true"; // 한 번만 실행
+                        abyssLayer.dataset.cognized = "true";
                         createAbyssFlash("#fff", 1000); 
-                        abyssLayer.classList.add("rgb-block-glitch"); 
                         
                         mainTextBox.innerHTML = "";
                         const p = document.createElement("h1");
                         p.textContent = "이제 '그'가 당신을 인지합니다.";
-                        p.className = "cognition-text";
+                        p.style.cssText = "font-size:3rem; color:#fff; font-weight:900; text-shadow:5px 0 red, -5px 0 blue, 0 0 20px #fff;";
                         mainTextBox.appendChild(p);
                     }
 
@@ -432,7 +470,6 @@
                         mainTextBox.innerHTML = "";
                     }
                     
-                    // --- 29.6초 최종 엔딩 시퀀스 ---
                     if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
                         abyssLayer.dataset.ended = "true";
                         clearInterval(warningInterval); 
@@ -441,17 +478,14 @@
                         mainTextBox.innerHTML = "";
 
                         setTimeout(() => {
-                            abyssLayer.style.background = "#000";
-                            abyssLayer.classList.add("glitch-final"); 
-
                             const curoData = fileSystem["The main character"]["Curo_REAL_Hidden_Content"] || "데이터를 불러올 수 없습니다.";
 
                             mainTextBox.innerHTML = `
                                 <div style="text-align:center; width:100%;">
-                                    <h1 class="認知텍스트" style="font-size:2.2rem; letter-spacing:8px; margin-bottom:30px; color:#fff; text-shadow: 0 0 20px #fff;">
+                                    <h1 class="title-rgb-glitch" style="margin-bottom:40px;">
                                         CURO_THE_HALF_ARCHIVE
                                     </h1>
-                                    <p id="curo-typing-area" style="color:#f00; font-size:1.2rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p>
+                                    <p id="curo-typing-area" class="typing-glitch" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p>
                                 </div>
                             `;
 
@@ -462,6 +496,10 @@
                                 if (charIdx < curoData.length) {
                                     typingArea.textContent += curoData[charIdx++];
                                     setTimeout(typeCuroContent, 40); 
+                                } else {
+                                    // 타이핑 완료 후 글리치 효과 제거
+                                    typingArea.classList.remove("typing-glitch");
+                                    typingArea.classList.add("stable-text");
                                 }
                             }
                             typeCuroContent();

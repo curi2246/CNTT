@@ -95,7 +95,7 @@
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
         }
 
-        /* 🔥 백그라운드 RGB 글리치 효과 (이미지 참고) */
+        /* 🔥 백그라운드 RGB 글리치 효과 */
         .glitch-bg-layer {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 9998; pointer-events: none;
@@ -151,14 +151,16 @@
             }
         }
 
-        /* 🔥 타이핑 텍스트 글리치 효과 */
-        .typing-glitch {
-            animation: typing-distortion 0.12s infinite;
+        /* 🔥 빠른 글리치 타이핑 효과 */
+        .fast-glitch-typing {
+            animation: fast-typing-distortion 0.05s infinite;
         }
-        @keyframes typing-distortion {
-            0% { transform: translate(1px, -1px); filter: brightness(1.2); }
-            50% { transform: translate(-1px, 1px); filter: brightness(0.8); }
-            100% { transform: translate(0); }
+        @keyframes fast-typing-distortion {
+            0% { transform: translate(2px, -2px); filter: brightness(1.5) hue-rotate(90deg); opacity: 0.9; }
+            25% { transform: translate(-3px, 2px); filter: brightness(0.7) hue-rotate(180deg); opacity: 1; }
+            50% { transform: translate(3px, -1px); filter: brightness(1.3) hue-rotate(270deg); opacity: 0.85; }
+            75% { transform: translate(-2px, 3px); filter: brightness(0.8) hue-rotate(0deg); opacity: 1; }
+            100% { transform: translate(0); filter: brightness(1); opacity: 1; }
         }
 
         /* 일반 텍스트는 글리치 영향 안받음 */
@@ -326,15 +328,25 @@
             const dir = document.getElementById("directory");
             dir.innerHTML = "";
             Object.keys(fileSystem).forEach(folder => {
-                const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
-                const list = document.createElement("div"); list.className = "hidden";
+                const fDiv = document.createElement("div"); 
+                fDiv.className = "folder"; 
+                fDiv.textContent = "📁 " + folder;
+                const list = document.createElement("div"); 
+                list.className = "hidden";
                 fDiv.onclick = () => list.classList.toggle("hidden");
+                
                 Object.keys(fileSystem[folder]).forEach(file => {
-                    const fi = document.createElement("div"); fi.className = "file"; fi.textContent = "📄 " + file;
+                    // 🔥 Curo_REAL_Hidden_Content 파일은 목록에서 숨김
+                    if (file === "Curo_REAL_Hidden_Content") return;
+                    
+                    const fi = document.createElement("div"); 
+                    fi.className = "file"; 
+                    fi.textContent = "📄 " + file;
                     fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
                     list.appendChild(fi);
                 });
-                dir.appendChild(fDiv); dir.appendChild(list);
+                dir.appendChild(fDiv); 
+                dir.appendChild(list);
             });
         }
 
@@ -422,7 +434,6 @@
                 abyssLayer.style.cssText = `position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:9999; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-direction:column;`;
                 document.body.appendChild(abyssLayer);
 
-                // 🔥 백그라운드 글리치 레이어 추가
                 const bgGlitch = document.createElement("div");
                 bgGlitch.className = "glitch-bg-layer";
                 abyssLayer.appendChild(bgGlitch);
@@ -485,20 +496,21 @@
                                     <h1 class="title-rgb-glitch" style="margin-bottom:40px;">
                                         CURO_THE_HALF_ARCHIVE
                                     </h1>
-                                    <p id="curo-typing-area" class="typing-glitch" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p>
+                                    <p id="curo-typing-area" class="fast-glitch-typing" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p>
                                 </div>
                             `;
 
                             const typingArea = document.getElementById("curo-typing-area");
                             let charIdx = 0;
 
+                            // 🔥 빠른 글리치 타이핑 (지지직 거리는 효과)
                             function typeCuroContent() {
                                 if (charIdx < curoData.length) {
                                     typingArea.textContent += curoData[charIdx++];
-                                    setTimeout(typeCuroContent, 40); 
+                                    setTimeout(typeCuroContent, 25); // 빠르게 타이핑
                                 } else {
                                     // 타이핑 완료 후 글리치 효과 제거
-                                    typingArea.classList.remove("typing-glitch");
+                                    typingArea.classList.remove("fast-glitch-typing");
                                     typingArea.classList.add("stable-text");
                                 }
                             }

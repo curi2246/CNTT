@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const abyssBgm = document.getElementById("???-bgm"); 
     const musicTitle = document.getElementById("music-title");
 
-    const PASSWORD = "1234";
+    const PASSWORD = "cnttofall";
     let inputBuffer = "";      
     let isGlitchUnlocked = false; 
     let fileSystem = {}; 

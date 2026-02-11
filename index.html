@@ -63,7 +63,7 @@
         }
 
         #auth-screen { justify-content: center; }
-        .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; }
+        .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
@@ -93,6 +93,36 @@
             background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint); 
             color: var(--neon-mint); padding: 10px 15px; font-size: 12px; 
             z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
+        }
+
+        /* 🔥 좌우 화살표 네비게이션 */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 80px;
+            background: rgba(94, 255, 235, 0.1);
+            border: 1px solid var(--neon-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            font-size: 1.5rem;
+            color: var(--neon-mint);
+            user-select: none;
+        }
+        .nav-arrow:hover {
+            background: rgba(94, 255, 235, 0.3);
+            box-shadow: 0 0 15px var(--neon-mint);
+        }
+        .nav-arrow-left {
+            left: -50px;
+        }
+        .nav-arrow-right {
+            right: -50px;
         }
 
         /* 🔥 백그라운드 RGB 글리치 효과 */
@@ -203,7 +233,7 @@
 
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div class="terminal">
+            <div class="terminal" id="file-terminal-container">
                 <div id="file-scroll-container">
                     <div id="file-text"></div>
                     <div id="hidden-zone" class="hidden-trigger-zone">
@@ -220,6 +250,9 @@
         const PASSWORD = "1234";
         let isGlitchUnlocked = false; 
         let inputBuffer = ""; 
+        let currentFileIndex = 0;
+        let currentFileList = [];
+        let currentFolder = "";
 
         const fileSystem = {
             "The main character": {
@@ -338,18 +371,27 @@
                 fDiv.onclick = () => list.classList.toggle("hidden");
                 
                 Object.keys(fileSystem[folder]).forEach(file => {
-                    // 🔥 Curo_REAL_Hidden_Content 파일은 목록에서 숨김
                     if (file === "Curo_REAL_Hidden_Content") return;
                     
                     const fi = document.createElement("div"); 
                     fi.className = "file"; 
                     fi.textContent = "📄 " + file;
-                    fi.onclick = (e) => { e.stopPropagation(); openFile(file, fileSystem[folder][file]); };
+                    fi.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        openFileWithNav(folder, file); 
+                    };
                     list.appendChild(fi);
                 });
                 dir.appendChild(fDiv); 
                 dir.appendChild(list);
             });
+        }
+
+        function openFileWithNav(folder, file) {
+            currentFolder = folder;
+            currentFileList = Object.keys(fileSystem[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
+            currentFileIndex = currentFileList.indexOf(file);
+            openFile(file, fileSystem[folder][file]);
         }
 
         function openFile(name, content) {
@@ -359,22 +401,51 @@
             document.getElementById("file-title").textContent = "FILE: " + name;
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
-            textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
+            textTarget.innerHTML = ""; 
+            window.onscroll = null; 
+            hZone.style.display = "none";
+
+            // 🔥 기존 화살표 제거
+            const oldArrows = document.querySelectorAll(".nav-arrow");
+            oldArrows.forEach(arrow => arrow.remove());
+
+            // 🔥 좌우 화살표 추가
+            const terminalContainer = document.getElementById("file-terminal-container");
+            
+            if (currentFileIndex > 0) {
+                const leftArrow = document.createElement("div");
+                leftArrow.className = "nav-arrow nav-arrow-left";
+                leftArrow.innerHTML = "◀";
+                leftArrow.onclick = () => navigateFile(-1);
+                terminalContainer.appendChild(leftArrow);
+            }
+            
+            if (currentFileIndex < currentFileList.length - 1) {
+                const rightArrow = document.createElement("div");
+                rightArrow.className = "nav-arrow nav-arrow-right";
+                rightArrow.innerHTML = "▶";
+                rightArrow.onclick = () => navigateFile(1);
+                terminalContainer.appendChild(rightArrow);
+            }
             
             const sysMsg = document.createElement("p");
-            sysMsg.style.color = "var(--neon-mint)"; sysMsg.className = "typing-cursor";
+            sysMsg.style.color = "var(--neon-mint)"; 
+            sysMsg.className = "typing-cursor";
             sysMsg.textContent = "> 기록 열람을 시작합니다...";
             textTarget.appendChild(sysMsg);
 
             setTimeout(() => {
                 sysMsg.classList.remove("typing-cursor");
                 const bodyMsg = document.createElement("div");
-                bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
+                bodyMsg.style.color = "#fff"; 
+                bodyMsg.style.whiteSpace = "pre-wrap"; 
+                bodyMsg.style.lineHeight = "1.6";
                 textTarget.appendChild(bodyMsg);
                 let charIdx = 0;
                 function typeBody() {
                     if(charIdx < content.length) {
-                        bodyMsg.textContent += content[charIdx]; charIdx++;
+                        bodyMsg.textContent += content[charIdx]; 
+                        charIdx++;
                         setTimeout(typeBody, 1); 
                     } else {
                         if (name.includes("Curo") && isGlitchUnlocked) {
@@ -394,10 +465,21 @@
             }, 800);
         }
 
+        function navigateFile(direction) {
+            currentFileIndex += direction;
+            const newFileName = currentFileList[currentFileIndex];
+            const newContent = fileSystem[currentFolder][newFileName];
+            openFile(newFileName, newContent);
+        }
+
         document.getElementById("back-btn").onclick = () => {
-            window.onscroll = null; document.body.style.backgroundColor = "var(--bg-black)";
+            window.onscroll = null; 
+            document.body.style.backgroundColor = "var(--bg-black)";
             document.getElementById("file-screen").classList.add("hidden");
             document.getElementById("database-view").classList.remove("hidden");
+            
+            const arrows = document.querySelectorAll(".nav-arrow");
+            arrows.forEach(arrow => arrow.remove());
         };
 
         function createAbyssFlash(color, duration) {
@@ -505,13 +587,11 @@
                             const typingArea = document.getElementById("curo-typing-area");
                             let charIdx = 0;
 
-                            // 🔥 빠른 글리치 타이핑 (지지직 거리는 효과)
                             function typeCuroContent() {
                                 if (charIdx < curoData.length) {
                                     typingArea.textContent += curoData[charIdx++];
-                                    setTimeout(typeCuroContent, 25); // 빠르게 타이핑
+                                    setTimeout(typeCuroContent, 25);
                                 } else {
-                                    // 타이핑 완료 후 글리치 효과 제거
                                     typingArea.classList.remove("fast-glitch-typing");
                                     typingArea.classList.add("stable-text");
                                 }

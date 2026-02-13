@@ -562,27 +562,27 @@ const LOCS = [
     code:"SECTOR-01", name:"요괴의 땅 / 구미의 숲",
     sub:"요괴 서식지 · 글리치 침식 숲",
     desc:"구미호와 요괴들이 서식하는 깊은 숲. 나무들 사이로 글리치가 흘러 공간이 뒤틀려 있으며, 나침반조차 정상 작동을 보장할 수 없다. 큐로의 원래 서식지와 가까운 것으로 추정되는 지역.",
-    guardian:"구미호 무리 (미확인 개체 다수)", danger:"높음", dc:"d-high",
+    guardian:"요괴(yokai)", danger:"높음", dc:"d-high",
     px:56, py:26, pinClass:"", bg:"linear-gradient(135deg,#0d1a0d,#1a1200)"
   },
   {
     code:"SECTOR-02", name:"친사의 땅 / 빛의 성역",
     sub:"천사 영역 · 빛의 성역",
     desc:"천사들이 거주하는 고지대 성역. 접근 자체가 제한되어 있으며 시로(Shiro)가 간헐적으로 목격된 구역이다. 헤일로에 덮인 글리치와 관련된 이상 현상이 보고된 바 있다.",
-    guardian:"시로 (Shiro) — 간헐적 관측", danger:"미지수", dc:"d-unk",
+    guardian:"천사(angel)", danger:"미지수", dc:"d-unk",
     px:86, py:14, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080814,#0a0d20)"
   },
   {
     code:"SECTOR-03", name:"악마의 영역 / 심연의 제단",
     sub:"악마 영역 · 심연의 제단",
-    desc:"순수 악마 계열 존재들의 본거지. 키스네와 같은 순수 악마들이 계약을 맺는 제단이 있다고 전해진다. 깊은 곳에는 이름 없는 존재들과의 계약 흔적이 새겨져 있다.",
-    guardian:"계약의 원칙 (현상체)", danger:"매우 높음", dc:"d-high",
+    desc:"순수 악마 계열 존재들의 본거지. 키스네와 같은 순수 악마들이 계약을 맺는 공간이 있다고 전해진다. 깊은 곳에는 이름 없는 존재들과의 계약 흔적이 새겨져 있다.",
+    guardian:"악마(Demon)", danger:"매우 높음", dc:"d-high",
     px:88, py:43, pinClass:"", bg:"linear-gradient(135deg,#1a0505,#0d0005)"
   },
   {
     code:"SECTOR-04", name:"변칙과 왜곡의 구역",
     sub:"글리치 구역 · 변칙 지대",
-    desc:"글리치 현상이 가장 극심하게 발현되는 지역. 공간 자체가 불안정하며 일반적인 물리 법칙이 적용되지 않는다. 큐로?(GLITCH_DATA)의 잔상이 관측된 유일한 구역. 접근 시 심각한 인지 왜곡 보고됨.",
+    desc:"글리치 현상이 가장 극심하게 발현되는 지역. 공간 자체가 불안정하며 일반적인 물리 법칙이 적용되지 않는다. 주변에 심각한 글리치 감염체들이 있으며 접근 시 심각한 인지 왜곡 보고됨.",
     guardian:"미식별 글리치 개체", danger:"극한", dc:"d-ex",
     px:13, py:45, pinClass:"pin-glitch", bg:"linear-gradient(135deg,#0d000d,#050005)"
   },
@@ -590,14 +590,14 @@ const LOCS = [
     code:"SECTOR-05", name:"게약의 도시",
     sub:"계약의 중심지 · 중앙 결절점",
     desc:"대륙 중앙에 위치한 계약 거점 도시. 다양한 종족과 존재들이 계약을 위해 모이는 중립 지대. 악마, 천사, 인간, 요괴 모두가 공식적으로 입장 가능한 유일한 공간이다.",
-    guardian:"길드 연합 (복수 세력)", danger:"보통", dc:"d-mid",
+    guardian:"인간(human)", danger:"보통", dc:"d-mid",
     px:55, py:56, pinClass:"", bg:"linear-gradient(135deg,#080f14,#0a0f18)"
   },
   {
     code:"SECTOR-EX", name:"고립된 시간의 섬 / 영원의 구원",
     sub:"시간이 멈춘 섬 · 영원의 구원",
-    desc:"리셋(Reset) 현상의 영향을 받지 않는 것으로 추정되는 고립된 섬. 노에인(Noein)과 관련된 기록이 일부 남아 있다. 리에(Leay)가 이곳을 방문한 기록이 존재하나 세부 내용은 삭제됨.",
-    guardian:"토리 (Tory) — 미확인", danger:"불명", dc:"d-unk",
+    desc:"리셋(Reset) 현상의 영향을 받지 않는 것으로 추정되는 고립된 섬. 노에인(Noein)과 관련된 기록이 일부 남아 있다. 리에(Leay), 큐로(Curo), 키스네(Kisune)가 방문한 기록이 있으며 주로 아레인(Irein)이란 존재만이 있다..",
+    guardian:"아레인(Irein)", danger:"불명", dc:"d-unk",
     px:60, py:92, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080f08,#050a05)"
   }
 ];

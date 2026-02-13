@@ -6,16 +6,13 @@
 <title>WORLD MAP</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Serif+KR:wght@400;700&display=swap');
-
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{
     --pink:#ff5e5e;
     --mint:#5effeb;
     --bg:#020d0d;
     --gold:#c9a84c;
-    --dark:#0a0a0a;
   }
-
   body{
     background:var(--bg);
     color:#fff;
@@ -31,130 +28,157 @@
     z-index:9999;
     display:flex;flex-direction:column;
     align-items:center;justify-content:center;
-    gap:6px;
-    transition:transform 0.8s cubic-bezier(0.77,0,0.18,1);
+    gap:4px;
+    transition:transform 0.9s cubic-bezier(0.77,0,0.18,1);
   }
-  #boot-overlay.slide-out{
-    transform:translateX(100%);
+  #boot-overlay.slide-out{ transform:translateX(100%); }
+  #boot-lines{
+    width:min(500px,85vw);
+    max-height:50vh;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    gap:3px;
   }
   .boot-line{
-    font-size:clamp(10px,1.4vw,13px);
+    font-size:clamp(9px,1.3vw,12px);
     color:#0f0;
     opacity:0;
     white-space:nowrap;
-    animation:boot-fade 0.05s forwards;
+    animation:bfade 0.05s forwards;
   }
-  @keyframes boot-fade{to{opacity:1;}}
-  .boot-bar{
-    width:min(400px,80vw);
-    height:4px;
-    background:#111;
-    margin-top:16px;
-    overflow:hidden;
+  @keyframes bfade{to{opacity:1;}}
+  .boot-warn{color:#ff5e5e !important;}
+  .boot-bar-wrap{
+    width:min(500px,85vw);
+    margin-top:14px;
   }
+  .boot-bar-label{font-size:10px;color:#333;margin-bottom:4px;letter-spacing:2px;}
+  .boot-bar{height:3px;background:#111;overflow:hidden;}
   .boot-bar-fill{
-    height:100%;
-    background:var(--mint);
-    width:0%;
-    transition:width 0.05s linear;
-    box-shadow:0 0 8px var(--mint);
+    height:100%;background:var(--mint);width:0%;
+    transition:width 0.08s linear;
+    box-shadow:0 0 6px var(--mint);
   }
 
   /* ── 메인 레이아웃 ── */
   #map-wrapper{
     width:100%;height:100%;
     display:flex;flex-direction:column;
-    opacity:0;
-    transition:opacity 0.6s ease;
+    opacity:0;transition:opacity 0.5s ease;
+    background: radial-gradient(ellipse at 60% 40%, #0a1520 0%, #020d0d 70%);
   }
   #map-wrapper.visible{opacity:1;}
 
   /* 헤더 */
   #map-header{
-    padding:12px 20px;
-    border-bottom:1px solid rgba(94,255,235,0.2);
-    display:flex;align-items:center;gap:12px;
-    background:rgba(0,0,0,0.6);
-    backdrop-filter:blur(4px);
+    padding:10px 18px;
+    border-bottom:1px solid rgba(94,255,235,0.15);
+    display:flex;align-items:center;gap:10px;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(6px);
     flex-shrink:0;
   }
   #map-header h2{
     font-family:'Noto Serif KR',serif;
-    font-size:clamp(14px,2vw,18px);
-    color:var(--mint);
-    letter-spacing:4px;
+    font-size:clamp(13px,1.8vw,17px);
+    color:var(--mint);letter-spacing:5px;
   }
-  .header-tag{
-    font-size:10px;color:#555;
-    letter-spacing:2px;
-    margin-left:auto;
-  }
+  .hdr-sep{color:#222;margin:0 6px;}
+  .hdr-hint{font-size:10px;color:#444;letter-spacing:1px;}
 
-  /* 지도 컨테이너 */
+  /* 지도 캔버스 영역 */
   #map-area{
-    flex:1;
-    position:relative;
-    overflow:hidden;
-    cursor:grab;
+    flex:1;position:relative;overflow:hidden;
   }
-  #map-area:active{cursor:grabbing;}
 
-  /* 지도 이미지 */
-  #map-img{
+  /* 배경 - 별 느낌 */
+  #map-area::before{
+    content:'';
+    position:absolute;inset:0;
+    background:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.08) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,0.12) 0%, transparent 100%);
+    pointer-events:none;z-index:0;
+  }
+
+  /* 지도 이미지 컨테이너 */
+  #map-img-wrap{
     position:absolute;
     top:50%;left:50%;
     transform:translate(-50%,-50%);
-    width:min(90vw,780px);
+    width:min(85vw,700px);
     height:auto;
-    user-select:none;
-    pointer-events:none;
-    filter:brightness(0.85) saturate(1.1);
+  }
+  #map-img{
+    width:100%;height:auto;
+    display:block;
+    filter:brightness(0.78) saturate(0.9);
+    user-select:none;pointer-events:none;
+    border-radius:4px;
   }
 
-  /* 핀 */
+  /* 구역 오버레이 (반투명 색상 영역 - 1번 스타일) */
+  .zone-overlay{
+    position:absolute;
+    border-radius:50%;
+    pointer-events:none;
+    mix-blend-mode:screen;
+    transition:opacity 0.3s;
+  }
+
+  /* ─ 핀 ─ */
   .map-pin{
     position:absolute;
     transform:translate(-50%,-50%);
     cursor:pointer;
-    z-index:10;
+    z-index:20;
   }
-  .pin-dot{
-    width:18px;height:18px;
+  .pin-ring{
+    position:relative;
+    width:22px;height:22px;
+  }
+  .pin-outer{
+    position:absolute;inset:0;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    background:rgba(10,10,20,0.75);
+    box-shadow:0 0 0 0 rgba(201,168,76,0.5);
+    animation:pring 2.5s ease-in-out infinite;
+    transition:transform 0.2s, background 0.2s;
+  }
+  .pin-inner{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:8px;height:8px;
     border-radius:50%;
     background:var(--gold);
-    border:2px solid rgba(255,255,255,0.6);
-    box-shadow:0 0 0 0 rgba(201,168,76,0.6);
-    animation:pin-pulse 2s ease-in-out infinite;
-    transition:transform 0.2s, box-shadow 0.2s;
-    position:relative;
+    box-shadow:0 0 6px var(--gold);
   }
-  .pin-dot::after{
-    content:'';
-    position:absolute;
-    bottom:-6px;left:50%;transform:translateX(-50%);
-    width:0;height:0;
-    border-left:5px solid transparent;
-    border-right:5px solid transparent;
-    border-top:7px solid var(--gold);
-  }
-  .map-pin:hover .pin-dot{
-    transform:scale(1.4);
-    box-shadow:0 0 0 6px rgba(201,168,76,0.3);
-  }
-  @keyframes pin-pulse{
+  @keyframes pring{
     0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.5);}
-    50%{box-shadow:0 0 0 8px rgba(201,168,76,0);}
+    50%{box-shadow:0 0 0 7px rgba(201,168,76,0);}
+  }
+  .map-pin:hover .pin-outer{
+    transform:scale(1.35);
+    background:rgba(201,168,76,0.2);
+  }
+  .map-pin:hover .pin-inner{
+    box-shadow:0 0 12px var(--gold);
   }
 
   /* 핀 라벨 */
   .pin-label{
     position:absolute;
-    bottom:28px;left:50%;transform:translateX(-50%);
-    background:rgba(0,0,0,0.85);
-    border:1px solid var(--gold);
+    bottom:26px;left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,0.88);
+    border:1px solid rgba(201,168,76,0.5);
     color:var(--gold);
     font-size:10px;
-    padding:3px 7px;
+    padding:3px 8px;
     white-space:nowrap;
     pointer-events:none;
     opacity:0;
@@ -163,178 +187,171 @@
   }
   .map-pin:hover .pin-label{opacity:1;}
 
-  /* ── 팝업 패널 ── */
-  #popup{
-    position:absolute;
-    inset:0;
-    z-index:100;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,0.7);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.3s;
-    backdrop-filter:blur(2px);
+  /* 글리치 핀 - SECTOR-04 전용 */
+  .pin-glitch .pin-outer{
+    border-color:var(--pink);
+    animation:pring-red 1.5s ease-in-out infinite;
   }
-  #popup.open{
-    opacity:1;
-    pointer-events:all;
+  .pin-glitch .pin-inner{
+    background:var(--pink);
+    box-shadow:0 0 6px var(--pink);
+    animation:glitch-dot 0.3s infinite;
   }
-  #popup-card{
-    background:#050f0f;
-    border:1px solid rgba(94,255,235,0.3);
-    width:min(520px,92vw);
-    max-height:80vh;
-    overflow-y:auto;
-    position:relative;
-    transform:translateY(20px) scale(0.97);
-    transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow:0 0 40px rgba(94,255,235,0.1), inset 0 0 40px rgba(0,0,0,0.5);
+  .pin-glitch .pin-label{
+    border-color:rgba(255,94,94,0.5);
+    color:var(--pink);
   }
-  #popup.open #popup-card{
-    transform:translateY(0) scale(1);
+  .pin-glitch:hover .pin-outer{border-color:var(--pink);}
+  @keyframes pring-red{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,94,94,0.5);}
+    50%{box-shadow:0 0 0 7px rgba(255,94,94,0);}
+  }
+  @keyframes glitch-dot{
+    0%{transform:translate(-50%,-50%);}
+    25%{transform:translate(-50%,-50%) translate(1px,-1px);}
+    50%{transform:translate(-50%,-50%) translate(-1px,1px);}
+    75%{transform:translate(-50%,-50%) translate(1px,1px);}
+    100%{transform:translate(-50%,-50%);}
   }
 
-  /* 팝업 이미지 배너 */
-  #popup-banner{
-    width:100%;height:160px;
-    background:linear-gradient(135deg,#0a1a1a,#1a0a0a);
+  /* ── 팝업 ── */
+  #popup{
+    position:absolute;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.65);
+    opacity:0;pointer-events:none;
+    transition:opacity 0.3s;
+    backdrop-filter:blur(3px);
+  }
+  #popup.open{opacity:1;pointer-events:all;}
+
+  #popup-card{
+    background:#050f0f;
+    border:1px solid rgba(94,255,235,0.25);
+    width:min(480px,90vw);
+    max-height:78vh;
+    overflow-y:auto;
     position:relative;
-    overflow:hidden;
+    transform:translateY(18px) scale(0.96);
+    transition:transform 0.35s cubic-bezier(0.34,1.5,0.64,1);
+    box-shadow:0 0 50px rgba(94,255,235,0.08), 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #popup.open #popup-card{transform:translateY(0) scale(1);}
+
+  #popup-banner{
+    width:100%;height:140px;
+    position:relative;overflow:hidden;
     display:flex;align-items:flex-end;
   }
-  #popup-banner-img{
+  #popup-banner-bg{
     position:absolute;inset:0;
     background-size:cover;background-position:center;
-    opacity:0.5;
-    filter:saturate(0.6) brightness(0.7);
   }
-  #popup-banner-overlay{
+  #popup-banner-grad{
     position:absolute;inset:0;
-    background:linear-gradient(to top, #050f0f 0%, transparent 60%);
+    background:linear-gradient(to top,#050f0f 0%,transparent 65%);
   }
-  #popup-code{
+  .banner-code{
     position:relative;z-index:1;
-    padding:0 20px 8px;
-    font-size:10px;color:var(--mint);
+    padding:0 18px 8px;
+    font-size:9px;color:var(--mint);
     letter-spacing:3px;
     text-shadow:0 0 8px var(--mint);
   }
 
-  /* 팝업 내용 */
-  #popup-body{padding:16px 20px 20px;}
+  #popup-body{padding:14px 18px 20px;}
   #popup-name{
     font-family:'Noto Serif KR',serif;
-    font-size:clamp(18px,3vw,26px);
-    color:#fff;
-    margin-bottom:4px;
+    font-size:clamp(16px,2.5vw,22px);
+    color:#fff;margin-bottom:3px;
   }
-  #popup-subtitle{
-    font-size:11px;color:#888;
-    letter-spacing:2px;
-    margin-bottom:16px;
+  #popup-sub{
+    font-size:10px;color:#555;
+    letter-spacing:2px;margin-bottom:14px;
     font-style:italic;
   }
   #popup-desc{
-    font-size:clamp(11px,1.5vw,13px);
-    color:#bbb;
-    line-height:1.8;
-    border-left:2px solid rgba(94,255,235,0.3);
-    padding-left:12px;
-    margin-bottom:16px;
+    font-size:clamp(11px,1.4vw,13px);
+    color:#aaa;line-height:1.85;
+    border-left:2px solid rgba(94,255,235,0.25);
+    padding-left:12px;margin-bottom:14px;
     font-family:'Noto Serif KR',serif;
   }
-  .popup-stat{
+  .pstat{
     display:flex;align-items:center;gap:10px;
-    background:rgba(94,255,235,0.05);
-    border:1px solid rgba(94,255,235,0.12);
-    padding:10px 14px;
-    margin-bottom:8px;
+    background:rgba(94,255,235,0.04);
+    border:1px solid rgba(94,255,235,0.1);
+    padding:9px 13px;margin-bottom:7px;
   }
-  .popup-stat-icon{font-size:18px;}
-  .popup-stat-label{
-    font-size:9px;color:var(--mint);
-    letter-spacing:2px;
-    margin-bottom:2px;
-  }
-  .popup-stat-value{
-    font-size:13px;color:#ddd;
-    font-family:'Noto Serif KR',serif;
-  }
-  .danger-low{color:#5eff8a;}
-  .danger-mid{color:#ffd75e;}
-  .danger-high{color:#ff5e5e;}
-  .danger-extreme{color:#ff00ff;}
+  .pstat-ico{font-size:16px;flex-shrink:0;}
+  .pstat-lbl{font-size:9px;color:var(--mint);letter-spacing:2px;margin-bottom:2px;}
+  .pstat-val{font-size:12px;color:#ccc;font-family:'Noto Serif KR',serif;}
+  .d-low{color:#5eff8a;}
+  .d-mid{color:#ffd75e;}
+  .d-high{color:#ff5e5e;}
+  .d-ex{color:#ff44ff;}
+  .d-unk{color:#888;}
 
-  /* 닫기 버튼 */
   #popup-close{
-    position:absolute;top:10px;right:10px;
-    width:32px;height:32px;
+    position:absolute;top:8px;right:8px;
+    width:28px;height:28px;
     background:rgba(0,0,0,0.7);
-    border:1px solid rgba(255,255,255,0.2);
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    z-index:200;
-    transition:background 0.2s;
+    border:1px solid rgba(255,255,255,0.15);
+    color:#888;font-size:14px;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    z-index:200;transition:all 0.2s;
   }
-  #popup-close:hover{background:rgba(255,94,94,0.3);}
+  #popup-close:hover{background:rgba(255,94,94,0.25);color:#fff;}
 
-  /* 스캔라인 오버레이 */
+  /* 하단 정보 바 */
+  #info-bar{
+    position:absolute;bottom:10px;left:0;right:0;
+    display:flex;justify-content:space-between;
+    padding:0 16px;
+    pointer-events:none;z-index:5;
+  }
+  .info-txt{font-size:9px;color:#2a2a2a;letter-spacing:1px;}
+
+  /* 스캔라인 */
   #scanline{
     position:fixed;inset:0;
-    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
-    z-index:9000;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+    z-index:8000;pointer-events:none;
   }
 
-  /* 하단 좌표 표시 */
-  #coords{
-    position:absolute;bottom:10px;left:14px;
-    font-size:10px;color:#333;
-    letter-spacing:1px;
-    z-index:5;
-  }
-
-  /* 범례 */
-  #legend{
-    position:absolute;bottom:10px;right:14px;
-    font-size:10px;color:#444;
-    letter-spacing:1px;
-    z-index:5;
-    text-align:right;
-  }
-  #legend div{margin-bottom:3px;}
-
-  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar{width:3px;}
   ::-webkit-scrollbar-track{background:transparent;}
-  ::-webkit-scrollbar-thumb{background:#333;}
+  ::-webkit-scrollbar-thumb{background:#222;}
 </style>
 </head>
 <body>
-
 <div id="scanline"></div>
 
-<!-- 부팅 오버레이 -->
+<!-- 부팅 -->
 <div id="boot-overlay">
   <div id="boot-lines"></div>
-  <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+  <div class="boot-bar-wrap">
+    <div class="boot-bar-label">LOADING WORLD DATA</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="bfill"></div></div>
+  </div>
 </div>
 
-<!-- 메인 지도 -->
+<!-- 메인 -->
 <div id="map-wrapper">
   <div id="map-header">
     <h2>대륙 지도</h2>
-    <span class="header-tag">WORLD_MAP.exe &nbsp;|&nbsp; 핀을 클릭하여 지역 정보를 확인하세요</span>
+    <span class="hdr-sep">|</span>
+    <span class="hdr-hint">핀을 선택하여 지역 정보를 확인하세요</span>
   </div>
   <div id="map-area">
-    <img id="map-img" src="7928.png" alt="world map" draggable="false"/>
-    <!-- 핀들은 JS로 생성 -->
-    <div id="coords">LAT: — &nbsp; LON: —</div>
-    <div id="legend">
-      <div>● 탐험 가능 구역</div>
-      <div>▲ 위험 구역</div>
+    <div id="map-img-wrap">
+      <img id="map-img" src="7928.png" alt="world map" draggable="false"/>
+      <!-- 구역 오버레이는 JS로 생성 -->
+    </div>
+
+    <div id="info-bar">
+      <span class="info-txt" id="coord-txt">LAT: — &nbsp; LON: —</span>
+      <span class="info-txt">WORLD_MAP.exe &nbsp;v1.0</span>
     </div>
 
     <!-- 팝업 -->
@@ -342,13 +359,13 @@
       <div id="popup-card">
         <button id="popup-close" onclick="closePopup()">✕</button>
         <div id="popup-banner">
-          <div id="popup-banner-img"></div>
-          <div id="popup-banner-overlay"></div>
-          <div id="popup-code">● CODE: <span id="popup-code-num">—</span></div>
+          <div id="popup-banner-bg"></div>
+          <div id="popup-banner-grad"></div>
+          <div class="banner-code">● <span id="p-code">—</span></div>
         </div>
         <div id="popup-body">
           <div id="popup-name">—</div>
-          <div id="popup-subtitle">—</div>
+          <div id="popup-sub">—</div>
           <div id="popup-desc">—</div>
           <div id="popup-stats"></div>
         </div>
@@ -358,233 +375,221 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────
-// 지점 데이터
-// ─────────────────────────────────────────
-const LOCATIONS = [
+// ── 지역 데이터 ──────────────────────────────
+// px, py = 지도 이미지 위 % 좌표
+const LOCS = [
   {
-    id: 1,
-    code: "SECTOR-01",
-    name: "요괴의 땅 / 구미의 숲",
-    subtitle: "The Fox's Haunt · Glitch-infested forest",
-    desc: "구미호와 요괴들이 서식하는 깊은 숲. 나무들 사이로 글리치가 흘러 공간이 뒤틀려 있으며, 나침반조차 정상 작동을 보장할 수 없다. 큐로의 원래 서식지와 가까운 것으로 추정되는 지역.",
-    guardian: "구미호 무리 (미확인 개체 다수)",
-    danger: "높음",
-    dangerClass: "danger-high",
-    // 지도 위 위치 (%, %) - 지도 이미지 기준
-    px: 42, py: 32,
-    bannerColor: "#0d1a0d"
+    id:1, code:"SECTOR-01",
+    name:"요괴의 땅 / 구미의 숲",
+    sub:"Fox's Haunt · Glitch-infested Forest",
+    desc:"구미호와 요괴들이 서식하는 깊은 숲. 나무들 사이로 글리치가 흘러 공간이 뒤틀려 있으며, 나침반조차 정상 작동을 보장할 수 없다. 큐로의 원래 서식지와 가까운 것으로 추정되는 지역.",
+    guardian:"구미호 무리 (미확인 개체 다수)",
+    danger:"높음", dc:"d-high",
+    px:42, py:30,
+    zoneColor:"rgba(60,180,80,0.12)", zoneW:22, zoneH:16,
+    bannerGrad:"linear-gradient(135deg,#0d1a0d,#1a1200)",
+    glitch:false
   },
   {
-    id: 2,
-    code: "SECTOR-02",
-    name: "친사의 땅 / 빛의 성역",
-    subtitle: "Angel's Domain · Sanctuary of Light",
-    desc: "천사들이 거주하는 고지대 성역. 접근 자체가 제한되어 있으며 시로(Shiro)가 간헐적으로 목격된 구역이다. 헤일로에 덮인 글리치와 관련된 이상 현상이 보고된 바 있다.",
-    guardian: "시로 (Shiro) — 간헐적 관측",
-    danger: "미지수",
-    dangerClass: "danger-extreme",
-    px: 72, py: 22,
-    bannerColor: "#0a0a1a"
+    id:2, code:"SECTOR-02",
+    name:"친사의 땅 / 빛의 성역",
+    sub:"Angel's Domain · Sanctuary of Light",
+    desc:"천사들이 거주하는 고지대 성역. 접근 자체가 제한되어 있으며 시로(Shiro)가 간헐적으로 목격된 구역이다. 헤일로에 덮인 글리치와 관련된 이상 현상이 보고된 바 있다.",
+    guardian:"시로 (Shiro) — 간헐적 관측",
+    danger:"미지수", dc:"d-unk",
+    px:72, py:20,
+    zoneColor:"rgba(120,140,255,0.1)", zoneW:20, zoneH:14,
+    bannerGrad:"linear-gradient(135deg,#080814,#0d0d20)",
+    glitch:false
   },
   {
-    id: 3,
-    code: "SECTOR-03",
-    name: "악마의 영역 / 심연의 제단",
-    subtitle: "Demon's Realm · Altar of the Abyss",
-    desc: "순수 악마 계열 존재들의 본거지. 키스네와 같은 순수 악마들이 계약을 맺는 제단이 있다고 전해진다. 깊은 곳에는 이름 없는 존재들과의 계약 흔적이 새겨져 있다.",
-    guardian: "계약의 원칙 (현상체)",
-    danger: "매우 높음",
-    dangerClass: "danger-high",
-    px: 80, py: 52,
-    bannerColor: "#1a0a0a"
+    id:3, code:"SECTOR-03",
+    name:"악마의 영역 / 심연의 제단",
+    sub:"Demon's Realm · Altar of the Abyss",
+    desc:"순수 악마 계열 존재들의 본거지. 키스네와 같은 순수 악마들이 계약을 맺는 제단이 있다고 전해진다. 깊은 곳에는 이름 없는 존재들과의 계약 흔적이 새겨져 있다.",
+    guardian:"계약의 원칙 (현상체)",
+    danger:"매우 높음", dc:"d-high",
+    px:80, py:52,
+    zoneColor:"rgba(200,60,60,0.1)", zoneW:18, zoneH:20,
+    bannerGrad:"linear-gradient(135deg,#1a0505,#0d0005)",
+    glitch:false
   },
   {
-    id: 4,
-    code: "SECTOR-04",
-    name: "변칙과 왜곡의 구역 / 릴지 구역",
-    subtitle: "Glitch Zone · Zone of Anomaly",
-    desc: "글리치 현상이 가장 극심하게 발현되는 지역. 공간 자체가 불안정하며 일반적인 물리 법칙이 적용되지 않는다. 큐로?(GLITCH_DATA)의 잔상이 관측된 유일한 구역. 접근 시 심각한 인지 왜곡 보고됨.",
-    guardian: "미식별 글리치 개체",
-    danger: "극한",
-    dangerClass: "danger-extreme",
-    px: 20, py: 55,
-    bannerColor: "#0a000a"
+    id:4, code:"SECTOR-04",
+    name:"변칙과 왜곡의 구역",
+    sub:"Glitch Zone · Anomaly District",
+    desc:"글리치 현상이 가장 극심하게 발현되는 지역. 공간 자체가 불안정하며 일반적인 물리 법칙이 적용되지 않는다. 큐로?(GLITCH_DATA)의 잔상이 관측된 유일한 구역. 접근 시 심각한 인지 왜곡 보고됨.",
+    guardian:"미식별 글리치 개체",
+    danger:"극한", dc:"d-ex",
+    px:18, py:52,
+    zoneColor:"rgba(180,0,180,0.1)", zoneW:20, zoneH:18,
+    bannerGrad:"linear-gradient(135deg,#0d000d,#050005)",
+    glitch:true
   },
   {
-    id: 5,
-    code: "SECTOR-05",
-    name: "게약의 도시",
-    subtitle: "City of Contracts · Central Hub",
-    desc: "대륙 중앙에 위치한 계약 거점 도시. 다양한 종족과 존재들이 계약을 위해 모이는 중립 지대. 악마, 천사, 인간, 요괴 모두가 공식적으로 입장 가능한 유일한 공간이다.",
-    guardian: "길드 연합 (복수 세력)",
-    danger: "보통",
-    dangerClass: "danger-mid",
-    px: 50, py: 50,
-    bannerColor: "#0a0f14"
+    id:5, code:"SECTOR-05",
+    name:"게약의 도시",
+    sub:"City of Contracts · Central Nexus",
+    desc:"대륙 중앙에 위치한 계약 거점 도시. 다양한 종족과 존재들이 계약을 위해 모이는 중립 지대. 악마, 천사, 인간, 요괴 모두가 공식적으로 입장 가능한 유일한 공간이다.",
+    guardian:"길드 연합 (복수 세력)",
+    danger:"보통", dc:"d-mid",
+    px:50, py:52,
+    zoneColor:"rgba(100,160,200,0.1)", zoneW:16, zoneH:14,
+    bannerGrad:"linear-gradient(135deg,#080f14,#0a0f18)",
+    glitch:false
   },
   {
-    id: 6,
-    code: "SECTOR-06",
-    name: "고립된 시간의 섬 / 영원의 구원",
-    subtitle: "Isle of Frozen Time · Salvation of Eternity",
-    desc: "리셋(Reset) 현상의 영향을 받지 않는 것으로 추정되는 고립된 섬. 노에인(Noein)과 관련된 기록이 일부 남아 있다. 리에(Leay)가 이곳을 방문한 기록이 존재하나 세부 내용은 삭제됨.",
-    guardian: "토리 (Tory) — 미확인",
-    danger: "불명",
-    dangerClass: "danger-mid",
-    px: 52, py: 82,
-    bannerColor: "#0a0f0a"
+    id:6, code:"SECTOR-06",
+    name:"고립된 시간의 섬 / 영원의 구원",
+    sub:"Isle of Frozen Time · Salvation of Eternity",
+    desc:"리셋(Reset) 현상의 영향을 받지 않는 것으로 추정되는 고립된 섬. 노에인(Noein)과 관련된 기록이 일부 남아 있다. 리에(Leay)가 이곳을 방문한 기록이 존재하나 세부 내용은 삭제됨.",
+    guardian:"토리 (Tory) — 미확인",
+    danger:"불명", dc:"d-unk",
+    px:52, py:83,
+    zoneColor:"rgba(60,160,80,0.1)", zoneW:18, zoneH:12,
+    bannerGrad:"linear-gradient(135deg,#080f08,#050a05)",
+    glitch:false
   }
 ];
 
-// ─────────────────────────────────────────
-// 부팅 시퀀스
-// ─────────────────────────────────────────
-const BOOT_LINES = [
+// ── 부팅 시퀀스 ─────────────────────────────
+const BOOT = [
   "INITIALIZING WORLD_MAP.exe...",
-  "LOADING SPATIAL DATABASE... OK",
-  "VERIFYING SECTOR CREDENTIALS... OK",
-  "DECRYPTING LOCATION RECORDS... OK",
-  "CALIBRATING COORDINATE SYSTEM...",
-  "WARNING: SECTOR-04 DATA PARTIALLY CORRUPTED",
-  "WARNING: GLITCH ANOMALY DETECTED IN ZONE 4",
-  "BYPASSING CORRUPTION FILTER...",
-  "RENDERING MAP LAYER... OK",
-  "PLACING LOCATION MARKERS... OK",
-  "SYSTEM READY. LAUNCHING INTERFACE.",
+  "MOUNTING SPATIAL DATABASE...",
+  "LOADING TERRAIN DATA.............. OK",
+  "LOADING SECTOR RECORDS............. OK",
+  "DECRYPTING LOCATION MARKERS........ OK",
+  "WARNING: SECTOR-04 DATA CORRUPTED",
+  "WARNING: ANOMALY ENTITIES DETECTED",
+  "BYPASSING CORRUPTION LAYER......... OK",
+  "CALIBRATING PIN OVERLAY............ OK",
+  "RENDERING MAP INTERFACE............ OK",
+  "ALL SYSTEMS READY.",
 ];
 
-async function runBoot() {
-  const container = document.getElementById("boot-lines");
-  const bar = document.getElementById("boot-bar-fill");
-
-  for (let i = 0; i < BOOT_LINES.length; i++) {
-    await sleep(90 + Math.random() * 60);
-    const el = document.createElement("div");
-    el.className = "boot-line";
-    el.style.animationDelay = "0s";
-    el.style.color = BOOT_LINES[i].startsWith("WARNING") ? "#ff5e5e" : "#0f0";
-    el.textContent = "> " + BOOT_LINES[i];
-    container.appendChild(el);
-    bar.style.width = ((i + 1) / BOOT_LINES.length * 100) + "%";
-    container.scrollTop = container.scrollHeight;
+async function runBoot(){
+  const lines = document.getElementById("boot-lines");
+  const fill  = document.getElementById("bfill");
+  for(let i=0;i<BOOT.length;i++){
+    await sleep(80+Math.random()*60);
+    const el=document.createElement("div");
+    el.className="boot-line"+(BOOT[i].startsWith("WARNING")?" boot-warn":"");
+    el.style.animationDelay="0s";
+    el.textContent="> "+BOOT[i];
+    lines.appendChild(el);
+    fill.style.width=((i+1)/BOOT.length*100)+"%";
   }
-
-  await sleep(400);
-
-  // 슬라이드 아웃
+  await sleep(350);
   document.getElementById("boot-overlay").classList.add("slide-out");
-  await sleep(850);
-  document.getElementById("boot-overlay").style.display = "none";
+  await sleep(920);
+  document.getElementById("boot-overlay").style.display="none";
   document.getElementById("map-wrapper").classList.add("visible");
   initMap();
 }
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+// ── 지도 초기화 ─────────────────────────────
+function initMap(){
+  const area   = document.getElementById("map-area");
+  const wrap   = document.getElementById("map-img-wrap");
+  const img    = document.getElementById("map-img");
 
-// ─────────────────────────────────────────
-// 지도 초기화
-// ─────────────────────────────────────────
-function initMap() {
-  const area = document.getElementById("map-area");
-  const img = document.getElementById("map-img");
+  function getWrapRect(){ return wrap.getBoundingClientRect(); }
+  function getAreaRect(){ return area.getBoundingClientRect(); }
 
-  function getImgRect() {
-    return img.getBoundingClientRect();
-  }
+  // 구역 오버레이 + 핀 생성
+  LOCS.forEach(loc=>{
+    // ── 구역 오버레이 (1번 스타일 반투명 영역)
+    const zone = document.createElement("div");
+    zone.className="zone-overlay";
+    zone.dataset.id=loc.id;
+    zone.style.background=loc.zoneColor;
+    zone.style.filter="blur(18px)";
+    area.appendChild(zone);
 
-  LOCATIONS.forEach(loc => {
-    const pin = document.createElement("div");
-    pin.className = "map-pin";
-    pin.dataset.id = loc.id;
-
-    const dot = document.createElement("div");
-    dot.className = "pin-dot";
-
-    const label = document.createElement("div");
-    label.className = "pin-label";
-    label.textContent = loc.name.split("/")[0].trim();
-
-    pin.appendChild(dot);
-    pin.appendChild(label);
+    // ── 핀
+    const pin=document.createElement("div");
+    pin.className="map-pin"+(loc.glitch?" pin-glitch":"");
+    pin.dataset.id=loc.id;
+    pin.innerHTML=`
+      <div class="pin-ring">
+        <div class="pin-outer"></div>
+        <div class="pin-inner"></div>
+      </div>
+      <div class="pin-label">${loc.name.split("/")[0].trim()}</div>
+    `;
+    pin.addEventListener("click",()=>openPopup(loc));
     area.appendChild(pin);
 
-    pin.addEventListener("click", () => openPopup(loc));
+    pin._update=function(){
+      const wr=getWrapRect();
+      const ar=getAreaRect();
+      const imgEl=img.getBoundingClientRect();
+      const x=imgEl.left-ar.left+imgEl.width*(loc.px/100);
+      const y=imgEl.top-ar.top+imgEl.height*(loc.py/100);
+      pin.style.left=x+"px";
+      pin.style.top=y+"px";
 
-    // 위치 업데이트 함수
-    pin._update = function() {
-      const r = getImgRect();
-      const areaR = area.getBoundingClientRect();
-      const x = r.left - areaR.left + r.width * (loc.px / 100);
-      const y = r.top - areaR.top + r.height * (loc.py / 100);
-      pin.style.left = x + "px";
-      pin.style.top = y + "px";
+      // 구역 오버레이 위치
+      const zw=imgEl.width*(loc.zoneW/100);
+      const zh=imgEl.height*(loc.zoneH/100);
+      zone.style.left=(x-zw/2)+"px";
+      zone.style.top=(y-zh/2)+"px";
+      zone.style.width=zw+"px";
+      zone.style.height=zh+"px";
     };
   });
 
-  function updateAllPins() {
-    area.querySelectorAll(".map-pin").forEach(p => p._update && p._update());
+  function updateAll(){
+    area.querySelectorAll(".map-pin").forEach(p=>p._update&&p._update());
   }
+  img.onload=updateAll;
+  if(img.complete)updateAll();
+  window.addEventListener("resize",updateAll);
+  setTimeout(updateAll,100);
+  setTimeout(updateAll,600);
 
-  // 이미지 로드 후 + 리사이즈 시 핀 위치 재계산
-  img.onload = updateAllPins;
-  if (img.complete) updateAllPins();
-  window.addEventListener("resize", updateAllPins);
-  setTimeout(updateAllPins, 100);
-  setTimeout(updateAllPins, 500);
-
-  // 좌표 표시 (마우스 이동)
-  area.addEventListener("mousemove", (e) => {
-    const r = getImgRect();
-    const imgR = r;
-    const rx = ((e.clientX - imgR.left) / imgR.width * 100).toFixed(1);
-    const ry = ((e.clientY - imgR.top) / imgR.height * 100).toFixed(1);
-    document.getElementById("coords").textContent = `LAT: ${ry}  LON: ${rx}`;
+  // 좌표 표시
+  area.addEventListener("mousemove",e=>{
+    const r=img.getBoundingClientRect();
+    const rx=((e.clientX-r.left)/r.width*100).toFixed(1);
+    const ry=((e.clientY-r.top)/r.height*100).toFixed(1);
+    document.getElementById("coord-txt").textContent=`LAT: ${ry}  LON: ${rx}`;
   });
 }
 
-// ─────────────────────────────────────────
-// 팝업
-// ─────────────────────────────────────────
-function openPopup(loc) {
-  document.getElementById("popup-code-num").textContent = loc.code;
-  document.getElementById("popup-name").textContent = loc.name;
-  document.getElementById("popup-subtitle").textContent = loc.subtitle;
-  document.getElementById("popup-desc").textContent = loc.desc;
-
-  const bannerImg = document.getElementById("popup-banner-img");
-  bannerImg.style.background = `${loc.bannerColor}`;
-
-  const stats = document.getElementById("popup-stats");
-  stats.innerHTML = `
-    <div class="popup-stat">
-      <div class="popup-stat-icon">👁</div>
+// ── 팝업 ─────────────────────────────────────
+function openPopup(loc){
+  document.getElementById("p-code").textContent=loc.code;
+  document.getElementById("popup-name").textContent=loc.name;
+  document.getElementById("popup-sub").textContent=loc.sub;
+  document.getElementById("popup-desc").textContent=loc.desc;
+  document.getElementById("popup-banner-bg").style.background=loc.bannerGrad;
+  document.getElementById("popup-stats").innerHTML=`
+    <div class="pstat">
+      <div class="pstat-ico">👁</div>
       <div>
-        <div class="popup-stat-label">GUARDIAN / OBSERVED ENTITY</div>
-        <div class="popup-stat-value">${loc.guardian}</div>
+        <div class="pstat-lbl">GUARDIAN / OBSERVED ENTITY</div>
+        <div class="pstat-val">${loc.guardian}</div>
       </div>
     </div>
-    <div class="popup-stat">
-      <div class="popup-stat-icon">⚠</div>
+    <div class="pstat">
+      <div class="pstat-ico">⚠</div>
       <div>
-        <div class="popup-stat-label">DANGER LEVEL</div>
-        <div class="popup-stat-value ${loc.dangerClass}">${loc.danger}</div>
+        <div class="pstat-lbl">DANGER LEVEL</div>
+        <div class="pstat-val ${loc.dc}">${loc.danger}</div>
       </div>
     </div>
   `;
-
   document.getElementById("popup").classList.add("open");
 }
-
-function closePopup() {
+function closePopup(){
   document.getElementById("popup").classList.remove("open");
 }
-
-document.getElementById("popup").addEventListener("click", (e) => {
-  if (e.target === document.getElementById("popup")) closePopup();
+document.getElementById("popup").addEventListener("click",e=>{
+  if(e.target===document.getElementById("popup"))closePopup();
 });
 
-// 시작
 runBoot();
 </script>
 </body>

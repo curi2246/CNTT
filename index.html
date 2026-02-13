@@ -614,7 +614,8 @@
             if (!mainScreen.classList.contains("hidden")) buildDirectory();
             if (currentOpenFile) {
                 const fd = fileSystem[currentLang][currentOpenFile.folder]?.[currentOpenFile.name];
-                if (fd) openFile(currentOpenFile.name, fd, currentPageIndex);
+                // 🔥 지도 타입이면 언어 변경 시 재열기 안 함
+                if (fd && !(fd.type === "map")) openFile(currentOpenFile.name, fd, currentPageIndex);
             }
         }
 

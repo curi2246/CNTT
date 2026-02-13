@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WORLD MAP</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Serif+KR:wght@400;700&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --pink:#ff5e5e;
+    --mint:#5effeb;
+    --bg:#020d0d;
+    --gold:#c9a84c;
+    --dark:#0a0a0a;
+  }
+
+  body{
+    background:var(--bg);
+    color:#fff;
+    font-family:'Share Tech Mono',monospace;
+    overflow:hidden;
+    width:100vw;height:100vh;
+  }
+
+  /* ── 부팅 오버레이 ── */
+  #boot-overlay{
+    position:fixed;inset:0;
+    background:#000;
+    z-index:9999;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:6px;
+    transition:transform 0.8s cubic-bezier(0.77,0,0.18,1);
+  }
+  #boot-overlay.slide-out{
+    transform:translateX(100%);
+  }
+  .boot-line{
+    font-size:clamp(10px,1.4vw,13px);
+    color:#0f0;
+    opacity:0;
+    white-space:nowrap;
+    animation:boot-fade 0.05s forwards;
+  }
+  @keyframes boot-fade{to{opacity:1;}}
+  .boot-bar{
+    width:min(400px,80vw);
+    height:4px;
+    background:#111;
+    margin-top:16px;
+    overflow:hidden;
+  }
+  .boot-bar-fill{
+    height:100%;
+    background:var(--mint);
+    width:0%;
+    transition:width 0.05s linear;
+    box-shadow:0 0 8px var(--mint);
+  }
+
+  /* ── 메인 레이아웃 ── */
+  #map-wrapper{
+    width:100%;height:100%;
+    display:flex;flex-direction:column;
+    opacity:0;
+    transition:opacity 0.6s ease;
+  }
+  #map-wrapper.visible{opacity:1;}
+
+  /* 헤더 */
+  #map-header{
+    padding:12px 20px;
+    border-bottom:1px solid rgba(94,255,235,0.2);
+    display:flex;align-items:center;gap:12px;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(4px);
+    flex-shrink:0;
+  }
+  #map-header h2{
+    font-family:'Noto Serif KR',serif;
+    font-size:clamp(14px,2vw,18px);
+    color:var(--mint);
+    letter-spacing:4px;
+  }
+  .header-tag{
+    font-size:10px;color:#555;
+    letter-spacing:2px;
+    margin-left:auto;
+  }
+
+  /* 지도 컨테이너 */
+  #map-area{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    cursor:grab;
+  }
+  #map-area:active{cursor:grabbing;}
+
+  /* 지도 이미지 */
+  #map-img{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:min(90vw,780px);
+    height:auto;
+    user-select:none;
+    pointer-events:none;
+    filter:brightness(0.85) saturate(1.1);
+  }
+
+  /* 핀 */
+  .map-pin{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    cursor:pointer;
+    z-index:10;
+  }
+  .pin-dot{
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--gold);
+    border:2px solid rgba(255,255,255,0.6);
+    box-shadow:0 0 0 0 rgba(201,168,76,0.6);
+    animation:pin-pulse 2s ease-in-out infinite;
+    transition:transform 0.2s, box-shadow 0.2s;
+    position:relative;
+  }
+  .pin-dot::after{
+    content:'';
+    position:absolute;
+    bottom:-6px;left:50%;transform:translateX(-50%);
+    width:0;height:0;
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:7px solid var(--gold);
+  }
+  .map-pin:hover .pin-dot{
+    transform:scale(1.4);
+    box-shadow:0 0 0 6px rgba(201,168,76,0.3);
+  }
+  @keyframes pin-pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.5);}
+    50%{box-shadow:0 0 0 8px rgba(201,168,76,0);}
+  }
+
+  /* 핀 라벨 */
+  .pin-label{
+    position:absolute;
+    bottom:28px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,0.85);
+    border:1px solid var(--gold);
+    color:var(--gold);
+    font-size:10px;
+    padding:3px 7px;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity 0.2s;
+    letter-spacing:1px;
+  }
+  .map-pin:hover .pin-label{opacity:1;}
+
+  /* ── 팝업 패널 ── */
+  #popup{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.7);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+    backdrop-filter:blur(2px);
+  }
+  #popup.open{
+    opacity:1;
+    pointer-events:all;
+  }
+  #popup-card{
+    background:#050f0f;
+    border:1px solid rgba(94,255,235,0.3);
+    width:min(520px,92vw);
+    max-height:80vh;
+    overflow-y:auto;
+    position:relative;
+    transform:translateY(20px) scale(0.97);
+    transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow:0 0 40px rgba(94,255,235,0.1), inset 0 0 40px rgba(0,0,0,0.5);
+  }
+  #popup.open #popup-card{
+    transform:translateY(0) scale(1);
+  }
+
+  /* 팝업 이미지 배너 */
+  #popup-banner{
+    width:100%;height:160px;
+    background:linear-gradient(135deg,#0a1a1a,#1a0a0a);
+    position:relative;
+    overflow:hidden;
+    display:flex;align-items:flex-end;
+  }
+  #popup-banner-img{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    opacity:0.5;
+    filter:saturate(0.6) brightness(0.7);
+  }
+  #popup-banner-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to top, #050f0f 0%, transparent 60%);
+  }
+  #popup-code{
+    position:relative;z-index:1;
+    padding:0 20px 8px;
+    font-size:10px;color:var(--mint);
+    letter-spacing:3px;
+    text-shadow:0 0 8px var(--mint);
+  }
+
+  /* 팝업 내용 */
+  #popup-body{padding:16px 20px 20px;}
+  #popup-name{
+    font-family:'Noto Serif KR',serif;
+    font-size:clamp(18px,3vw,26px);
+    color:#fff;
+    margin-bottom:4px;
+  }
+  #popup-subtitle{
+    font-size:11px;color:#888;
+    letter-spacing:2px;
+    margin-bottom:16px;
+    font-style:italic;
+  }
+  #popup-desc{
+    font-size:clamp(11px,1.5vw,13px);
+    color:#bbb;
+    line-height:1.8;
+    border-left:2px solid rgba(94,255,235,0.3);
+    padding-left:12px;
+    margin-bottom:16px;
+    font-family:'Noto Serif KR',serif;
+  }
+  .popup-stat{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(94,255,235,0.05);
+    border:1px solid rgba(94,255,235,0.12);
+    padding:10px 14px;
+    margin-bottom:8px;
+  }
+  .popup-stat-icon{font-size:18px;}
+  .popup-stat-label{
+    font-size:9px;color:var(--mint);
+    letter-spacing:2px;
+    margin-bottom:2px;
+  }
+  .popup-stat-value{
+    font-size:13px;color:#ddd;
+    font-family:'Noto Serif KR',serif;
+  }
+  .danger-low{color:#5eff8a;}
+  .danger-mid{color:#ffd75e;}
+  .danger-high{color:#ff5e5e;}
+  .danger-extreme{color:#ff00ff;}
+
+  /* 닫기 버튼 */
+  #popup-close{
+    position:absolute;top:10px;right:10px;
+    width:32px;height:32px;
+    background:rgba(0,0,0,0.7);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    z-index:200;
+    transition:background 0.2s;
+  }
+  #popup-close:hover{background:rgba(255,94,94,0.3);}
+
+  /* 스캔라인 오버레이 */
+  #scanline{
+    position:fixed;inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+    z-index:9000;pointer-events:none;
+  }
+
+  /* 하단 좌표 표시 */
+  #coords{
+    position:absolute;bottom:10px;left:14px;
+    font-size:10px;color:#333;
+    letter-spacing:1px;
+    z-index:5;
+  }
+
+  /* 범례 */
+  #legend{
+    position:absolute;bottom:10px;right:14px;
+    font-size:10px;color:#444;
+    letter-spacing:1px;
+    z-index:5;
+    text-align:right;
+  }
+  #legend div{margin-bottom:3px;}
+
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#333;}
+</style>
+</head>
+<body>
+
+<div id="scanline"></div>
+
+<!-- 부팅 오버레이 -->
+<div id="boot-overlay">
+  <div id="boot-lines"></div>
+  <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+</div>
+
+<!-- 메인 지도 -->
+<div id="map-wrapper">
+  <div id="map-header">
+    <h2>대륙 지도</h2>
+    <span class="header-tag">WORLD_MAP.exe &nbsp;|&nbsp; 핀을 클릭하여 지역 정보를 확인하세요</span>
+  </div>
+  <div id="map-area">
+    <img id="map-img" src="7928.png" alt="world map" draggable="false"/>
+    <!-- 핀들은 JS로 생성 -->
+    <div id="coords">LAT: — &nbsp; LON: —</div>
+    <div id="legend">
+      <div>● 탐험 가능 구역</div>
+      <div>▲ 위험 구역</div>
+    </div>
+
+    <!-- 팝업 -->
+    <div id="popup">
+      <div id="popup-card">
+        <button id="popup-close" onclick="closePopup()">✕</button>
+        <div id="popup-banner">
+          <div id="popup-banner-img"></div>
+          <div id="popup-banner-overlay"></div>
+          <div id="popup-code">● CODE: <span id="popup-code-num">—</span></div>
+        </div>
+        <div id="popup-body">
+          <div id="popup-name">—</div>
+          <div id="popup-subtitle">—</div>
+          <div id="popup-desc">—</div>
+          <div id="popup-stats"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// 지점 데이터
+// ─────────────────────────────────────────
+const LOCATIONS = [
+  {
+    id: 1,
+    code: "SECTOR-01",
+    name: "요괴의 땅 / 구미의 숲",
+    subtitle: "The Fox's Haunt · Glitch-infested forest",
+    desc: "구미호와 요괴들이 서식하는 깊은 숲. 나무들 사이로 글리치가 흘러 공간이 뒤틀려 있으며, 나침반조차 정상 작동을 보장할 수 없다. 큐로의 원래 서식지와 가까운 것으로 추정되는 지역.",
+    guardian: "구미호 무리 (미확인 개체 다수)",
+    danger: "높음",
+    dangerClass: "danger-high",
+    // 지도 위 위치 (%, %) - 지도 이미지 기준
+    px: 42, py: 32,
+    bannerColor: "#0d1a0d"
+  },
+  {
+    id: 2,
+    code: "SECTOR-02",
+    name: "친사의 땅 / 빛의 성역",
+    subtitle: "Angel's Domain · Sanctuary of Light",
+    desc: "천사들이 거주하는 고지대 성역. 접근 자체가 제한되어 있으며 시로(Shiro)가 간헐적으로 목격된 구역이다. 헤일로에 덮인 글리치와 관련된 이상 현상이 보고된 바 있다.",
+    guardian: "시로 (Shiro) — 간헐적 관측",
+    danger: "미지수",
+    dangerClass: "danger-extreme",
+    px: 72, py: 22,
+    bannerColor: "#0a0a1a"
+  },
+  {
+    id: 3,
+    code: "SECTOR-03",
+    name: "악마의 영역 / 심연의 제단",
+    subtitle: "Demon's Realm · Altar of the Abyss",
+    desc: "순수 악마 계열 존재들의 본거지. 키스네와 같은 순수 악마들이 계약을 맺는 제단이 있다고 전해진다. 깊은 곳에는 이름 없는 존재들과의 계약 흔적이 새겨져 있다.",
+    guardian: "계약의 원칙 (현상체)",
+    danger: "매우 높음",
+    dangerClass: "danger-high",
+    px: 80, py: 52,
+    bannerColor: "#1a0a0a"
+  },
+  {
+    id: 4,
+    code: "SECTOR-04",
+    name: "변칙과 왜곡의 구역 / 릴지 구역",
+    subtitle: "Glitch Zone · Zone of Anomaly",
+    desc: "글리치 현상이 가장 극심하게 발현되는 지역. 공간 자체가 불안정하며 일반적인 물리 법칙이 적용되지 않는다. 큐로?(GLITCH_DATA)의 잔상이 관측된 유일한 구역. 접근 시 심각한 인지 왜곡 보고됨.",
+    guardian: "미식별 글리치 개체",
+    danger: "극한",
+    dangerClass: "danger-extreme",
+    px: 20, py: 55,
+    bannerColor: "#0a000a"
+  },
+  {
+    id: 5,
+    code: "SECTOR-05",
+    name: "게약의 도시",
+    subtitle: "City of Contracts · Central Hub",
+    desc: "대륙 중앙에 위치한 계약 거점 도시. 다양한 종족과 존재들이 계약을 위해 모이는 중립 지대. 악마, 천사, 인간, 요괴 모두가 공식적으로 입장 가능한 유일한 공간이다.",
+    guardian: "길드 연합 (복수 세력)",
+    danger: "보통",
+    dangerClass: "danger-mid",
+    px: 50, py: 50,
+    bannerColor: "#0a0f14"
+  },
+  {
+    id: 6,
+    code: "SECTOR-06",
+    name: "고립된 시간의 섬 / 영원의 구원",
+    subtitle: "Isle of Frozen Time · Salvation of Eternity",
+    desc: "리셋(Reset) 현상의 영향을 받지 않는 것으로 추정되는 고립된 섬. 노에인(Noein)과 관련된 기록이 일부 남아 있다. 리에(Leay)가 이곳을 방문한 기록이 존재하나 세부 내용은 삭제됨.",
+    guardian: "토리 (Tory) — 미확인",
+    danger: "불명",
+    dangerClass: "danger-mid",
+    px: 52, py: 82,
+    bannerColor: "#0a0f0a"
+  }
+];
+
+// ─────────────────────────────────────────
+// 부팅 시퀀스
+// ─────────────────────────────────────────
+const BOOT_LINES = [
+  "INITIALIZING WORLD_MAP.exe...",
+  "LOADING SPATIAL DATABASE... OK",
+  "VERIFYING SECTOR CREDENTIALS... OK",
+  "DECRYPTING LOCATION RECORDS... OK",
+  "CALIBRATING COORDINATE SYSTEM...",
+  "WARNING: SECTOR-04 DATA PARTIALLY CORRUPTED",
+  "WARNING: GLITCH ANOMALY DETECTED IN ZONE 4",
+  "BYPASSING CORRUPTION FILTER...",
+  "RENDERING MAP LAYER... OK",
+  "PLACING LOCATION MARKERS... OK",
+  "SYSTEM READY. LAUNCHING INTERFACE.",
+];
+
+async function runBoot() {
+  const container = document.getElementById("boot-lines");
+  const bar = document.getElementById("boot-bar-fill");
+
+  for (let i = 0; i < BOOT_LINES.length; i++) {
+    await sleep(90 + Math.random() * 60);
+    const el = document.createElement("div");
+    el.className = "boot-line";
+    el.style.animationDelay = "0s";
+    el.style.color = BOOT_LINES[i].startsWith("WARNING") ? "#ff5e5e" : "#0f0";
+    el.textContent = "> " + BOOT_LINES[i];
+    container.appendChild(el);
+    bar.style.width = ((i + 1) / BOOT_LINES.length * 100) + "%";
+    container.scrollTop = container.scrollHeight;
+  }
+
+  await sleep(400);
+
+  // 슬라이드 아웃
+  document.getElementById("boot-overlay").classList.add("slide-out");
+  await sleep(850);
+  document.getElementById("boot-overlay").style.display = "none";
+  document.getElementById("map-wrapper").classList.add("visible");
+  initMap();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─────────────────────────────────────────
+// 지도 초기화
+// ─────────────────────────────────────────
+function initMap() {
+  const area = document.getElementById("map-area");
+  const img = document.getElementById("map-img");
+
+  function getImgRect() {
+    return img.getBoundingClientRect();
+  }
+
+  LOCATIONS.forEach(loc => {
+    const pin = document.createElement("div");
+    pin.className = "map-pin";
+    pin.dataset.id = loc.id;
+
+    const dot = document.createElement("div");
+    dot.className = "pin-dot";
+
+    const label = document.createElement("div");
+    label.className = "pin-label";
+    label.textContent = loc.name.split("/")[0].trim();
+
+    pin.appendChild(dot);
+    pin.appendChild(label);
+    area.appendChild(pin);
+
+    pin.addEventListener("click", () => openPopup(loc));
+
+    // 위치 업데이트 함수
+    pin._update = function() {
+      const r = getImgRect();
+      const areaR = area.getBoundingClientRect();
+      const x = r.left - areaR.left + r.width * (loc.px / 100);
+      const y = r.top - areaR.top + r.height * (loc.py / 100);
+      pin.style.left = x + "px";
+      pin.style.top = y + "px";
+    };
+  });
+
+  function updateAllPins() {
+    area.querySelectorAll(".map-pin").forEach(p => p._update && p._update());
+  }
+
+  // 이미지 로드 후 + 리사이즈 시 핀 위치 재계산
+  img.onload = updateAllPins;
+  if (img.complete) updateAllPins();
+  window.addEventListener("resize", updateAllPins);
+  setTimeout(updateAllPins, 100);
+  setTimeout(updateAllPins, 500);
+
+  // 좌표 표시 (마우스 이동)
+  area.addEventListener("mousemove", (e) => {
+    const r = getImgRect();
+    const imgR = r;
+    const rx = ((e.clientX - imgR.left) / imgR.width * 100).toFixed(1);
+    const ry = ((e.clientY - imgR.top) / imgR.height * 100).toFixed(1);
+    document.getElementById("coords").textContent = `LAT: ${ry}  LON: ${rx}`;
+  });
+}
+
+// ─────────────────────────────────────────
+// 팝업
+// ─────────────────────────────────────────
+function openPopup(loc) {
+  document.getElementById("popup-code-num").textContent = loc.code;
+  document.getElementById("popup-name").textContent = loc.name;
+  document.getElementById("popup-subtitle").textContent = loc.subtitle;
+  document.getElementById("popup-desc").textContent = loc.desc;
+
+  const bannerImg = document.getElementById("popup-banner-img");
+  bannerImg.style.background = `${loc.bannerColor}`;
+
+  const stats = document.getElementById("popup-stats");
+  stats.innerHTML = `
+    <div class="popup-stat">
+      <div class="popup-stat-icon">👁</div>
+      <div>
+        <div class="popup-stat-label">GUARDIAN / OBSERVED ENTITY</div>
+        <div class="popup-stat-value">${loc.guardian}</div>
+      </div>
+    </div>
+    <div class="popup-stat">
+      <div class="popup-stat-icon">⚠</div>
+      <div>
+        <div class="popup-stat-label">DANGER LEVEL</div>
+        <div class="popup-stat-value ${loc.dangerClass}">${loc.danger}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("popup").classList.add("open");
+}
+
+function closePopup() {
+  document.getElementById("popup").classList.remove("open");
+}
+
+document.getElementById("popup").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("popup")) closePopup();
+});
+
+// 시작
+runBoot();
+</script>
+</body>
+</html>

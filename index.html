@@ -127,6 +127,193 @@
             color: #fff;
         }
 
+        /* ====== ⏳ FUTURE / PAST 박스 ====== */
+        #timeline-boxes {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 28px;
+            gap: 12px;
+            display: flex;
+            flex-direction: row;
+        }
+        .timeline-box {
+            flex: 1;
+            border: 1px solid;
+            padding: 16px 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-align: center;
+            transition: all 0.25s;
+            background: rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+        }
+        .timeline-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: currentColor;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .timeline-box:hover::before { opacity: 0.07; }
+        .timeline-box-label {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 4px;
+        }
+        .timeline-box-sub { opacity: 0.6; font-size: 10px; letter-spacing: 1px; }
+        #box-future {
+            border-color: #ff5e5e;
+            color: #ff5e5e;
+            box-shadow: 0 0 8px rgba(255,94,94,0.3);
+        }
+        #box-future:hover {
+            box-shadow: 0 0 20px rgba(255,94,94,0.6);
+            border-color: #ff8888;
+        }
+        #box-past {
+            border-color: var(--neon-mint);
+            color: var(--neon-mint);
+            box-shadow: 0 0 8px rgba(94,255,235,0.2);
+        }
+        #box-past:hover {
+            box-shadow: 0 0 20px rgba(94,255,235,0.5);
+        }
+
+        /* ====== 🕐 시계 오버레이 ====== */
+        #clock-overlay {
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 9000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #clock-overlay.active { display: flex; }
+
+        /* 아날로그 시계 */
+        #clock-svg-wrap {
+            position: relative;
+            width: 240px; height: 240px;
+        }
+        .clock-face {
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3), inset 0 0 20px rgba(0,0,0,0.8);
+            background: radial-gradient(circle, #0a0a0a 0%, #000 100%);
+            overflow: hidden;
+        }
+        .clock-center {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #fff;
+            z-index: 10;
+            box-shadow: 0 0 8px #fff;
+        }
+        .clock-hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            border-radius: 2px 2px 0 0;
+        }
+        #hand-hour {
+            width: 5px; height: 65px;
+            background: #fff;
+            margin-left: -2.5px;
+            transform: rotate(0deg);
+        }
+        #hand-min {
+            width: 3px; height: 88px;
+            background: #ccc;
+            margin-left: -1.5px;
+            transform: rotate(0deg);
+        }
+        #hand-sec {
+            width: 2px; height: 95px;
+            background: #ff4444;
+            margin-left: -1px;
+            transform: rotate(0deg);
+        }
+        /* 시계 눈금 */
+        .clock-tick {
+            position: absolute;
+            top: 8px; left: 50%;
+            width: 2px; height: 10px;
+            background: #555;
+            margin-left: -1px;
+            transform-origin: 1px 112px;
+        }
+        .clock-tick.major {
+            height: 16px; background: #999; width: 3px; margin-left: -1.5px;
+        }
+
+        /* 시계 파괴 효과 */
+        #clock-crack-layer {
+            position: absolute; inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+        #clock-crack-layer.visible { opacity: 1; }
+
+        /* 시계 아래 텍스트 */
+        #clock-status-text {
+            margin-top: 28px;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: #444;
+        }
+
+        /* 깨짐 파편 */
+        .crack-line {
+            position: absolute;
+            background: rgba(255,255,255,0.8);
+            transform-origin: 0 0;
+        }
+
+        /* 화면 전체 깨짐 오버레이 */
+        #screen-shatter {
+            position: fixed; inset: 0;
+            z-index: 9100;
+            pointer-events: none;
+            display: none;
+        }
+        #screen-shatter.active { display: block; }
+        #screen-shatter canvas {
+            width: 100%; height: 100%;
+        }
+
+        /* 페이드아웃 */
+        #fade-out-overlay {
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 9200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease-in;
+        }
+        #fade-out-overlay.fading { opacity: 1; pointer-events: all; }
+
+        @keyframes clock-shatter {
+            0%   { transform: translate(0,0) rotate(0deg); filter: brightness(2); }
+            15%  { transform: translate(-4px, 3px) rotate(-2deg); filter: hue-rotate(90deg) brightness(3); }
+            30%  { transform: translate(5px, -4px) rotate(2deg); filter: hue-rotate(180deg); }
+            45%  { transform: translate(-3px, 5px) rotate(-1deg); filter: brightness(0.5); }
+            60%  { transform: translate(4px, -3px) rotate(3deg); filter: hue-rotate(270deg) brightness(2); }
+            75%  { transform: translate(-5px, 2px) rotate(-2deg); filter: invert(1); }
+            100% { transform: translate(0,0); filter: brightness(1); }
+        }
+
         /* 🔥 좌우 화살표 네비게이션 */
         .nav-arrow {
             position: absolute;
@@ -346,8 +533,8 @@
 
     <div class="bg-sigil">⟡</div>
 
-    <audio id="main-bgm" loop src="bgm.mp3.mp3"></audio>
-    <audio id="glitch-bgm" loop src="hidden.mp3.mp3"></audio>
+    <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
+    <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
 
     <div id="music-info-box">
@@ -376,6 +563,18 @@
             <div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
             <div class="terminal"><div id="terminal-text"></div></div>
             <div class="directory" id="directory"></div>
+
+            <!-- ⏳ FUTURE / PAST 박스 -->
+            <div id="timeline-boxes" style="display:none;">
+                <div class="timeline-box" id="box-future" onclick="triggerFuture()">
+                    <div class="timeline-box-label">FUTURE</div>
+                    <div class="timeline-box-sub">ACCESS TIMELINE DATA</div>
+                </div>
+                <div class="timeline-box" id="box-past" onclick="triggerPast()">
+                    <div class="timeline-box-label">PAST</div>
+                    <div class="timeline-box-sub">RESTORE ARCHIVE</div>
+                </div>
+            </div>
         </div>
 
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
@@ -392,6 +591,42 @@
             <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer; margin-bottom: 50px;">← BACK</button>
         </div>
     </div>
+
+    <!-- 🕐 시계 오버레이 -->
+    <div id="clock-overlay">
+        <div id="clock-svg-wrap">
+            <div class="clock-face" id="clock-face">
+                <!-- 눈금은 JS로 생성 -->
+                <div class="clock-hand" id="hand-hour"></div>
+                <div class="clock-hand" id="hand-min"></div>
+                <div class="clock-hand" id="hand-sec"></div>
+                <div class="clock-center"></div>
+                <!-- 균열 레이어 -->
+                <div id="clock-crack-layer">
+                    <svg width="240" height="240" style="position:absolute;inset:0;">
+                        <line x1="120" y1="120" x2="60" y2="30" stroke="white" stroke-width="1.5" opacity="0.9"/>
+                        <line x1="120" y1="120" x2="200" y2="50" stroke="white" stroke-width="1" opacity="0.8"/>
+                        <line x1="120" y1="120" x2="220" y2="180" stroke="white" stroke-width="1.5" opacity="0.9"/>
+                        <line x1="120" y1="120" x2="40" y2="190" stroke="white" stroke-width="1" opacity="0.7"/>
+                        <line x1="120" y1="120" x2="140" y2="5" stroke="white" stroke-width="0.8" opacity="0.6"/>
+                        <line x1="60" y1="30" x2="20" y2="10" stroke="white" stroke-width="0.8" opacity="0.7"/>
+                        <line x1="200" y1="50" x2="235" y2="20" stroke="white" stroke-width="0.7" opacity="0.6"/>
+                        <line x1="220" y1="180" x2="240" y2="230" stroke="white" stroke-width="1" opacity="0.8"/>
+                        <line x1="40" y1="190" x2="10" y2="235" stroke="white" stroke-width="0.8" opacity="0.7"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div id="clock-status-text">SYSTEM CLOCK ACTIVE</div>
+    </div>
+
+    <!-- 💥 화면 파괴 오버레이 -->
+    <div id="screen-shatter">
+        <canvas id="shatter-canvas"></canvas>
+    </div>
+
+    <!-- 페이드아웃 -->
+    <div id="fade-out-overlay"></div>
 
     <!-- 🗺️ 지도 부팅 오버레이 -->
     <div id="map-boot-overlay" style="display:none;">
@@ -423,15 +658,28 @@
     </div>
 
     <script>
-        const PASSWORD = "cnttofall";
+        const PASSWORD = "1234";
         let isGlitchUnlocked = false; 
-        let inputBuffer = ""; 
         let currentFileIndex = 0;
         let currentFileList = [];
         let currentFolder = "";
         let currentLang = "en";
         let currentOpenFile = null;
         let currentPageIndex = 0; // 🔥 추가
+
+        // broken_index에서 돌아왔을 때 자동 로그인
+        if (sessionStorage.getItem("returnedFromBroken") === "1") {
+            sessionStorage.removeItem("returnedFromBroken");
+            window.addEventListener("DOMContentLoaded", () => {
+                document.getElementById("auth-screen").classList.add("hidden");
+                document.getElementById("main-screen").classList.remove("hidden");
+                const bgm = document.getElementById("main-bgm");
+                if (bgm) bgm.play().catch(() => {});
+                document.getElementById("music-info-box").style.display = "block";
+                buildDirectory();
+                startMainTyping();
+            });
+        }
 
         const uiText = {
             en: {
@@ -548,10 +796,10 @@
                             "[ 큐로 — 추가 데이터 ]\n\n더미 데이터"
                         ]
                     },
-                    "Curo_REAL_Hidden_Content": "명칭: 큐로?(Curo?) [GLITCH_DATA]\n\n시간의 어느 중간지점에서 부정적인 감정과 글리치가 서로 폭주를 일으켜 나타난 존재로 모습은 큐로의 형태를 하고 있으나\n눈 부분이 글리치로 뒤덮혀 있으며 매우 광기적인 성격을 띈다 가장 큰 예시로 항상 웃고 있으며 중간마다 삐- 소리와 함께 블루 스크린으로 변하는데 그 때 어디서 나타날지 모르는 상태가 된다.\n목소리는 매우 이상해지며 얇은 목소리, 굵은 목소리 등등 나눌 수 없으며 항상 제각각으로 목소리가 나온다.\n\n[능력]\n기본보다 매우 빠른 속도로 움직이며 글리치를 일으켜 자신의 분신을 만들기도 한다. 이후 능력들은 동일.\n\n딱 한번만 등장했으며 아이든을 상대한 이후 눈 부분에 있던 글리치가 완전히 깨지며 정신을 잃은 이후 다시는 등장 한 적이 없다. 하지만 이후 !#m'>y:ung*ho로 변모했으며 자세한 설명은 입력하여 직접 찾아보는 것을 추천한다.",
+                    "Curo_REAL_Hidden_Content": "명칭: 큐로?(Curo?) [GLITCH_DATA]\n\n시간의 어느 중간지점에서 부정적인 감정과 글리치가 서로 폭주를 일으켜 나타난 존재로 모습은 큐로의 형태를 하고 있으나\n눈 부분이 글리치로 뒤덮혀 있으며 매우 광기적인 성격을 띈다 가장 큰 예시로 항상 웃고 있으며 중간마다 삐- 소리와 함께 블루 스크린으로 변하는데 그 때 어디서 나타날지 모르는 상태가 된다.\n목소리는 매우 이상해지며 얇은 목소리, 굵은 목소라 등등 나눌 수 없으며 항상 제각각으로 목소리가 나온다.\n\n[능력]\n기본보다 매우 빠른 속도로 움직이며 글리치를 일으켜 자신의 분신을 만들기도 한다. 이후 능력들은 동일.\n\n딱 한번만 등장했으며 아이든을 상대한 이후 눈 부분에 있던 글리치가 완전히 깨지며 정신을 잃은 이후 다시는 등장 한 적이 없다. 하지만 이후 !#m'>y:ung*ho로 변모했으며 자세한 설명은 입력하여 직접 찾아보는 것을 추천한다.",
                     "Kisune_Full_Archive.txt": {
                         pages: [
-                            "명칭: 키스네(Kisune)\n\n[종족]\n악마(pure demon)\n\n[성별]\n여성\n\n[프로필]\n키: 158cm\n몸무게: 46.6kg\n성격: 악마라는 것이 무색하게 매우 친절하지만 악마는 악마인지라 살생을 하지 말아야할 이유를 모르며 무조건 자기가 정당하다는 자기 주장이 강한 성격\n외형: 흰색 반팔을 입고 있으며 그 위에 아주 약간 밝은 검정 후드집업을 입고 다니고 있다. 다른 일행에 비해 가장 패션이 다양하며 수영복, 유카타 등등 다양한 패션을 보여준 적이 있다.\n\n[능력]\n다른 악마들보다 더욱 뛰어난 계약 체결 능력을 가지고 있으며 그 계약의 여파로 계약자의 능력을 일부분 가져가 자신이 사용 하는 것이 가능하다. 예를 들어 큐로의 포탈과 블래스터를 가져다 쓸 수는 있지만 위력은 약해진 상태로 나오거나 포탈의 거리가 매우 짧아진 상태로 소환이 가능해지는 것 등등 본인의 역량이 강하면 강할 수록 그 능력들도 본 위력을 발휘할 수 있게 된다.또한 어느 공간을 찢어 자신만의 공간을 오갈 수 있는 것으로 알려져 있으며 그 내부는 평범한 원룸으로 추정된다. 거기서 식사와 잠을 해결하는 것으로 보이며 다른 인물들도 초대하여 들어오는 것이 가능한 것으로 보아 대부분에 생활을 이 시공간에서 보내는 것으로 추정된다.\n\n[일행]\n큐로(curo), 키스네(Kisune), 리에(Leay) 이 세명이서만 다니는 것으로 보이며 특히 큐로와 자주 붙어다니고 애정행각을 하는 것을 보면은 큐로와 연인 사이인 것으로 보인다. 리에와는 매우 친하게 지내며 자주 장난을 주고받는 사이로 보이며 가끔 두명이서만 놀러 다니는 것이 보인다.\n\n만난 적 있음, 혹은 접점이 있던 존재들]\n아레인(Arein), 토리(tory), 시로(shiro), 실크(silk), 애키스(ekis), 알레프(Aleph), 키스네 코든(Kisune_Corden) 등등 다양한 인물들과 만나며 특히 키스네 코든과는 서로 어색한 사이를 유지 중이다. 다른 시간선에서 나타난 자신이란 사실에 처음에는 부정하며 살아가려 했지만 큐로의 말과 리에의 설득으로 어느정도 이해하며 같은 시간선에서 지내는 것을 별로 크게 신경쓰지 않고 나름 좋아지려 노력하는 모습이 보인다.\n\n[현재 가지고 있는 병]\n 키스네 코든, 자기 자신이 같은 시간선에 두명이 존재하는 오류 떄문에 부정적인 감정이 격해지면 격해질 수록 몸이 글리치가 일어나며 숨을 쉬기 어려워할 정도로 고통에 시달리는 것으로 보인다. 하지만 가끔씩 아무 이유 없이 갑자기 발병하는 일도 있지만 매우 드물며 키스네 본인도 이를 인지하고 최대한 인내심을 가지고 긍정적으로 살아가고 있다.",
+                            "명칭: 키스네(Kisune)\n\n[종족]\n악마(pure demon)\n\n[성별]\n여성\n\n[프로필\n키: 158cm\n몸무게: 46.6kg\n성격: 악마라는 것이 무색하게 매우 친절하지만 악마는 악마인지라 살생을 하지 말아야할 이유를 모르며 무조건 자기가 정당하다는 자기 주장이 강한 성격\n외형: 흰색 반팔을 입고 있으며 그 위에 아주 약간 밝은 검정 후드집업을 입고 다니고 있다. 다른 일행에 비해 가장 패션이 다양하며 수영복, 유카타 등등 다양한 패션을 보여준 적이 있다.\n\n[능력]\n다른 악마들보다 더욱 뛰어난 계약 체결 능력을 가지고 있으며 그 계약의 여파로 계약자의 능력을 일부분 가져가 자신이 사용 하는 것이 가능하다. 예를 들어 큐로의 포탈과 블래스터를 가져다 쓸 수는 있지만 위력은 약해진 상태로 나오거나 포탈의 거리가 매우 짧아진 상태로 소환이 가능해지는 것 등등 본인의 역량이 강하면 강할 수록 그 능력들도 본 위력을 발휘할 수 있게 된다.또한 어느 공간을 찢어 자신만의 공간을 오갈 수 있는 것으로 알려져 있으며 그 내부는 평범한 원룸으로 추정된다. 거기서 식사와 잠을 해결하는 것으로 보이며 다른 인물들도 초대하여 들어오는 것이 가능한 것으로 보아 대부분에 생활을 이 시공간에서 보내는 것으로 추정된다.\n\n[일행]\n큐로(curo), 키스네(Kisune), 리에(Leay) 이 세명이서만 다니는 것으로 보이며 특히 큐로와 자주 붙어다니고 애정행각을 하는 것을 보면은 큐로와 연인 사이인 것으로 보인다. 리에와는 매우 친하게 지내며 자주 장난을 주고받는 사이로 보이며 가끔 두명이서만 놀러 다니는 것이 보인다.\n\n만난 적 있음, 혹은 접점이 있던 존재들]\n아레인(Arein), 토리(tory), 시로(shiro), 실크(silk), 애키스(ekis), 알레프(Aleph), 키스네 코든(Kisune_Corden) 등등 다양한 인물들과 만나며 특히 키스네 코든과는 서로 어색한 사이를 유지 중이다. 다른 시간선에서 나타난 자신이란 사실에 처음에는 부정하며 살아가려 했지만 큐로의 말과 리에의 설득으로 어느정도 이해하며 같은 시간선에서 지내는 것을 별로 크게 신경쓰지 않고 나름 좋아지려 노력하는 모습이 보인다.\n\n[현재 가지고 있는 병]\n 키스네 코든, 자기 자신이 같은 시간선에 두명이 존재하는 오류 떄문에 부정적인 감정이 격해지면 격해질 수록 몸이 글리치가 일어나며 숨을 쉬기 어려워할 정도로 고통에 시달리는 것으로 보인다. 하지만 가끔씩 아무 이유 없이 갑자기 발병하는 일도 있지만 매우 드물며 키스네 본인도 이를 인지하고 최대한 인내심을 가지고 긍정적으로 살아가고 있다.",
                             "[ 키스네 — 추가 데이터 ]\n\n더미 데이터"
                         ]
                     },
@@ -566,7 +814,7 @@
                 },
                 "The enemy": {
                     "enemies.txt": "여태까지 큐로, 키스네, 리에가 상대하던 적들, 혹은 적 이였던 존재들을 나열한 파일이다. 각각 애키스(ekis), 키스네 코든(kisune_corden), 알레프(aleph), 아이든(aiden)이 있다. 그들이 상대, 혹은 겪었던 현상과 자연재해들은 전부 World 파일에 있으니 참고.",
-                    "Ekis_Full_Archive.txt": "명칭: 애키스(Ekis)\n\n[종족]\n???\n\n[성별]\n\n[프로필]\n키: 190cm\n몸무게: 84kg\n성격: 어디로 튈지 모르는 미치광이 싸이코 패스 뭐든 실험에 일종이라고 하며 정당화시키고 비인류적인 것들조차 감미롭게 보는 미친놈\n\n[능력]\n계약으로 인해 본인의 몸을 강제로 뒤틀리게 만들어 원거리 공격을 하거나 손을 자유 자제로 변형시켜 속박하는데도 사용하기도 하며 자기 자신에 대한 생명을 지워버린다는 대가로 세상을 리셋 시켜버린다는 미친 계약 활용 능력을 가지고 있다.\n\n외형: ",
+                    "Ekis_Full_Archive.txt": "명칭: 애키스(Ekis)\n\n[종족]\n???\n\n[성별]\n\n[프로필]\n키: 190cm\n몸무게: 84kg\n성격: 어디로 튈지 모르는 미치광이 싸이코 패스 뭐든 실험에 일종이라고 하며 정당화시키고 비인류적인 것들조차 감미롭게 보는 미친놈",
                     "Aleph_Full_Archive.txt": "더미 데이터",
                     "Aiden_Full_Archive.txt": "더미 데이터"
                 },
@@ -665,7 +913,15 @@
             const lines = [t.typingLine1, t.typingLine2];
             let lIdx = 0, cIdx = 0;
             function type() {
-                if(lIdx >= lines.length) return;
+                if(lIdx >= lines.length) {
+                    // 타이핑 완료 후 timeline-boxes 표시
+                    const boxes = document.getElementById("timeline-boxes");
+                    boxes.style.display = "flex";
+                    boxes.style.opacity = "0";
+                    boxes.style.transition = "opacity 0.8s";
+                    setTimeout(() => { boxes.style.opacity = "1"; }, 100);
+                    return;
+                }
                 let p = term.querySelectorAll("p")[lIdx];
                 if(!p) { p = document.createElement("p"); term.appendChild(p); }
                 p.textContent = lines[lIdx].slice(0, cIdx + 1); cIdx++;
@@ -1232,6 +1488,236 @@
             const mapWrap = document.getElementById("map-viewer-wrap");
             mapWrap.classList.remove("open");
             setTimeout(() => { mapWrap.style.display = "none"; }, 700);
+        }
+
+        // ============================================================
+        // ⏳ FUTURE / PAST 시계 시스템
+        // ============================================================
+
+        // 시계 눈금 생성
+        function buildClockTicks() {
+            const face = document.getElementById("clock-face");
+            for (let i = 0; i < 60; i++) {
+                const tick = document.createElement("div");
+                tick.className = "clock-tick" + (i % 5 === 0 ? " major" : "");
+                tick.style.transform = `rotate(${i * 6}deg)`;
+                face.insertBefore(tick, face.firstChild);
+            }
+        }
+        buildClockTicks();
+
+        // Web Audio 사운드 생성 유틸
+        function makeAudioCtx() {
+            return new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // FUTURE 사운드: 묵직한 킥 + 글리치 버즈
+        function playFutureSound() {
+            try {
+                const ctx = makeAudioCtx();
+                // 저음 킥
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = "sine"; osc.frequency.setValueAtTime(80, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.start(); osc.stop(ctx.currentTime + 0.5);
+                // 고음 글리치
+                setTimeout(() => {
+                    const ctx2 = makeAudioCtx();
+                    const buf = ctx2.createBuffer(1, ctx2.sampleRate * 0.15, ctx2.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+                    const src = ctx2.createBufferSource();
+                    const g2 = ctx2.createGain();
+                    src.buffer = buf; src.connect(g2); g2.connect(ctx2.destination);
+                    g2.gain.setValueAtTime(0.6, ctx2.currentTime);
+                    g2.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.15);
+                    src.start(); src.stop(ctx2.currentTime + 0.15);
+                }, 80);
+            } catch(e) {}
+        }
+
+        // PAST 사운드: 빈티지 카세트 클릭 + 저음 드론
+        function playPastSound() {
+            try {
+                const ctx = makeAudioCtx();
+                // 클릭
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 500);
+                const src = ctx.createBufferSource();
+                const g = ctx.createGain();
+                src.buffer = buf; src.connect(g); g.connect(ctx.destination);
+                g.gain.setValueAtTime(0.8, ctx.currentTime);
+                src.start();
+                // 드론
+                setTimeout(() => {
+                    const ctx2 = makeAudioCtx();
+                    const osc = ctx2.createOscillator();
+                    const g2 = ctx2.createGain();
+                    osc.connect(g2); g2.connect(ctx2.destination);
+                    osc.type = "sawtooth"; osc.frequency.setValueAtTime(55, ctx2.currentTime);
+                    g2.gain.setValueAtTime(0.3, ctx2.currentTime);
+                    g2.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + 0.8);
+                    osc.start(); osc.stop(ctx2.currentTime + 0.8);
+                }, 30);
+            } catch(e) {}
+        }
+
+        // 시계 파괴 사운드
+        function playShatterSound() {
+            try {
+                const ctx = makeAudioCtx();
+                // 유리 깨지는 노이즈
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < data.length; i++) {
+                    const decay = Math.exp(-i / (ctx.sampleRate * 0.08));
+                    data[i] = (Math.random() * 2 - 1) * decay;
+                }
+                const src = ctx.createBufferSource();
+                const g = ctx.createGain();
+                const filter = ctx.createBiquadFilter();
+                filter.type = "highpass"; filter.frequency.value = 2000;
+                src.buffer = buf; src.connect(filter); filter.connect(g); g.connect(ctx.destination);
+                g.gain.setValueAtTime(1.5, ctx.currentTime);
+                src.start();
+                // 저음 충격
+                const osc = ctx.createOscillator();
+                const g2 = ctx.createGain();
+                osc.connect(g2); g2.connect(ctx.destination);
+                osc.type = "sine"; osc.frequency.setValueAtTime(120, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.2);
+                g2.gain.setValueAtTime(2, ctx.currentTime);
+                g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start(); osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        // 시계 바늘 각도 설정
+        let clockRAF = null;
+        let clockStartTime = null;
+        let clockMode = null; // "future" | "past"
+
+        function startClock(mode) {
+            clockMode = mode;
+            clockStartTime = null;
+            const overlay = document.getElementById("clock-overlay");
+            overlay.classList.add("active");
+
+            const statusText = document.getElementById("clock-status-text");
+            statusText.textContent = mode === "future" ? "TIMELINE ACCELERATING..." : "RESTORING ARCHIVE...";
+            statusText.style.color = mode === "future" ? "#ff5e5e" : "var(--neon-mint)";
+
+            document.getElementById("clock-crack-layer").classList.remove("visible");
+
+            if (clockRAF) cancelAnimationFrame(clockRAF);
+            clockRAF = requestAnimationFrame(animateClock);
+        }
+
+        function animateClock(timestamp) {
+            if (!clockStartTime) clockStartTime = timestamp;
+            const elapsed = (timestamp - clockStartTime) / 1000; // 초
+
+            const hourHand = document.getElementById("hand-hour");
+            const minHand = document.getElementById("hand-min");
+            const secHand = document.getElementById("hand-sec");
+
+            if (clockMode === "future") {
+                // 점점 빠르게: 초당 속도가 exponential하게 증가
+                const speed = Math.min(elapsed * elapsed * 80 + 2, 800); // deg/s
+                const secDeg = (elapsed * elapsed * 40 + elapsed * 2) * 360 / 60;
+                const minDeg = secDeg / 60;
+                const hourDeg = minDeg / 12;
+
+                secHand.style.transform = `rotate(${secDeg}deg)`;
+                minHand.style.transform = `rotate(${minDeg}deg)`;
+                hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                hourHand.style.filter = elapsed > 1 ? `blur(${(elapsed-1)*2}px)` : "";
+                minHand.style.filter = elapsed > 1 ? `blur(${(elapsed-1)*1}px)` : "";
+
+                if (elapsed < 1.7) {
+                    clockRAF = requestAnimationFrame(animateClock);
+                } else {
+                    // 1.7초: 파괴!
+                    triggerClockBreak();
+                }
+            } else {
+                // PAST: 빠르게 돌다가 1.9초에 쫀득하게 멈춤
+                const TARGET_DEG = 360 * 3; // 3바퀴 목표
+                const easeOutElastic = (t) => {
+                    if (t <= 0) return 0;
+                    if (t >= 1) return 1;
+                    const c4 = (2 * Math.PI) / 4.5;
+                    return t < 0.5
+                        ? -(Math.pow(2, 20*t - 10) * Math.sin((20*t - 11.125) * c4)) / 2
+                        : (Math.pow(2, -20*t + 10) * Math.sin((20*t - 11.125) * c4)) / 2 + 1;
+                };
+                const t = Math.min(elapsed / 1.9, 1);
+                const easedT = easeOutElastic(t);
+                const secDeg = easedT * TARGET_DEG;
+                const minDeg = secDeg / 60;
+                const hourDeg = minDeg / 12;
+
+                secHand.style.transform = `rotate(${secDeg}deg)`;
+                minHand.style.transform = `rotate(${minDeg}deg)`;
+                hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                secHand.style.filter = "";
+                minHand.style.filter = "";
+                hourHand.style.filter = "";
+
+                if (t < 1) {
+                    clockRAF = requestAnimationFrame(animateClock);
+                } else {
+                    // 정지 완료
+                    const statusText = document.getElementById("clock-status-text");
+                    statusText.textContent = "ARCHIVE RESTORED";
+                    statusText.style.color = "var(--neon-mint)";
+                    // 3초 후 시계 닫기
+                    setTimeout(() => {
+                        document.getElementById("clock-overlay").classList.remove("active");
+                    }, 2000);
+                }
+            }
+        }
+
+        function triggerClockBreak() {
+            playShatterSound();
+            // 균열 표시
+            document.getElementById("clock-crack-layer").classList.add("visible");
+            // 시계 흔들림
+            const face = document.getElementById("clock-face");
+            face.style.animation = "clock-shatter 0.1s infinite";
+            // 화면 전체 글리치
+            document.body.style.filter = "invert(1) hue-rotate(90deg)";
+            setTimeout(() => { document.body.style.filter = ""; }, 80);
+            setTimeout(() => { document.body.style.filter = "invert(1)"; }, 160);
+            setTimeout(() => { document.body.style.filter = ""; }, 240);
+
+            // 0.5초 후 페이드아웃 → broken_index.html
+            setTimeout(() => {
+                face.style.animation = "";
+                const fade = document.getElementById("fade-out-overlay");
+                fade.classList.add("fading");
+                setTimeout(() => {
+                    window.location.href = "broken_index.html";
+                }, 1800);
+            }, 500);
+        }
+
+        // FUTURE 버튼
+        function triggerFuture() {
+            playFutureSound();
+            setTimeout(() => startClock("future"), 200);
+        }
+
+        // PAST 버튼
+        function triggerPast() {
+            playPastSound();
+            setTimeout(() => startClock("past"), 200);
         }
     </script>
 </body>

@@ -1195,10 +1195,35 @@
                     if (file === "Curo_REAL_Hidden_Content") return;
                     const fd = fs[folder][file];
                     const isMap = fd && fd.type === "map";
+                    const isKisune = file === "Kisune_Full_Archive.txt";
                     const fi = document.createElement("div"); fi.className = "file";
-                    fi.textContent = (isMap ? "🗺️ " : "📄 ") + file;
-                    if (isMap) fi.style.color = "var(--neon-mint)";
-                    fi.onclick = (e) => { e.stopPropagation(); openFileWithNav(folder, file); };
+                    
+                    // WORLD_MAP.exe와 Kisune만 정상, 나머지는 💥 박살
+                    if (isMap) {
+                        // WORLD_MAP.exe
+                        fi.textContent = "🗺️ " + file;
+                        fi.style.color = "var(--neon-mint)";
+                    } else if (isKisune) {
+                        fi.textContent = "📄 kisune_corden";
+                        fi.style.color = "#fff";
+                        // 🕸️ 파일명만 글리치
+                        fi.style.animation = "broken-text-flicker 3s infinite";
+                        fi.style.textShadow = "2px 0 rgba(255,0,0,0.5), -1px 0 rgba(0,255,200,0.4)";
+                    } else {
+                        fi.textContent = "💥 " + file;
+                        fi.style.color = "#666";
+                        fi.style.textDecoration = "line-through";
+                    }
+                    
+                    fi.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        if (!isMap && !isKisune) {
+                            // 잠긴 파일 클릭 시
+                            alert("⚠️ 잠겨진 파일");
+                            return;
+                        }
+                        openFileWithNav(folder, file); 
+                    };
                     list.appendChild(fi);
                 });
                 dir.appendChild(fDiv); dir.appendChild(list);
@@ -1406,66 +1431,21 @@
 
         const mapData = {
             en: {
-                title: "◈ WORLD MAP — CONTINENTAL SECTOR",
+                title: "◈ WORLD MAP — CONTINENTAL SECTOR [CORRUPTED]",
                 locations: [
                     {
-                        id: "yokai_forest",
-                        name: "Land of Yokai — Spider's Forest",
-                        sub: "Domain of ancient fox spirits",
-                        code: "SECTOR-01",
-                        color: "mint",
-                        x: 43, y: 32, // % 위치
-                        emoji: "🌲",
-                        desc: "A dense, ancient forest where yokai have lived since before recorded history. The Nine-Tail foxes hold dominion here. Spatial distortions and illusions are common — outsiders rarely return.",
-                        tags: [
-                            { label: "ALIGNMENT", value: "Neutral / Yokai" },
-                            { label: "DANGER LEVEL", value: "EXTREME", danger: true },
-                            { label: "KNOWN ENTITY", value: "Curo (Origin Point)" },
-                        ]
-                    },
-                    {
-                        id: "angel_land",
-                        name: "Land of Angels — Sanctuary of Light",
-                        sub: "Sacred ground of the celestial order",
-                        code: "SECTOR-02",
-                        color: "white",
-                        x: 72, y: 20,
-                        emoji: "✨",
-                        desc: "A highland domain shrouded in perpetual radiance. Angels maintain the fabric of the world's system from here. Unauthorized access is forbidden — violators are erased from record.",
-                        tags: [
-                            { label: "ALIGNMENT", value: "Celestial / Order" },
-                            { label: "DANGER LEVEL", value: "RESTRICTED", danger: true },
-                            { label: "KNOWN ENTITY", value: "Shiro (Irregular)" },
-                        ]
-                    },
-                    {
-                        id: "contract_city",
-                        name: "City of Contracts",
-                        sub: "Neutral ground — all races coexist",
-                        code: "SECTOR-03",
-                        color: "gold",
-                        x: 50, y: 55,
-                        emoji: "🏙️",
-                        desc: "The central hub of civilization. Originally founded as a neutral zone, it has evolved into the largest known settlement. Contracts between all species — demons, angels, yokai, and humans — are enforced here by an invisible authority.",
-                        tags: [
-                            { label: "ALIGNMENT", value: "Neutral / All Races" },
-                            { label: "DANGER LEVEL", value: "MODERATE" },
-                            { label: "POPULATION", value: "~1.3 Billion (Human Concentration)" },
-                        ]
-                    },
-                    {
-                        id: "demon_abyss",
-                        name: "Demon Territory — Altar of the Abyss",
-                        sub: "The deep domain of pure demons",
-                        code: "SECTOR-04",
+                        id: "wasteland",
+                        name: "Wasteland — The End",
+                        sub: "Nothing remains",
+                        code: "SECTOR-00",
                         color: "pink",
-                        x: 78, y: 52,
-                        emoji: "🌋",
-                        desc: "A volcanic wasteland where pure demons hold absolute authority. Contract ceremonies of the highest order are conducted at the Altar. Kisune originated from this region — though she rarely acknowledges it.",
+                        x: 50, y: 50,
+                        emoji: "💀",
+                        desc: "The entire continent has been annihilated by Kisune Corden. All civilizations, territories, and life have been erased. Only ash and silence remain.",
                         tags: [
-                            { label: "ALIGNMENT", value: "Demon / Infernal" },
-                            { label: "DANGER LEVEL", value: "LETHAL", danger: true },
-                            { label: "KNOWN ENTITY", value: "Kisune (Former Resident)" },
+                            { label: "ALIGNMENT", value: "EXTINCT" },
+                            { label: "DANGER LEVEL", value: "ABSOLUTE", danger: true },
+                            { label: "CAUSE", value: "Kisune Corden" },
                         ]
                     },
                     {
@@ -1483,114 +1463,39 @@
                             { label: "STATUS", value: "DATA CORRUPTED" },
                         ]
                     },
-                    {
-                        id: "isolated_isle",
-                        name: "Isle of Isolated Time — Eternal Salvation",
-                        sub: "A fragment of frozen time",
-                        code: "SECTOR-EX",
-                        color: "mint",
-                        x: 55, y: 85,
-                        emoji: "🏝️",
-                        desc: "A small island detached from the main continent and from the flow of time itself. Resets do not affect this location. Its existence is theorized to be a 'save point' — but by whom, and for what purpose, remains unknown.",
-                        tags: [
-                            { label: "ALIGNMENT", value: "Unknown / Anomaly" },
-                            { label: "DANGER LEVEL", value: "LOW" },
-                            { label: "SPECIAL", value: "Reset-Immune Zone" },
-                        ]
-                    },
                 ]
             },
             ko: {
-                title: "◈ 세계 지도 — 대륙 구역",
+                title: "◈ 세계 지도 — 대륙 구역 [손상됨]",
                 locations: [
                     {
-                        id: "yokai_forest",
-                        name: "요괴의 땅 — 구미의 숲",
-                        sub: "고대 여우 요괴들의 영역",
-                        code: "구역-01",
-                        color: "mint",
-                        x: 43, y: 32,
-                        emoji: "🌲",
-                        desc: "기록된 역사 이전부터 요괴들이 살아온 울창한 고대의 숲. 구미호가 이 곳의 지배권을 쥐고 있다. 공간 왜곡과 환영이 빈번하게 발생하며 — 외부인이 돌아온 사례는 드물다.",
-                        tags: [
-                            { label: "진영", value: "중립 / 요괴" },
-                            { label: "위험 등급", value: "극도로 위험", danger: true },
-                            { label: "관련 인물", value: "큐로 (출신지)" },
-                        ]
-                    },
-                    {
-                        id: "angel_land",
-                        name: "천사의 땅 — 빛의 성역",
-                        sub: "천상의 질서를 수호하는 성지",
-                        code: "구역-02",
-                        color: "white",
-                        x: 72, y: 20,
-                        emoji: "✨",
-                        desc: "영원한 빛으로 뒤덮인 고지대 영역. 천사들은 이곳에서 세계의 시스템을 유지한다. 무단 접근은 금지되어 있으며 — 위반자는 기록에서 말소된다.",
-                        tags: [
-                            { label: "진영", value: "천상 / 질서" },
-                            { label: "위험 등급", value: "접근 제한", danger: true },
-                            { label: "관련 인물", value: "시로 (불규칙 존재)" },
-                        ]
-                    },
-                    {
-                        id: "contract_city",
-                        name: "계약의 도시",
-                        sub: "모든 종족이 공존하는 중립 지대",
-                        code: "구역-03",
-                        color: "gold",
-                        x: 50, y: 55,
-                        emoji: "🏙️",
-                        desc: "문명의 중심 거점. 원래 중립지대로 창설되었으나 현재는 가장 큰 정착지로 성장했다. 악마, 천사, 요괴, 인간 사이의 모든 계약이 보이지 않는 권력에 의해 이곳에서 집행된다.",
-                        tags: [
-                            { label: "진영", value: "중립 / 전 종족" },
-                            { label: "위험 등급", value: "보통" },
-                            { label: "인구", value: "약 13억 (인간 밀집)" },
-                        ]
-                    },
-                    {
-                        id: "demon_abyss",
-                        name: "악마의 영역 — 심연의 제단",
-                        sub: "순수 악마들의 심층 영역",
-                        code: "구역-04",
+                        id: "wasteland",
+                        name: "황무지 — 종말",
+                        sub: "아무것도 남지 않았다",
+                        code: "구역-00",
                         color: "pink",
-                        x: 78, y: 52,
-                        emoji: "🌋",
-                        desc: "순수 악마가 절대적 권위를 지닌 화산 황무지. 최고 등급의 계약 의식이 이 제단에서 거행된다. 키스네가 이 지역 출신이지만 — 그녀는 거의 인정하지 않는다.",
+                        x: 50, y: 50,
+                        emoji: "💀",
+                        desc: "키스네 코든으로 인해 대륙 전체가 소멸했다. 모든 문명, 영역, 생명체가 말소되었다. 오직 재와 침묵만이 남았다.",
                         tags: [
-                            { label: "진영", value: "악마 / 심연" },
-                            { label: "위험 등급", value: "치명적", danger: true },
-                            { label: "관련 인물", value: "키스네 (전 거주자)" },
+                            { label: "진영", value: "전멸" },
+                            { label: "위험 등급", value: "절대적", danger: true },
+                            { label: "원인", value: "키스네 코든" },
                         ]
                     },
                     {
                         id: "glitch_zone",
-                        name: "변칙과 왜곡의 규역 — 릴지 구역",
+                        name: "글리치 구역 — 왜곡 유적",
                         sub: "현실이 영구적으로 붕괴된 곳",
                         code: "구역-??",
                         color: "pink",
                         x: 20, y: 58,
                         emoji: "⚡",
-                        desc: "누적된 글리치 현상이 물리 법칙을 영구적으로 왜곡시킨 지역. 시간, 공간, 정체성이 이곳에서 붕괴된다. 지도 자체도 이 구역을 올바르게 렌더링하기를 거부한다. 접근 금지.",
+                        desc: "축적된 글리치 현상으로 인해 물리 법칙이 영구적으로 왜곡된 지역. 시간, 공간, 정체성이 붕괴된다. 지도조차 이 영역을 제대로 렌더링하지 못한다. 접근하지 말 것.",
                         tags: [
-                            { label: "진영", value: "오류 / 미정의" },
+                            { label: "진영", value: "오류 / 정의 불가" },
                             { label: "위험 등급", value: "분류 불가", danger: true },
                             { label: "상태", value: "데이터 손상" },
-                        ]
-                    },
-                    {
-                        id: "isolated_isle",
-                        name: "고립된 시간의 섬 — 영원의 구원",
-                        sub: "동결된 시간의 파편",
-                        code: "구역-EX",
-                        color: "mint",
-                        x: 55, y: 85,
-                        emoji: "🏝️",
-                        desc: "대륙 본토와 시간의 흐름으로부터 분리된 작은 섬. 이곳에는 리셋이 적용되지 않는다. 그 존재는 '세이브 포인트'로 이론화되고 있지만 — 누가, 무슨 목적으로 만들었는지는 미지수다.",
-                        tags: [
-                            { label: "진영", value: "불명 / 변칙" },
-                            { label: "위험 등급", value: "낮음" },
-                            { label: "특수", value: "리셋 면역 구역" },
                         ]
                     },
                 ]
@@ -1610,12 +1515,12 @@
                 "> 위성 연결 초기화...",
                 "> 대륙 지형 데이터 로드 중...",
                 "> 구역 데이터베이스 검색 중...",
-                "  [구역-01] 요괴의 땅............OK",
-                "  [구역-02] 천사의 땅............OK",
-                "  [구역-03] 계약의 도시..........OK",
-                "  [구역-04] 악마의 영역..........OK",
+                "  [구역-01] 요괴의 땅............전멸",
+                "  [구역-02] 천사의 땅............전멸",
+                "  [구역-03] 계약의 도시..........전멸",
+                "  [구역-04] 악마의 영역..........전멸",
                 "  [구역-??] 변칙 구역............WARNING",
-                "  [구역-EX] 고립된 시간의 섬.....OK",
+                "  [구역-EX] 고립된 시간의 섬.....전멸",
                 "> 지도 렌더러 활성화...",
                 "> LAUNCH",
             ] : [
@@ -1623,12 +1528,12 @@
                 "> Initializing satellite link...",
                 "> Loading continental terrain data...",
                 "> Scanning sector database...",
-                "  [SECTOR-01] Yokai Forest..........OK",
-                "  [SECTOR-02] Angel Sanctuary.......OK",
-                "  [SECTOR-03] Contract City..........OK",
-                "  [SECTOR-04] Demon Abyss............OK",
+                "  [SECTOR-01] Yokai Forest..........EXTINCT",
+                "  [SECTOR-02] Angel Sanctuary.......EXTINCT",
+                "  [SECTOR-03] Contract City..........EXTINCT",
+                "  [SECTOR-04] Demon Abyss............EXTINCT",
                 "  [SECTOR-??] Glitch Zone.............WARNING",
-                "  [SECTOR-EX] Isolated Isle............OK",
+                "  [SECTOR-EX] Isolated Isle............EXTINCT",
                 "> Activating map renderer...",
                 "> LAUNCH",
             ];
@@ -1641,8 +1546,8 @@
             function printNextLine() {
                 if (lineIdx < bootLines.length) {
                     const line = bootLines[lineIdx];
-                    // WARNING는 빨갛게
-                    if (line.includes("WARNING")) {
+                    // WARNING는 빨갛게, EXTINCT/전멸도 빨갛게
+                    if (line.includes("WARNING") || line.includes("EXTINCT") || line.includes("전멸")) {
                         bootLog.innerHTML += `<span style="color:var(--neon-pink)">${line}</span>\n`;
                     } else if (line.startsWith(">")) {
                         bootLog.innerHTML += `<span style="color:#fff">${line}</span>\n`;
@@ -1677,10 +1582,10 @@
             // 지도 이미지 설정
             bgImg.src = MAP_IMAGE_SRC;
             bgImg.onerror = () => {
-                // 이미지 없으면 대체 배경 (그라데이션)
+                // 이미지 없으면 대체 배경 (회색 황무지)
                 bgImg.style.display = "none";
                 document.getElementById("map-canvas-area").style.background =
-                    "radial-gradient(ellipse at 40% 40%, #1a2a0a 0%, #0a1a2a 50%, #1a0a0a 100%)";
+                    "radial-gradient(ellipse at 50% 50%, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%)";
             };
 
             // 핀 생성
@@ -1766,11 +1671,17 @@
 
         // FUTURE 사운드: 묵직한 킥 + 글리치 버즈
         function playFutureSound() {
-            try { new Audio("Futire button.mp3").play(); } catch(e) {}
+            try { 
+                new Audio("Futire button.mp3").play();
+                new Audio("Future.mp3").play();
+            } catch(e) {}
         }
 
         function playPastSound() {
-            try { new Audio("past button.mp3").play(); } catch(e) {}
+            try { 
+                new Audio("past button.mp3").play();
+                new Audio("past.mp3").play();
+            } catch(e) {}
         }
 
         function playShatterSound() {

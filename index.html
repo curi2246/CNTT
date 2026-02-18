@@ -654,7 +654,7 @@
     </div>
 
     <script>
-        const PASSWORD = "cnttofall";
+        const PASSWORD = "1234";
         let isGlitchUnlocked = false; 
         let currentFileIndex = 0;
         let currentFileList = [];
@@ -1509,11 +1509,17 @@
 
         // FUTURE 사운드: 묵직한 킥 + 글리치 버즈
         function playFutureSound() {
-            try { new Audio("Futire button.mp3").play(); } catch(e) {}
+            try { 
+                new Audio("Futire button.mp3").play();
+                new Audio("Future.mp3").play();
+            } catch(e) {}
         }
 
         function playPastSound() {
-            try { new Audio("past button.mp3").play(); } catch(e) {}
+            try { 
+                new Audio("past button.mp3").play();
+                new Audio("past.mp3").play();
+            } catch(e) {}
         }
 
         function playShatterSound() {

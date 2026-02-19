@@ -533,8 +533,8 @@
 
     <div class="bg-sigil">⟡</div>
 
-    <audio id="main-bgm" loop src="bgm.mp3.mp3"></audio>
-    <audio id="glitch-bgm" loop src="hidden.mp3.mp3"></audio>
+    <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
+    <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
 
     <div id="music-info-box">
@@ -654,8 +654,9 @@
     </div>
 
     <script>
-        const PASSWORD = "cnttofall";
+        const PASSWORD = "1234";
         let isGlitchUnlocked = false; 
+        let inputBuffer = "";
         let currentFileIndex = 0;
         let currentFileList = [];
         let currentFolder = "";
@@ -866,7 +867,9 @@
         window.addEventListener('keydown', (e) => {
             inputBuffer += e.key.toLowerCase();
             if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
+            console.log("Key pressed:", e.key, "Buffer:", inputBuffer); // 디버그
             if (inputBuffer === "glitch" && !isGlitchUnlocked) {
+                console.log("GLITCH ACTIVATED!"); // 디버그
                 isGlitchUnlocked = true;
                 const mainBgm = document.getElementById("main-bgm");
                 const glitchBgm = document.getElementById("glitch-bgm");

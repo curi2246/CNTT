@@ -314,6 +314,37 @@
             100% { transform: translate(0,0); filter: brightness(1); }
         }
 
+        /* 🌊 시계 멈출 때 물결 파동 효과 */
+        .clock-ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 240px;
+            height: 240px;
+            margin-left: -120px;
+            margin-top: -120px;
+            border-radius: 50%;
+            border: 3px solid rgba(94, 255, 235, 0.8);
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-wave {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                border-width: 3px;
+            }
+            50% {
+                opacity: 0.6;
+                border-width: 2px;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+
         /* 🔥 좌우 화살표 네비게이션 */
         .nav-arrow {
             position: absolute;
@@ -1766,6 +1797,13 @@
                 secHand.style.transform = `rotate(${secDeg}deg)`;
                 minHand.style.transform = `rotate(${minDeg}deg)`;
                 hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                
+                // 🌈 진행도에 따라 하얀색 → 원래 색으로 복구
+                const colorT = Math.min(elapsed / 1.5, 1); // 1.5초 동안 색상 복구
+                const whiteness = 1 - colorT;
+                const face = document.getElementById("clock-face");
+                face.style.filter = `brightness(${1 + whiteness * 2}) saturate(${colorT})`;
+                
                 secHand.style.filter = "";
                 minHand.style.filter = "";
                 hourHand.style.filter = "";
@@ -1773,7 +1811,26 @@
                 if (t < 1) {
                     clockRAF = requestAnimationFrame(animateClock);
                 } else {
-                    // 정지 완료
+                    // 🌊 정지 완료 - 물결 파동 생성
+                    const overlay = document.getElementById("clock-overlay");
+                    
+                    // 3개의 파동을 0.1초 간격으로
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const ripple = document.createElement("div");
+                            ripple.className = "clock-ripple";
+                            ripple.style.animation = `ripple-wave 1.2s ease-out forwards`;
+                            ripple.style.animationDelay = "0s";
+                            overlay.appendChild(ripple);
+                            
+                            // 애니메이션 끝나면 제거
+                            setTimeout(() => ripple.remove(), 1200);
+                        }, i * 100);
+                    }
+                    
+                    // 색상 완전 복구
+                    face.style.filter = "";
+                    
                     const statusText = document.getElementById("clock-status-text");
                     statusText.textContent = "ARCHIVE RESTORED";
                     statusText.style.color = "var(--neon-mint)";

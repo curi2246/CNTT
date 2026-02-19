@@ -930,7 +930,7 @@
         let currentFileIndex = 0;
         let currentFileList = [];
         let currentFolder = "";
-        let currentLang = "en";
+        let currentLang = sessionStorage.getItem("savedLang") || "en";
         let currentOpenFile = null;
         let currentPageIndex = 0; // 🔥 추가
 
@@ -1102,6 +1102,7 @@
         // =============================================
         function setLang(lang) {
             currentLang = lang;
+            sessionStorage.setItem("savedLang", lang); // 언어 저장
             document.getElementById("btn-en").classList.toggle("active", lang === "en");
             document.getElementById("btn-ko").classList.toggle("active", lang === "ko");
             const t = uiText[lang];
@@ -1111,6 +1112,15 @@
             document.getElementById("ui-hidden-error").textContent = t.hiddenError;
             document.getElementById("back-btn").textContent = t.backBtn;
             document.getElementById("music-title").textContent = t.nowPlaying;
+            
+            // 🕸️ 터미널 텍스트도 언어에 맞게 업데이트
+            const term = document.getElementById("terminal-text");
+            if (term && term.children.length >= 3) {
+                term.children[0].textContent = lang === "ko" ? "> 접속 승인. 환영합니다, 계약자님." : "> Access granted. Welcome, Contractor.";
+                term.children[1].textContent = lang === "ko" ? "> 데이터베이스 기록을 성공적으로 불러왔습니다." : "> Database records successfully loaded.";
+                term.children[2].textContent = lang === "ko" ? "> 경고: 타임라인 손상이 감지되었습니다." : "> WARNING: TIMELINE CORRUPTION DETECTED.";
+            }
+            
             const mainScreen = document.getElementById("main-screen");
             if (!mainScreen.classList.contains("hidden")) buildDirectory();
             if (currentOpenFile) {
@@ -1839,6 +1849,11 @@
 
             // broken-world 클래스 적용
             document.body.classList.add("broken-world");
+
+            // 🌐 언어 버튼 상태 초기화
+            document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+            document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+            document.getElementById("ui-title-db").textContent = currentLang === "ko" ? "중앙 데이터베이스" : "CENTRAL DATABASE";
 
             // 음악 재생 시도
             const bgm = document.getElementById("main-bgm");

@@ -533,8 +533,8 @@
 
     <div class="bg-sigil">⟡</div>
 
-    <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
-    <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
+    <audio id="main-bgm" loop src="bgm.mp3.mp3"></audio>
+    <audio id="glitch-bgm" loop src="hidden.mp3.mp3"></audio>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
 
     <div id="music-info-box">
@@ -660,7 +660,7 @@
         let currentFileIndex = 0;
         let currentFileList = [];
         let currentFolder = "";
-        let currentLang = "en";
+        let currentLang = sessionStorage.getItem("savedLang") || "en";
         let currentOpenFile = null;
         let currentPageIndex = 0; // 🔥 추가
 
@@ -673,6 +673,12 @@
                 const bgm = document.getElementById("main-bgm");
                 if (bgm) bgm.play().catch(() => {});
                 document.getElementById("music-info-box").style.display = "block";
+                
+                // 🌐 언어 버튼 상태 초기화
+                document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+                document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+                document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
+                
                 buildDirectory();
                 startMainTyping();
             });
@@ -846,6 +852,7 @@
         // =============================================
         function setLang(lang) {
             currentLang = lang;
+            sessionStorage.setItem("savedLang", lang); // 언어 저장
             document.getElementById("btn-en").classList.toggle("active", lang === "en");
             document.getElementById("btn-ko").classList.toggle("active", lang === "ko");
             const t = uiText[lang];
@@ -855,6 +862,14 @@
             document.getElementById("ui-hidden-error").textContent = t.hiddenError;
             document.getElementById("back-btn").textContent = t.backBtn;
             document.getElementById("music-title").textContent = t.nowPlaying;
+            
+            // 🌐 터미널 텍스트도 언어에 맞게 업데이트
+            const term = document.getElementById("terminal-text");
+            if (term && term.children.length >= 2) {
+                term.children[0].textContent = t.typingLine1;
+                term.children[1].textContent = t.typingLine2;
+            }
+            
             const mainScreen = document.getElementById("main-screen");
             if (!mainScreen.classList.contains("hidden")) buildDirectory();
             if (currentOpenFile) {
@@ -896,6 +911,12 @@
                     document.body.classList.remove("auth-success-flash");
                     document.getElementById("auth-screen").classList.add("hidden");
                     document.getElementById("main-screen").classList.remove("hidden");
+                    
+                    // 🌐 언어 버튼 상태 초기화
+                    document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+                    document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+                    document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
+                    
                     buildDirectory(); startMainTyping();
                 }, 1200);
             } else {

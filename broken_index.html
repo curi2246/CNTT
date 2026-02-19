@@ -1853,13 +1853,13 @@
             term.innerHTML = "";
             const line1 = document.createElement("p");
             line1.className = "broken-terminal-line";
-            line1.textContent = "> Access granted. Welcome, Contractor.";
+            line1.textContent = currentLang === "ko" ? "> 접속 승인. 환영합니다, 계약자님." : "> Access granted. Welcome, Contractor.";
             const line2 = document.createElement("p");
             line2.className = "broken-terminal-line";
-            line2.textContent = "> Database records successfully loaded.";
+            line2.textContent = currentLang === "ko" ? "> 데이터베이스 기록을 성공적으로 불러왔습니다." : "> Database records successfully loaded.";
             const line3 = document.createElement("p");
             line3.className = "broken-terminal-new";
-            line3.textContent = "> WARNING: TIMELINE CORRUPTION DETECTED.";
+            line3.textContent = currentLang === "ko" ? "> 경고: 타임라인 손상이 감지되었습니다." : "> WARNING: TIMELINE CORRUPTION DETECTED.";
             term.appendChild(line1);
             setTimeout(() => term.appendChild(line2), 600);
             setTimeout(() => term.appendChild(line3), 1400);

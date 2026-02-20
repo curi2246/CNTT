@@ -1227,8 +1227,9 @@ fi.style.textDecoration = "line-through";
 fi.onclick = (e) => { 
 e.stopPropagation(); 
 if (!isMap && !isKisune) {
-// 잠긴 파일 클릭 시
-alert("⚠️ 잠겨진 파일");
+// 글리치 효과만 발생
+document.body.classList.add('glitch-active');
+setTimeout(() => document.body.classList.remove('glitch-active'), 300);
 return;
 }
 openFileWithNav(folder, file); 

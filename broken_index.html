@@ -1025,6 +1025,7 @@ en: {
 },
 ko: {
 "The main character": {
+"Leay_Full_Archive.txt": { pages: ["[데이터 손상 - 타임라인 소멸]"] },
 "Curo_Half_Archive.txt": { pages: ["[데이터 손상 - 타임라인 소멸]"] },
 "Curo_REAL_Hidden_Content": "[데이터 손상 - 타임라인 소멸]",
 "Kisune_Full_Archive.txt": { pages: ["[데이터 손상 - 타임라인 소멸]"] },
@@ -1271,6 +1272,15 @@ if (fileData && Array.isArray(fileData.pages)) return fileData.pages;
 return [String(fileData)];
 }
 function openFile(name, fileData, pageIdx) {
+// 🔥 손상된 파일 감지 - 글리치 효과만 발생하고 안 열림
+const pages = getPages(fileData);
+if (pages[0] && (pages[0].includes("[DATA CORRUPTED]") || pages[0].includes("[데이터 손상]"))) {
+// 글리치 효과
+document.body.classList.add('glitch-active');
+setTimeout(() => document.body.classList.remove('glitch-active'), 300);
+return; // 파일 안 열림
+}
+
 // 🗺️ 지도 파일 감지
 if (fileData && fileData.type === "map") {
 launchMapViewer();
@@ -1286,18 +1296,10 @@ textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
 // 기존 화살표 전부 제거
 document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
 const terminalContainer = document.getElementById("file-terminal-container");
-const pages = getPages(fileData);
 currentPageIndex = pageIdx ?? 0;
 const content = pages[currentPageIndex];
-// 파일 간 이동 화살표
-if (currentFileIndex > 0) {
-const la = document.createElement("div"); la.className = "nav-arrow nav-arrow-left"; la.innerHTML = "◀";
-la.onclick = () => navigateFile(-1); terminalContainer.appendChild(la);
-}
-if (currentFileIndex < currentFileList.length - 1) {
-const ra = document.createElement("div"); ra.className = "nav-arrow nav-arrow-right"; ra.innerHTML = "▶";
-ra.onclick = () => navigateFile(1); terminalContainer.appendChild(ra);
-}
+// 🔥 부서진 세계에서는 파일 간 이동 화살표 숨김 (페이지 내 화살표는 표시)
+// 파일 간 이동 화살표 제거됨
 // 🔥 페이지 내부 화살표 (하단 모서리, 2페이지 이상일 때만)
 if (pages.length > 1) {
 if (currentPageIndex > 0) {

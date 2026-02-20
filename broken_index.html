@@ -78,6 +78,23 @@ position: fixed; bottom: 20px; right: 20px;
 background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-mint); 
 color: var(--neon-mint); padding: 10px 15px; font-size: 12px; 
 z-index: 100; display: none; box-shadow: 0 0 10px rgba(94, 255, 235, 0.3);
+gap: 10px; align-items: center;
+}
+#music-control-btn {
+background: transparent;
+border: 1px solid var(--neon-mint);
+color: var(--neon-mint);
+padding: 4px 10px;
+cursor: pointer;
+font-size: 11px;
+letter-spacing: 1px;
+transition: all 0.2s;
+margin-left: 10px;
+}
+#music-control-btn:hover {
+background: var(--neon-mint);
+color: #000;
+box-shadow: 0 0 10px var(--neon-mint);
 }
 /* 🔥 언어 전환 버튼 */
 #lang-switcher {
@@ -802,6 +819,7 @@ animation: micro-shake 4s infinite;
   <div id="music-info-box">
     <span style="margin-right: 5px;">🎵</span>
     <span id="music-title">Now Playing: SYSTEM_MAIN.mp3</span>
+    <button id="music-control-btn" onclick="toggleMusic()">⏸ PAUSE</button>
   </div>
 
   <!-- 🔥 언어 전환 버튼 -->
@@ -1089,6 +1107,34 @@ pages: [
 // =============================================
 // 언어 전환 함수
 // =============================================
+let isMusicPlaying = true;
+let currentBGM = null;
+
+function toggleMusic() {
+const btn = document.getElementById("music-control-btn");
+const mainBgm = document.getElementById("main-bgm");
+const glitchBgm = document.getElementById("glitch-bgm");
+const hiddenBgm = document.getElementById("???-bgm");
+
+if (isMusicPlaying) {
+// 정지
+mainBgm.pause();
+glitchBgm.pause();
+hiddenBgm.pause();
+btn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
+isMusicPlaying = false;
+} else {
+// 재생
+if (currentBGM) {
+currentBGM.play();
+} else {
+mainBgm.play();
+}
+btn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
+isMusicPlaying = true;
+}
+}
+
 function setLang(lang) {
 currentLang = lang;
 sessionStorage.setItem("savedLang", lang); // 언어 저장
@@ -1101,6 +1147,11 @@ document.getElementById("ui-title-db").textContent = t.dbTitle;
 document.getElementById("ui-hidden-error").textContent = t.hiddenError;
 document.getElementById("back-btn").textContent = t.backBtn;
 document.getElementById("music-title").textContent = t.nowPlaying;
+// 음악 버튼 텍스트 업데이트
+const musicBtn = document.getElementById("music-control-btn");
+if (musicBtn) {
+musicBtn.textContent = isMusicPlaying ? (lang === "ko" ? "⏸ 정지" : "⏸ PAUSE") : (lang === "ko" ? "▶ 재생" : "▶ PLAY");
+}
 // 🕸️ 터미널 텍스트도 언어에 맞게 업데이트
 const term = document.getElementById("terminal-text");
 if (term && term.children.length >= 3) {
@@ -1124,7 +1175,11 @@ isGlitchUnlocked = true;
 const mainBgm = document.getElementById("main-bgm");
 const glitchBgm = document.getElementById("glitch-bgm");
 if (mainBgm) mainBgm.pause();
-if (glitchBgm) { glitchBgm.currentTime = 0; glitchBgm.play().catch(err => console.log("재생 실패", err)); }
+if (glitchBgm) { 
+glitchBgm.currentTime = 0; 
+glitchBgm.play().catch(err => console.log("재생 실패", err)); 
+currentBGM = glitchBgm;
+}
 document.getElementById("music-title").textContent = currentLang === "en" ? "Now Playing: error.mp3" : "재생 중: error.mp3.mp3";
 document.body.classList.add('glitch-active');
 setTimeout(() => document.body.classList.remove('glitch-active'), 1500);
@@ -1139,7 +1194,10 @@ const t = uiText[currentLang];
 if(val === PASSWORD) {
 document.body.classList.add("auth-success-flash");
 msg.textContent = t.accessGranted; msg.style.color = "var(--neon-mint)";
-if(bgm) bgm.play().catch(e => console.log("자동재생 차단됨"));
+if(bgm) {
+bgm.play().catch(e => console.log("자동재생 차단됨"));
+currentBGM = bgm;
+}
 document.getElementById("music-info-box").style.display = "block";
 setTimeout(() => {
 document.body.classList.remove("auth-success-flash");
@@ -1355,7 +1413,11 @@ const t = uiText[currentLang];
 fileScreenElem.style.opacity = "0";
 if(bgSigil) bgSigil.style.display = "none";
 if(glitchBgm) glitchBgm.pause();
-if(abyssBgm) { abyssBgm.currentTime = 0; abyssBgm.play(); }
+if(abyssBgm) { 
+abyssBgm.currentTime = 0; 
+abyssBgm.play(); 
+currentBGM = abyssBgm;
+}
 document.getElementById("music-title").textContent = currentLang === "en" ? "Now Playing: CENSORED!!.mp3" : "재생 중: CENSORED!!.mp3.mp3";
 [0, 2400, 5000, 7400].forEach(time => setTimeout(() => createAbyssFlash("#fff", 400), time));
 setTimeout(() => {
@@ -1810,10 +1872,8 @@ document.body.classList.add("broken-world");
 document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
 document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
 document.getElementById("ui-title-db").textContent = currentLang === "ko" ? "중앙 데이터베이스" : "CENTRAL DATABASE";
-// 음악 재생 시도
-const bgm = document.getElementById("main-bgm");
-if (bgm) bgm.play().catch(() => {});
-document.getElementById("music-info-box").style.display = "block";
+// 부서진 세계에서는 음악 없음
+document.getElementById("music-info-box").style.display = "none";
 // 디렉토리 빌드
 buildDirectory();
 // 부서진 터미널 텍스트 표시

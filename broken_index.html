@@ -48,6 +48,20 @@ animation: pulse-neon 3s ease-in-out infinite;
 100% { transform: translate(0); }
 }
 .glitch-active { animation: screenShake 0.15s infinite !important; }
+
+/* 파일 아이템 글리치 효과 */
+@keyframes fileGlitch {
+0% { transform: translate(0); filter: hue-rotate(0deg); color: #fff; }
+10% { transform: translate(-3px, 2px); filter: hue-rotate(90deg); color: #ff00ff; }
+20% { transform: translate(3px, -2px); filter: hue-rotate(180deg); color: #00ffff; }
+30% { transform: translate(-2px, 0); filter: hue-rotate(270deg); color: #ffff00; }
+40% { transform: translate(2px, 1px); filter: invert(1); color: #ff0000; }
+60% { transform: translate(-1px, -1px); opacity: 0.5; }
+80% { transform: translate(1px, 0); opacity: 1; }
+100% { transform: translate(0); filter: none; color: #fff; }
+}
+.file-glitch { animation: fileGlitch 0.4s ease-in-out !important; }
+
 .screen { 
 position: relative; width: 100vw; min-height: 100vh;
 display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -1227,9 +1241,9 @@ fi.style.textDecoration = "line-through";
 fi.onclick = (e) => { 
 e.stopPropagation(); 
 if (!isMap && !isKisune) {
-// 글리치 효과만 발생
-document.body.classList.add('glitch-active');
-setTimeout(() => document.body.classList.remove('glitch-active'), 300);
+// 클릭한 파일만 글리치 효과
+fi.classList.add('file-glitch');
+setTimeout(() => fi.classList.remove('file-glitch'), 400);
 return;
 }
 openFileWithNav(folder, file); 

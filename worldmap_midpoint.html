@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>시간의 중간 지점</title>
+<title>Timeline Midpoint</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -143,8 +143,8 @@ display:block;
 </head>
 <body>
 <div id="map-header">
-<div class="hdr-left">◆ 시간의 중간 지점 <span style="color:#888;">—</span> 손상된 타임라인</div>
-<div class="close-btn" onclick="window.parent.postMessage('close-map','*')">✕ 닫기</div>
+<div class="hdr-left">◆ Timeline Midpoint <span style="color:#888;">—</span> Shattered Timeline</div>
+
 </div>
 
 <div id="map-area">
@@ -152,7 +152,7 @@ display:block;
 </div>
 
 <div id="info-bar">
-<span class="info-txt" id="status-txt">시스템 상태: 불안정 | 감지된 변칙 개체: 3</span>
+<span class="info-txt" id="status-txt">System Status: Unstable | Anomalies Detected: 3</span>
 </div>
 
 <div id="location-panel">
@@ -179,18 +179,18 @@ var locations = {
 portal: {
 x: 75,
 y: 45,
-title: "차원 포탈",
+title: "Dimensional Portal",
 subtitle: "DIMENSIONAL GATEWAY",
-content: "시간의 틈새를 가로지르는 차원문. 이곳을 통해 손상되지 않은 과거의 세계로 돌아갈 수 있다.\n\n[상태]\n• 안정적 작동 중\n• 에너지 준위: 92%\n• 시공간 왜곡율: 0.003%\n\n[경고]\n포탈 통과 시 시간 왜곡이 발생할 수 있음. 반복 사용 시 기억 손실 가능성 존재.",
+content: "A dimensional gate crossing the temporal rift. Through here, you can return to the undamaged past world.\n\n[상태]\n• Stable operation\n• Energy level: 92%\n• Spacetime distortion: 0.003%\n\n[경고]\nTime distortion may occur when passing through. Memory loss possible with repeated use.",
 color: '#5effeb',
 type: 'portal'
 },
 survivors: {
 x: 25,
 y: 40,
-title: "시간 생존자들의 마을",
+title: "Time Survivors' Village",
 subtitle: "SURVIVOR'S SETTLEMENT",
-content: "타임라인 붕괴에서 살아남은 자들의 정착지. 리셋과 글리치를 견뎌낸 극소수의 생존자들이 모여 작은 공동체를 이루고 있다.\n\n[인구]\n• 약 200명\n• 노에인(Noein): 47%\n• 변칙 개체: 38%\n• 일반 인간: 15%\n\n[상태]\n• 방어 시설 구축 중\n• 식량 자급률: 65%\n• 의료 시설: 기초적 수준\n\n[특징]\n대부분의 주민이 리셋 기억 보유자. 타임라인 붕괴 이전의 기술과 지식을 일부 보존하고 있음.",
+content: "Settlement of those who survived the timeline collapse. A small community formed by the very few survivors who endured resets and glitches.\n\n[Population]\n• Approx 200people\n• 노에인(Noein): 47%\n• Anomalous entities: 38%\n• Normal humans: 15%\n\n[상태]\n• Defense facilities under construction\n• Food self-sufficiency: 65%\n• Medical facilities: Basic level\n\n[Features]\nMost residents are reset memory holders. Partially preserving technology and knowledge from before timeline collapse.",
 color: '#c9a84c',
 type: 'village'
 },
@@ -199,7 +199,7 @@ x: 50,
 y: 65,
 title: "결전의 공간",
 subtitle: "FINAL BATTLEGROUND",
-content: "모든 것이 끝난 곳. 키스네 코든과의 최후의 전투가 벌어졌던 장소. 지금은 폐허만이 남아있다.\n\n[상태]\n• 접근 위험도: EXTREME\n• 방사선 수치: 정상\n• 글리치 농도: 위험 수준\n\n[잔류 에너지]\n고농도 글리치 감지됨. 현실 왜곡 현상 다수 관측.\n\n[경고]\n이 지역에 장시간 머물 경우 정신 오염 가능성. 환각, 기억 왜곡, 시간 감각 상실 등의 증상 보고됨. 방호복 착용 필수.",
+content: "Where everything ended. The site of the final battle with Kisune Corden. Now only ruins remain.\n\n[상태]\n• Access 위험도: EXTREME\n• Radiation levels: Normal\n• Glitch density: Hazardous\n\n[Residual Energy]\nHigh-density glitch detected. Multiple reality distortion phenomena observed.\n\n[경고]\nProlonged stay may cause mental contamination. Reported symptoms: hallucinations, memory distortion, loss of time perception. Protective suit required.",
 color: '#ff5e5e',
 type: 'danger'
 }
@@ -441,7 +441,7 @@ function reassembleGlass() {
     if(progress < 1) {
       requestAnimationFrame(animateNoise);
     } else {
-      window.location.href = 'worldmap_ko.html';
+      window.location.href = 'worldmap.html';
     }
   }
   

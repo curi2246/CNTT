@@ -492,6 +492,57 @@
   }
   ::-webkit-scrollbar{width:3px;}
   ::-webkit-scrollbar-thumb{background:#1a1a1a;}
+
+  /* 다음 맵으로 가는 화살표 버튼 */
+  #next-map-arrow{
+    position:absolute;
+    right:20px;
+    top:50%;
+    transform:translateY(-50%);
+    width:70px;
+    height:70px;
+    background:rgba(94,255,235,0.15);
+    border:3px solid var(--mint);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all 0.3s;
+    z-index:200;
+  }
+  #next-map-arrow:hover{
+    background:rgba(94,255,235,0.3);
+    box-shadow:0 0 20px rgba(94,255,235,0.6);
+    transform:translateY(-50%) scale(1.1);
+  }
+  #next-map-arrow::before{
+    content:'▶';
+    font-size:24px;
+    color:var(--mint);
+  }
+
+  /* 유리 깨짐 오버레이 */
+  #glass-shatter-overlay{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9998;
+    display:none;
+  }
+  #glass-shatter-overlay.active{
+    display:block;
+  }
+  #glass-canvas{
+    width:100%;
+    height:100%;
+  }
+
+  @keyframes crack-spread{
+    0%{opacity:0;}
+    10%{opacity:1;}
+    100%{opacity:1;}
+  }
 </style>
 </head>
 <body>
@@ -530,6 +581,7 @@
       <div id="terrain-texture"></div>
       <!-- 핀은 JS -->
     </div>
+    <div id="next-map-arrow"></div>
 
     <div id="info-bar">
       <span class="info-txt" id="coord-txt">LAT: —  LON: —</span>
@@ -557,32 +609,32 @@
 </div>
 
 <script>
-const LOCS = [
+var LOCS = [
   {
     code:"SECTOR-01", name:"Fox's Haunt / Kitsune Forest",
     sub:"Fox's Haunt · Glitch-infested Forest",
     desc:"A deep forest inhabited by foxes and yokai. Glitch flows between the trees, warping space itself — even compasses cannot be trusted here. Believed to be near Curo's original territory.",
-    guardian:"yokai", danger:"High", dc:"d-high",
+    guardian:"Kitsune Pack (multiple unidentified entities)", danger:"High", dc:"d-high",
     px:56, py:26, pinClass:"", bg:"linear-gradient(135deg,#0d1a0d,#1a1200)"
   },
   {
     code:"SECTOR-02", name:"친사의 땅 / 빛의 성역",
     sub:"Angel's Domain · Sanctuary of Light",
     desc:"A high-altitude sanctuary inhabited by angels. Access is strictly restricted. Shiro has been intermittently sighted in this region. Anomalies related to glitch-covered halos have been reported.",
-    guardian:"angel", danger:"Unknown", dc:"d-unk",
+    guardian:"Shiro — intermittently observed", danger:"Unknown", dc:"d-unk",
     px:86, py:14, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080814,#0a0d20)"
   },
   {
     code:"SECTOR-03", name:"Demon's Realm / Altar of the Abyss",
     sub:"Demon's Realm · Altar of the Abyss",
     desc:"Home territory of pure demon entities. Rumored to contain an altar where pure demons like Kisune forge contracts. Deep within, traces of pacts with nameless beings are carved into the walls.",
-    guardian:"demon", danger:"Very High", dc:"d-high",
+    guardian:"Principle of Contract (phenomenon entity)", danger:"Very High", dc:"d-high",
     px:88, py:43, pinClass:"", bg:"linear-gradient(135deg,#1a0505,#0d0005)"
   },
   {
     code:"SECTOR-04", name:"Anomaly Zone / Glitch District",
     sub:"Glitch Zone · Anomaly District",
-    desc:"A region where glitch phenomena manifest at their most extreme. Space itself is unstable, and conventional physical laws do not apply. Severe glitch-infected entities are present in the surrounding area, and serious cognitive distortion has been reported upon approach.",
+    desc:"The region with the most extreme glitch manifestations. Space itself is unstable and standard physical laws do not apply. The only zone where a Curo?(GLITCH_DATA) apparition has been observed. Severe cognitive distortion reported upon entry.",
     guardian:"Unidentified glitch entity", danger:"Extreme", dc:"d-ex",
     px:13, py:45, pinClass:"pin-glitch", bg:"linear-gradient(135deg,#0d000d,#050005)"
   },
@@ -590,19 +642,19 @@ const LOCS = [
     code:"SECTOR-05", name:"City of Contracts",
     sub:"City of Contracts · Central Nexus",
     desc:"A contract hub city located at the center of the continent. A neutral zone where beings of all races gather to forge contracts. The only place where demons, angels, humans, and yokai can all officially enter.",
-    guardian:"human", danger:"Moderate", dc:"d-mid",
+    guardian:"Guild Alliance (multiple factions)", danger:"Moderate", dc:"d-mid",
     px:55, py:56, pinClass:"", bg:"linear-gradient(135deg,#080f14,#0a0f18)"
   },
   {
     code:"SECTOR-EX", name:"Isle of Frozen Time / Eternal Salvation",
     sub:"Isle of Frozen Time · Salvation of Eternity",
-    desc:"An isolated island presumed to be unaffected by the Reset phenomenon. Some records related to Noein remain. There are documented accounts of visits by Leay, Curo, and Kisune, and it is said that only a being known as Irein primarily resides there.",
-    guardian:"Irein", danger:"Unclassified", dc:"d-unk",
+    desc:"An isolated island believed to be unaffected by the Reset phenomenon. Partial records related to the Noein remain. Leay's visit to this location has been documented, though the details have been redacted.",
+    guardian:"Tory — unconfirmed", danger:"Unclassified", dc:"d-unk",
     px:60, py:92, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080f08,#050a05)"
   }
 ];
 
-const BOOT = [
+var BOOT = [
   {t:"> Initializing WORLD_MAP.exe...", w:false},
   {t:"> Establishing satellite connection...", w:false},
   {t:"> Loading continental terrain data...", w:false},
@@ -619,98 +671,204 @@ const BOOT = [
   {t:"> System ready.", w:false},
 ];
 
-async function runBoot(){
-  const lines = document.getElementById("boot-lines");
-  const fill  = document.getElementById("bfill");
-  for(let i=0;i<BOOT.length;i++){
-    await sleep(70 + Math.random()*80);
-    const el = document.createElement("div");
-    el.className = (BOOT[i].sub ? "boot-line-sub" : "boot-line") + (BOOT[i].w ? " boot-warn" : "");
-    el.style.animationDelay = "0s";
-    el.textContent = BOOT[i].t;
-    lines.appendChild(el);
-    fill.style.width = ((i+1)/BOOT.length*100)+"%";
+function runBoot(){
+  var lines = document.getElementById("boot-lines");
+  var fill  = document.getElementById("bfill");
+  var currentIndex = 0;
+  
+  function addLine() {
+    if(currentIndex < BOOT.length) {
+      var el = document.createElement("div");
+      el.className = (BOOT[currentIndex].sub ? "boot-line-sub" : "boot-line") + (BOOT[currentIndex].w ? " boot-warn" : "");
+      el.style.animationDelay = "0s";
+      el.textContent = BOOT[currentIndex].t;
+      lines.appendChild(el);
+      fill.style.width = ((currentIndex+1)/BOOT.length*100)+"%";
+      currentIndex++;
+      
+      setTimeout(addLine, 70 + Math.random()*80);
+    } else {
+      setTimeout(function() {
+        // TV 꺼지는 효과로 부팅 화면 사라짐
+        document.getElementById("boot-overlay").classList.add("tv-off");
+        
+        setTimeout(function() {
+          // TV 켜지는 효과로 지도 등장
+          var mw = document.getElementById("map-wrapper");
+          mw.style.opacity = "1";
+          mw.classList.add("tv-on");
+          
+          setTimeout(function() {
+            document.getElementById("boot-overlay").style.display = "none";
+          }, 700);
+        }, 300);
+      }, 400);
+      
+      initMap();
+    }
   }
-  await sleep(400);
-
-  // TV 꺼지는 효과로 부팅 화면 사라짐
-  document.getElementById("boot-overlay").classList.add("tv-off");
-  await sleep(300);
-
-  // TV 켜지는 효과로 지도 등장
-  const mw = document.getElementById("map-wrapper");
-  mw.style.opacity = "1";
-  mw.classList.add("tv-on");
-
-  await sleep(700);
-  document.getElementById("boot-overlay").style.display = "none";
-  initMap();
+  
+  addLine();
 }
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
+var sleep = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
 
 function initMap(){
-  const terrain = document.getElementById("terrain");
-  LOCS.forEach(loc=>{
-    const pin = document.createElement("div");
+  var terrain = document.getElementById("terrain");
+  for(var i = 0; i < LOCS.length; i++) {
+    var loc = LOCS[i];
+    var pin = document.createElement("div");
     pin.className = "map-pin";
     pin.style.left = loc.px + "%";
     pin.style.top  = loc.py + "%";
-    pin.innerHTML = `
-      <div class="pin-wrap">
-        <div class="pin-dot-wrap ${loc.pinClass}">
-          <div class="pin-outer"></div>
-          <div class="pin-inner"></div>
-        </div>
-        <div class="pin-code">${loc.code}</div>
-      </div>
-    `;
-    // pinClass를 pin-dot-wrap 대신 pin 자체에 적용
+    pin.innerHTML = 
+      "<div class='pin-wrap'>" +
+        "<div class='pin-dot-wrap " + loc.pinClass + "'>" +
+          "<div class='pin-outer'></div>" +
+          "<div class='pin-inner'></div>" +
+        "</div>" +
+        "<div class='pin-code'>" + loc.code + "</div>" +
+      "</div>";
     pin.querySelector(".pin-dot-wrap").className = "pin-dot-wrap";
     if(loc.pinClass) pin.classList.add(loc.pinClass);
-    pin.addEventListener("click", ()=>openPopup(loc));
+    pin.addEventListener("click", function() { openPopup(loc); });
     terrain.appendChild(pin);
-  });
+  }
 
-  terrain.addEventListener("mousemove", e=>{
-    const r = terrain.getBoundingClientRect();
-    const rx = ((e.clientX-r.left)/r.width*100).toFixed(1);
-    const ry = ((e.clientY-r.top)/r.height*100).toFixed(1);
+  terrain.addEventListener("mousemove", function(e) {
+    var r = terrain.getBoundingClientRect();
+    var rx = ((e.clientX-r.left)/r.width*100).toFixed(1);
+    var ry = ((e.clientY-r.top)/r.height*100).toFixed(1);
     document.getElementById("coord-txt").textContent = "LAT: "+ry+"  LON: "+rx;
   });
 }
-
 function openPopup(loc){
   document.getElementById("p-code").textContent = loc.code;
   document.getElementById("popup-name").textContent = loc.name;
   document.getElementById("popup-sub").textContent = loc.sub;
   document.getElementById("popup-desc").textContent = loc.desc;
   document.getElementById("popup-banner-bg").style.background = loc.bg;
-  document.getElementById("popup-stats").innerHTML = `
-    <div class="pstat">
-      <div class="pstat-ico">👁</div>
-      <div>
-        <div class="pstat-lbl">GUARDIAN / OBSERVED ENTITY</div>
-        <div class="pstat-val">${loc.guardian}</div>
-      </div>
-    </div>
-    <div class="pstat">
-      <div class="pstat-ico">⚠</div>
-      <div>
-        <div class="pstat-lbl">DANGER LEVEL</div>
-        <div class="pstat-val ${loc.dc}">${loc.danger}</div>
-      </div>
-    </div>
-  `;
+  document.getElementById("popup-stats").innerHTML = 
+    "<div class='pstat'>" +
+      "<div class='pstat-ico'>👁</div>" +
+      "<div>" +
+        "<div class='pstat-lbl'>GUARDIAN / OBSERVED ENTITY</div>" +
+        "<div class='pstat-val'>" + loc.guardian + "</div>" +
+      "</div>" +
+    "</div>" +
+    "<div class='pstat'>" +
+      "<div class='pstat-ico'>⚠</div>" +
+      "<div>" +
+        "<div class='pstat-lbl'>DANGER LEVEL</div>" +
+        "<div class='pstat-val " + loc.dc + "'>" + loc.danger + "</div>" +
+      "</div>" +
+    "</div>";
+  document.getElementById("popup").classList.add("open");
+}
+function openPopup(loc){
+  document.getElementById("p-code").textContent = loc.code;
+  document.getElementById("popup-name").textContent = loc.name;
+  document.getElementById("popup-sub").textContent = loc.sub;
+  document.getElementById("popup-desc").textContent = loc.desc;
+  document.getElementById("popup-banner-bg").style.background = loc.bg;
+  document.getElementById("popup-stats").innerHTML = 
+    "<div class='pstat'>" +
+      "<div class='pstat-ico'>👁</div>" +
+      "<div>" +
+        "<div class='pstat-lbl'>GUARDIAN / OBSERVED ENTITY</div>" +
+        "<div class='pstat-val'>" + loc.guardian + "</div>" +
+      "</div>" +
+    "</div>" +
+    "<div class='pstat'>" +
+      "<div class='pstat-ico'>⚠</div>" +
+      "<div>" +
+        "<div class='pstat-lbl'>DANGER LEVEL</div>" +
+        "<div class='pstat-val " + loc.dc + "'>" + loc.danger + "</div>" +
+      "</div>" +
+    "</div>";
   document.getElementById("popup").classList.add("open");
 }
 function closePopup(){
   document.getElementById("popup").classList.remove("open");
 }
-document.getElementById("popup").addEventListener("click", e=>{
+document.getElementById("popup").addEventListener("click", function(e) {
   if(e.target===document.getElementById("popup")) closePopup();
 });
 
 runBoot();
 </script>
+
+  <!-- 유리 깨짐 효과 -->
+  <div id="glass-shatter-overlay">
+    <canvas id="glass-canvas"></canvas>
+  </div>
+
+<script>
+  // 화살표 버튼 클릭 이벤트
+  var nextArrow = document.getElementById('next-map-arrow');
+  if(nextArrow) {
+    nextArrow.onclick = function() {
+      shatterAndTransition();
+    };
+  }
+
+  function shatterAndTransition() {
+    var overlay = document.getElementById('glass-shatter-overlay');
+    var canvas = document.getElementById('glass-canvas');
+    var ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    overlay.classList.add('active');
+    
+    var startTime = Date.now();
+    var increaseDuration = 1500; // 노이즈 증가 (1.5초)
+    var decreaseDuration = 1500; // 노이즈 감소 (1.5초)
+    var totalDuration = increaseDuration + decreaseDuration;
+    var switched = false;
+    
+    function animateNoise() {
+      var elapsed = Date.now() - startTime;
+      var progress = Math.min(elapsed / totalDuration, 1);
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      var noiseIntensity;
+      if(elapsed < increaseDuration) {
+        // 0 → 1 (1.5초)
+        noiseIntensity = elapsed / increaseDuration;
+        
+        // 노이즈가 90% 이상일 때 페이지 전환
+        if(noiseIntensity > 0.9 && !switched) {
+          switched = true;
+          window.location.href = 'worldmap_midpoint.html';
+        }
+      } else {
+        // 1 → 0 (1.5초)
+        noiseIntensity = 1 - ((elapsed - increaseDuration) / decreaseDuration);
+      }
+      
+      // 노이즈 그리기
+      var imageData = ctx.createImageData(canvas.width, canvas.height);
+      var data = imageData.data;
+      
+      for(var i = 0; i < data.length; i += 4) {
+        var noise = Math.random() * 255 * noiseIntensity;
+        data[i] = noise;
+        data[i + 1] = noise;
+        data[i + 2] = noise;
+        data[i + 3] = 255 * noiseIntensity;
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      
+      if(progress < 1 && !switched) {
+        requestAnimationFrame(animateNoise);
+      }
+    }
+    
+    animateNoise();
+  }
+</script>
+
 </body>
 </html>

@@ -432,7 +432,7 @@ function reassembleGlass() {
       
       if(noiseIntensity > 0.9 && !switched) {
         switched = true;
-        window.location.href = 'worldmap_ko.html';
+        window.location.href = 'worldmap.html';
       }
     } else {
       noiseIntensity = 1 - ((elapsed - increaseDuration) / decreaseDuration);

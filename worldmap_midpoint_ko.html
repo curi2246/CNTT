@@ -144,7 +144,7 @@ display:block;
 <body>
 <div id="map-header">
 <div class="hdr-left">◆ 시간의 중간 지점 <span style="color:#888;">—</span> 손상된 타임라인</div>
-<div class="close-btn" onclick="window.parent.postMessage('close-map','*')">✕ CLOSE</div>
+<div class="close-btn" onclick="window.parent.postMessage('close-map','*')">✕ 닫기</div>
 </div>
 
 <div id="map-area">
@@ -416,27 +416,14 @@ function reassembleGlass() {
   
   var startTime = Date.now();
   var increaseDuration = 1500;
-  var decreaseDuration = 1500;
-  var totalDuration = increaseDuration + decreaseDuration;
-  var switched = false;
   
   function animateNoise() {
     var elapsed = Date.now() - startTime;
-    var progress = Math.min(elapsed / totalDuration, 1);
+    var progress = Math.min(elapsed / increaseDuration, 1);
     
     gctx.clearRect(0, 0, gc.width, gc.height);
     
-    var noiseIntensity;
-    if(elapsed < increaseDuration) {
-      noiseIntensity = elapsed / increaseDuration;
-      
-      if(noiseIntensity > 0.9 && !switched) {
-        switched = true;
-        window.location.href = 'worldmap.html';
-      }
-    } else {
-      noiseIntensity = 1 - ((elapsed - increaseDuration) / decreaseDuration);
-    }
+    var noiseIntensity = progress;
     
     var imageData = gctx.createImageData(gc.width, gc.height);
     var data = imageData.data;
@@ -451,13 +438,64 @@ function reassembleGlass() {
     
     gctx.putImageData(imageData, 0, 0);
     
-    if(progress < 1 && !switched) {
+    if(progress < 1) {
       requestAnimationFrame(animateNoise);
+    } else {
+      window.location.href = 'worldmap_ko.html';
     }
   }
   
   animateNoise();
 }
+
+// 페이지 로드 시 자동으로 노이즈 감소
+window.addEventListener('load', function() {
+  var overlay = document.getElementById('glass-shatter-overlay');
+  var canvas = document.getElementById('glass-canvas');
+  
+  if(!overlay || !canvas) return;
+  
+  var ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  overlay.classList.add('active');
+  
+  var startTime = Date.now();
+  var decreaseDuration = 1500;
+  
+  function fadeInNoise() {
+    var elapsed = Date.now() - startTime;
+    var progress = Math.min(elapsed / decreaseDuration, 1);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 1 → 0 (노이즈 감소)
+    var noiseIntensity = 1 - progress;
+    
+    var imageData = ctx.createImageData(canvas.width, canvas.height);
+    var data = imageData.data;
+    
+    for(var i = 0; i < data.length; i += 4) {
+      var noise = Math.random() * 255 * noiseIntensity;
+      data[i] = noise;
+      data[i + 1] = noise;
+      data[i + 2] = noise;
+      data[i + 3] = 255 * noiseIntensity;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    if(progress < 1) {
+      requestAnimationFrame(fadeInNoise);
+    } else {
+      // 완료되면 오버레이 제거
+      overlay.classList.remove('active');
+    }
+  }
+  
+  fadeInNoise();
+});
+
 </script>
 </body>
 </html>

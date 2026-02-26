@@ -821,31 +821,15 @@ runBoot();
     overlay.classList.add('active');
     
     var startTime = Date.now();
-    var increaseDuration = 1500; // 노이즈 증가 (1.5초)
-    var decreaseDuration = 1500; // 노이즈 감소 (1.5초)
-    var totalDuration = increaseDuration + decreaseDuration;
-    var switched = false;
+    var increaseDuration = 1500;
     
     function animateNoise() {
       var elapsed = Date.now() - startTime;
-      var progress = Math.min(elapsed / totalDuration, 1);
+      var progress = Math.min(elapsed / increaseDuration, 1);
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      var noiseIntensity;
-      if(elapsed < increaseDuration) {
-        // 0 → 1 (1.5초)
-        noiseIntensity = elapsed / increaseDuration;
-        
-        // 노이즈가 90% 이상일 때 페이지 전환
-        if(noiseIntensity > 0.9 && !switched) {
-          switched = true;
-          window.location.href = 'worldmap_midpoint_ko.html';
-        }
-      } else {
-        // 1 → 0 (1.5초)
-        noiseIntensity = 1 - ((elapsed - increaseDuration) / decreaseDuration);
-      }
+      var noiseIntensity = progress;
       
       // 노이즈 그리기
       var imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -861,13 +845,65 @@ runBoot();
       
       ctx.putImageData(imageData, 0, 0);
       
-      if(progress < 1 && !switched) {
+      if(progress < 1) {
         requestAnimationFrame(animateNoise);
+      } else {
+        // 노이즈 100%에서 페이지 전환
+        window.location.href = 'worldmap_midpoint_ko.html';
       }
     }
     
     animateNoise();
   }
+
+// 페이지 로드 시 자동으로 노이즈 감소
+window.addEventListener('load', function() {
+  var overlay = document.getElementById('glass-shatter-overlay');
+  var canvas = document.getElementById('glass-canvas');
+  
+  if(!overlay || !canvas) return;
+  
+  var ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  overlay.classList.add('active');
+  
+  var startTime = Date.now();
+  var decreaseDuration = 1500;
+  
+  function fadeInNoise() {
+    var elapsed = Date.now() - startTime;
+    var progress = Math.min(elapsed / decreaseDuration, 1);
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 1 → 0 (노이즈 감소)
+    var noiseIntensity = 1 - progress;
+    
+    var imageData = ctx.createImageData(canvas.width, canvas.height);
+    var data = imageData.data;
+    
+    for(var i = 0; i < data.length; i += 4) {
+      var noise = Math.random() * 255 * noiseIntensity;
+      data[i] = noise;
+      data[i + 1] = noise;
+      data[i + 2] = noise;
+      data[i + 3] = 255 * noiseIntensity;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    if(progress < 1) {
+      requestAnimationFrame(fadeInNoise);
+    } else {
+      // 완료되면 오버레이 제거
+      overlay.classList.remove('active');
+    }
+  }
+  
+  fadeInNoise();
+});
+
 </script>
 
 </body>

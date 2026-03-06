@@ -292,6 +292,7 @@ const CHARACTERS_KO = {
             `큐로: "..."
 
 터벅..터벅...
+
 키스네: "뭐해?"
 
 자연스럽게 책상 옆에 핫 초코를 두고 앉는다
@@ -303,7 +304,7 @@ const CHARACTERS_KO = {
 큐로: "리에가 이 구슬 사용법이 적혀있을 거라고 해서 잠시 읽고 있었어"`,
             `키스네: "...지금 며칠동안 읽고 있는게 그거야?"
 
-큐로: "아마도 맞을 걸 한참을 읽어도 안 나와서 골머리지"
+큐로: "아마도 맞을 걸 한참을 읽어도 안 나와서 망정이지"
 
 키스네: "지난번에 상대했던..누구였지?"
 
@@ -431,7 +432,7 @@ He digs into his pocket and pulls out a small orb, about the size of his palm �
 Curo: "Leay said the instructions for it were written down somewhere, so I've been trying to track them down."`,
             `Kisune: "...Wait. That thing you've been buried in for days — that's it?"
 
-Curo: "Pretty much. I've been at it for a while and still nothing. Which, it's giving me a real headache.”
+Curo: "Pretty much. I've been at it for a while and still nothing. Which, honestly, is kind of a relief."
 
 Kisune: "That person we fought last time... what was their name again?"
 
@@ -653,12 +654,14 @@ function resumeMusic() {
 
 // ── 뒤로가기: 메인 화면(데이터베이스) ────────────
 function goBack() {
-    // 현재 재생 중이면 위치 저장
-    if (bgAudio && !bgAudio.paused) {
+    // 현재 음악 상태 저장
+    if (bgAudio) {
         sessionStorage.setItem('musicTime',    String(bgAudio.currentTime));
-        sessionStorage.setItem('musicPlaying', 'true');
+        sessionStorage.setItem('musicPlaying', isStoryMusicPlaying ? 'true' : 'false');
     }
-    window.location.href = 'index.html#main-screen';
+    // index.html이 returnedFromBroken 패턴과 동일하게 처리
+    sessionStorage.setItem('returnedFromStory', '1');
+    window.location.href = 'index.html';
 }
 
 // ── 초기화 ──────────────────────────────────────

@@ -608,159 +608,6 @@
         }
         .map-info-tag span { color: #fff; font-size: 12px; }
         .map-info-tag.danger { border-color: rgba(255,94,94,0.4); color: var(--neon-pink); background: rgba(255,94,94,0.06); }
-
-        /* ====== 📖 스토리 박스 ====== */
-        #story-nav-boxes {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 20px;
-        }
-        .story-nav-box {
-            flex: 1;
-            border: 1px solid;
-            padding: 14px 12px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-align: center;
-            transition: all 0.25s;
-            background: rgba(0,0,0,0.6);
-            position: relative;
-            overflow: hidden;
-        }
-        .story-nav-box::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: currentColor;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .story-nav-box:hover::before { opacity: 0.07; }
-        .story-nav-box-label {
-            font-size: 13px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            margin-bottom: 4px;
-        }
-        .story-nav-box-sub { opacity: 0.6; font-size: 10px; letter-spacing: 1px; }
-
-        /* 일상 스토리: 민트 테마 */
-        #story-box-daily {
-            border-color: var(--neon-mint);
-            color: var(--neon-mint);
-            box-shadow: 0 0 8px rgba(94,255,235,0.2);
-        }
-        #story-box-daily:hover {
-            box-shadow: 0 0 20px rgba(94,255,235,0.5);
-            border-color: #aafff5;
-        }
-
-        /* 소설 스토리: 핑크 테마 */
-        #story-box-novel {
-            border-color: var(--neon-pink);
-            color: var(--neon-pink);
-            box-shadow: 0 0 8px rgba(255,94,94,0.2);
-        }
-        #story-box-novel:hover {
-            box-shadow: 0 0 20px rgba(255,94,94,0.5);
-            border-color: #ff9e9e;
-        }
-
-        /* ====== 📖 스토리 선택 화면 ====== */
-        #story-select-screen {
-            display: none;
-            width: 100%;
-            max-width: 600px;
-            flex-direction: column;
-            align-items: center;
-        }
-        #story-select-screen.visible { display: flex; }
-
-        .story-select-header {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        #story-back-btn {
-            background: none;
-            border: 1px solid #444;
-            color: #888;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            letter-spacing: 2px;
-            transition: all 0.2s;
-        }
-        #story-back-btn:hover { border-color: var(--neon-mint); color: var(--neon-mint); }
-
-        .story-select-title {
-            font-size: 12px;
-            letter-spacing: 4px;
-            font-weight: bold;
-        }
-
-        .story-char-list {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .story-char-item {
-            border: 1px solid #333;
-            padding: 14px 16px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
-            background: rgba(0,0,0,0.5);
-        }
-        .story-char-item:hover {
-            border-color: var(--neon-mint);
-            background: rgba(94,255,235,0.05);
-            box-shadow: 0 0 10px rgba(94,255,235,0.2);
-        }
-        .story-char-item.novel-item:hover {
-            border-color: var(--neon-pink);
-            background: rgba(255,94,94,0.05);
-            box-shadow: 0 0 10px rgba(255,94,94,0.2);
-        }
-        .story-char-name {
-            font-size: 13px;
-            letter-spacing: 3px;
-            color: #fff;
-        }
-        .story-char-sub {
-            font-size: 10px;
-            color: #555;
-            letter-spacing: 2px;
-        }
-        .story-char-arrow {
-            color: #444;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .story-char-item:hover .story-char-arrow { color: var(--neon-mint); }
-        .story-char-item.novel-item:hover .story-char-arrow { color: var(--neon-pink); }
-
-        /* 소설 스토리 잠금 표시 */
-        .story-char-item.locked {
-            opacity: 0.4;
-            cursor: default;
-        }
-        .story-char-item.locked:hover {
-            border-color: #333;
-            background: rgba(0,0,0,0.5);
-            box-shadow: none;
-        }
-        .story-char-item.locked .story-char-arrow { content: "🔒"; }
     </style>
 </head>
 <body>
@@ -795,28 +642,6 @@
 
     <div id="main-screen" class="screen hidden">
         <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-
-            <!-- 📖 일상/소설 스토리 박스 -->
-            <div id="story-nav-boxes">
-                <div class="story-nav-box" id="story-box-daily" onclick="openStorySelect('daily')">
-                    <div class="story-nav-box-label">일상 스토리</div>
-                    <div class="story-nav-box-sub">DAILY · LOG · ARCHIVE</div>
-                </div>
-                <div class="story-nav-box" id="story-box-novel" onclick="openStorySelect('novel')">
-                    <div class="story-nav-box-label">소설 스토리</div>
-                    <div class="story-nav-box-sub">NOVEL · STORY · FILE</div>
-                </div>
-            </div>
-
-            <!-- 📖 스토리 선택 화면 (캐릭터 목록) -->
-            <div id="story-select-screen">
-                <div class="story-select-header">
-                    <button id="story-back-btn" onclick="closeStorySelect()">← BACK</button>
-                    <div class="story-select-title" id="story-select-title">SELECT CHARACTER</div>
-                </div>
-                <div class="story-char-list" id="story-char-list"></div>
-            </div>
-
             <div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
             <div class="terminal"><div id="terminal-text"></div></div>
             <div class="directory" id="directory"></div>
@@ -938,6 +763,48 @@
                 
                 buildDirectory();
                 startMainTyping();
+            });
+        }
+
+        // story_viewer에서 돌아왔을 때 자동 로그인 (비번 화면 건너뜀)
+        if (sessionStorage.getItem("returnedFromStory") === "1") {
+            sessionStorage.removeItem("returnedFromStory");
+            window.addEventListener("DOMContentLoaded", () => {
+                document.getElementById("auth-screen").classList.add("hidden");
+                document.getElementById("main-screen").classList.remove("hidden");
+
+                // 언어 버튼 상태 초기화
+                document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+                document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+                document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
+
+                buildDirectory();
+                startMainTyping();
+
+                // 음악 복원
+                const timeStr  = sessionStorage.getItem("musicTime");
+                const playing  = sessionStorage.getItem("musicPlaying");
+                const mainBgm  = document.getElementById("main-bgm");
+                const musicBox = document.getElementById("music-info-box");
+                const musicBtn = document.getElementById("music-control-btn");
+
+                if (mainBgm) {
+                    if (timeStr) mainBgm.currentTime = parseFloat(timeStr);
+
+                    if (playing === "false") {
+                        // 멈춰있던 상태 → 그대로 멈춤
+                        mainBgm.pause();
+                        isMusicPlaying = false;
+                        if (musicBtn) musicBtn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
+                    } else {
+                        // 재생 중이었던 상태 → 이어서 재생
+                        mainBgm.play().catch(() => {});
+                        currentBGM = mainBgm;
+                        isMusicPlaying = true;
+                        if (musicBtn) musicBtn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
+                    }
+                    if (musicBox) musicBox.style.display = "flex";
+                }
             });
         }
 
@@ -2022,93 +1889,6 @@
                     window.location.href = "broken_index.html";
                 }, 1800);
             }, 500);
-        }
-
-        // ====== 📖 스토리 선택 시스템 ======
-        const STORY_CHARS = {
-            daily: {
-                title: "일상 스토리",
-                subtitle: "DAILY · LOG · ARCHIVE",
-                color: "var(--neon-mint)",
-                chars: [
-                    { key: "kuro",  name: "큐로",  sub: "KURO · DAILY LOG" },
-                    { key: "kisne", name: "키스네", sub: "KISNE · DAILY LOG" },
-                    { key: "rie",   name: "리에",  sub: "RIE · DAILY LOG" },
-                ]
-            },
-            novel: {
-                title: "소설 스토리",
-                subtitle: "NOVEL · STORY · FILE",
-                color: "var(--neon-pink)",
-                chars: [
-                    { key: "kuro",  name: "큐로",  sub: "KURO · STORY", locked: true },
-                    { key: "kisne", name: "키스네", sub: "KISNE · STORY", locked: true },
-                    { key: "rie",   name: "리에",  sub: "RIE · STORY", locked: true },
-                ]
-            }
-        };
-
-        let currentStoryMode = null;
-
-        function openStorySelect(mode) {
-            currentStoryMode = mode;
-            const data = STORY_CHARS[mode];
-            const screen = document.getElementById("story-select-screen");
-            const title = document.getElementById("story-select-title");
-            const list = document.getElementById("story-char-list");
-
-            // 제목/데이터베이스 숨기기
-            document.getElementById("ui-title-db").parentElement.style.display = "none";
-            document.getElementById("terminal-text").closest(".terminal").style.display = "none";
-            document.getElementById("directory").style.display = "none";
-            document.getElementById("timeline-boxes").style.display = "none";
-            document.getElementById("story-nav-boxes").style.display = "none";
-
-            // 제목 설정
-            title.textContent = data.title;
-            title.style.color = data.color;
-
-            // 캐릭터 목록 생성
-            list.innerHTML = "";
-            data.chars.forEach(char => {
-                const item = document.createElement("div");
-                item.className = "story-char-item" + (mode === "novel" ? " novel-item" : "") + (char.locked ? " locked" : "");
-                item.innerHTML = `
-                    <div>
-                        <div class="story-char-name">${char.name}</div>
-                        <div class="story-char-sub">${char.sub}</div>
-                    </div>
-                    <div class="story-char-arrow">${char.locked ? "🔒" : "▶"}</div>
-                `;
-                if (!char.locked) {
-                    item.onclick = () => {
-                        if (mode === "daily") {
-                            window.location.href = `story_viewer.html?char=${char.key}`;
-                        } else {
-                            window.location.href = `novel_viewer.html?char=${char.key}`;
-                        }
-                    };
-                }
-                list.appendChild(item);
-            });
-
-            screen.classList.add("visible");
-        }
-
-        function closeStorySelect() {
-            const screen = document.getElementById("story-select-screen");
-            screen.classList.remove("visible");
-
-            // 원래 요소 복원
-            document.getElementById("ui-title-db").parentElement.style.display = "";
-            document.getElementById("terminal-text").closest(".terminal").style.display = "";
-            document.getElementById("directory").style.display = "";
-            document.getElementById("story-nav-boxes").style.display = "flex";
-            // timeline-boxes는 원래 none이었으면 그대로
-            const boxes = document.getElementById("timeline-boxes");
-            if (boxes.dataset.wasVisible === "true") boxes.style.display = "flex";
-
-            currentStoryMode = null;
         }
 
         // FUTURE 버튼

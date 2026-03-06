@@ -137,6 +137,22 @@
         .corner.br { bottom: 6px; right: 6px; border-width: 0 1px 1px 0; }
 
         /* 오른쪽 스토리 박스 */
+        @keyframes expandWidth {
+            from { width: 0; opacity: 0; clip-path: inset(0 100% 0 0); }
+            to   { width: 100%; opacity: 1; clip-path: inset(0 0% 0 0); }
+        }
+        .story-layout.expand-in .story-box,
+        .story-layout.expand-in .photo-box {
+            animation: expandWidth 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            overflow: hidden;
+        }
+        .story-layout.expand-in .photo-box {
+            animation-delay: 0s;
+        }
+        .story-layout.expand-in .story-box {
+            animation-delay: 0.06s;
+        }
+
         .story-box {
             flex: 1;
             border: 1px solid var(--neon-pink);
@@ -483,7 +499,7 @@ His hands slowly move up to cup Kisune's face.
 
 Kisune: "...Curo?"
 
-chu—sound briefly echoes, and just like that, he pulls back.
+A soft, squishing sound — and just like that, he pulls back.
 
 Curo: "...Look... part of it's on me too, for shutting everyone out. And I did tell you — all of this is for you guys. If it's still bothering you, I'll make more of an effort."`,
             `.......
@@ -712,6 +728,15 @@ function init() {
     renderDots();
     // index.html에서 넘어온 언어 설정 반영
     sessionStorage.setItem('savedLang', currentLang);
+
+    // 박스 expand 애니메이션
+    const layout = document.querySelector('.story-layout');
+    if (layout) {
+        layout.classList.remove('expand-in');
+        void layout.offsetWidth;
+        layout.classList.add('expand-in');
+        setTimeout(() => layout.classList.remove('expand-in'), 500);
+    }
 
     resumeMusic();
 }

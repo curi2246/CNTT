@@ -81,8 +81,19 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .directory { width: 100%; max-width: 600px; }
-        .folder { border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 12px; margin-bottom: 8px; cursor: pointer; }
-        .file { cursor: pointer; padding: 10px; color: #fff; border-left: 1px dashed #444; margin-left: 15px; }
+        .folder { border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 12px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.2s, background 0.2s; }
+        .folder:hover { box-shadow: 0 0 10px var(--neon-mint); background: rgba(94,255,235,0.05); }
+        .file { cursor: pointer; padding: 10px; color: #fff; border-left: 1px dashed #444; margin-left: 15px; transition: color 0.15s, text-shadow 0.15s; }
+        .file:hover { color: var(--neon-mint); text-shadow: 0 0 6px var(--neon-mint); }
+
+        @keyframes expandWidth {
+            from { width: 0; opacity: 0; clip-path: inset(0 100% 0 0); }
+            to   { width: 100%; opacity: 1; clip-path: inset(0 0% 0 0); }
+        }
+        .terminal-expand {
+            animation: expandWidth 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            overflow: hidden;
+        }
         .hidden { display: none !important; }
         
         .typing-cursor::after { content: "|"; animation: blink 0.8s infinite; }
@@ -862,12 +873,7 @@
         const fileSystem = {
             en: {
                 "The main character": {
-                    "Leay_Full_Archive.txt": {
-                        pages: [
-                            "Name: Leay\n\n[Species]\nHuman, Noein\n\n[Gender]\nFemale\n\n[Profile]\nHeight: 169cm\nWeight: 51.2kg\nPersonality: Kind yet self-interested — she occasionally weighs personal gain in her decisions.\nAppearance: White hair with a slightly slender build. Usually wears a light gray hoodie and keeps her hat on most of the time. She has been seen without it on occasion, showing various fashion choices, but typically keeps herself covered.\n\n[Abilities]\nHas the basic physical capabilities of a human female, but retains memories across Resets — a rare trait. Due to experiencing multiple overlapping events, she has developed the sharpest dynamic vision among all known living beings.\n\n[Companions]\nMostly travels with Curo and Kisune. Where they sleep or eat remains unknown.\n\n[Known Contacts]\nArein, Tory, Shiro, Silk, Ekis, Kisune Corden, and others. She is known to have connections with most characters, and most of those relationships involve some degree of familiarity.",
-                            "[ Leay — Additional Data ]\n\nDummy Data"
-                        ]
-                    },
+                    "Leay_Full_Archive.txt": { src: "files/en/Leay_Full_Archive.txt" },
                     "Curo_Half_Archive.txt": {
                         pages: [
                             "Name: Curo\n\n[Species]\nYokai, Nine-Tail Fox\n\n[Gender]\nMale\n\n[Profile]\nHeight: 180cm\nWeight: 72.1kg\nPersonality: Warm yet coldly pragmatic — he can be nurturing while remaining calculating when needed.\nAppearance: Black hair. Wears a black short-sleeve shirt under a light sky-blue zip-up hoodie. Has one fox tail and matching ears — the tips are bright red with light gray on the outside. His eyes were originally both ocean-blue, but after a forced experiment in childhood, his left eye turned ruby-red, giving him heterochromia.\n\n[Abilities]\nPrimarily uses blue glitch-rippling portals and a blaster. The blaster has no fixed form — it extends radially from a central core of shattered crystals and metal fragments. It resembles something between wings and a cannon barrel, intentionally asymmetrical. The main material is dark teal and blue-gray metal, embedded with glowing emerald energy core fragments that pulse faintly. When charging, light bleeds through the cracks like it's cutting the air. An alternate form has been observed where the blaster manifests as a massive dragon — the user can ride it, fold its mouth back to fire while boosting forward. The blaster's rear is particularly unstable, with black particles and ink-like debris always drifting nearby. It never fully disperses.\n\n[Companions]\nPrimarily stays with Kisune and Leay. Appears to be romantically involved with Kisune.\n\n[Known Contacts]\nArein, Tory, Shiro, Silk, Ekis, Aleph, Kisune Corden. His relationship with Ekis is extremely hostile — Ekis forcibly conducted inhumane experiments on him in childhood. When Ekis is mentioned, the air around Curo noticeably drops in temperature.",
@@ -1160,6 +1166,11 @@
                 openMapFile(file);
                 return;
             }
+            // 🔥 src 타입이면 외부 .txt 파일 fetch
+            if (fd && fd.src) {
+                openFileWithFetch(file, fd, 0);
+                return;
+            }
             openFile(file, fd, 0);
         }
 
@@ -1180,10 +1191,33 @@
         }
 
         // 🔥 문자열이면 단일 페이지, pages 배열이면 다중 페이지로 처리
+        // src 타입이면 외부 .txt 파일 fetch
         function getPages(fileData) {
             if (typeof fileData === "string") return [fileData];
             if (fileData && Array.isArray(fileData.pages)) return fileData.pages;
             return [String(fileData)];
+        }
+
+        // src 타입 파일: fetch로 읽어서 openFile 호출
+        async function openFileWithFetch(name, fileData, pageIdx) {
+            window.scrollTo(0, 0);
+            document.getElementById("database-view").classList.add("hidden");
+            document.getElementById("file-screen").classList.remove("hidden");
+            document.getElementById("file-title").textContent = "FILE: " + name;
+            document.getElementById("file-text").innerHTML =
+                '<pre style="color:var(--neon-mint); opacity:0.6;">> LOADING FILE...</pre>';
+            try {
+                const resp = await fetch(fileData.src);
+                if (!resp.ok) throw new Error("fetch failed");
+                const text = await resp.text();
+                // \n---\n 또는 \n===\n 기준으로 페이지 분할
+                const pages = text.split(/\n---\n|\n===\n/).map(p => p.trim()).filter(Boolean);
+                const syntheticData = { pages: pages.length ? pages : [text] };
+                openFile(name, syntheticData, pageIdx ?? 0);
+            } catch(e) {
+                document.getElementById("file-text").innerHTML =
+                    '<pre style="color:red;">> ERROR: ' + fileData.src + ' 파일을 불러올 수 없습니다.\n> 파일이 서버에 존재하는지 확인해주세요.</pre>';
+            }
         }
 
         function openFile(name, fileData, pageIdx) {
@@ -1199,6 +1233,11 @@
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
+            // 터미널 expand 애니메이션
+            const tc = document.getElementById("file-terminal-container");
+            tc.classList.remove("terminal-expand");
+            void tc.offsetWidth; // reflow
+            tc.classList.add("terminal-expand");
 
             // 기존 화살표 전부 제거
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());

@@ -208,6 +208,24 @@
 <div class="bg-sigil">✦</div>
 <div class="scanline"></div>
 
+<!-- 오른쪽 하단 음악 박스 (index.html과 동일) -->
+<div id="music-info-box" style="
+    position: fixed; bottom: 20px; right: 20px;
+    background: rgba(0,0,0,0.8); border: 1px solid #5effeb;
+    color: #5effeb; padding: 10px 15px; font-size: 12px;
+    z-index: 100; display: none; box-shadow: 0 0 10px rgba(94,255,235,0.3);
+    gap: 10px; align-items: center; font-family: 'Courier New', monospace;
+">
+    <span>🎵</span>
+    <span id="music-title-box">Now Playing: SYSTEM_MAIN.mp3</span>
+    <button id="music-control-btn" onclick="toggleStoryMusic()" style="
+        background: transparent; border: 1px solid #5effeb; color: #5effeb;
+        padding: 4px 10px; cursor: pointer; font-size: 11px;
+        letter-spacing: 1px; transition: all 0.2s; margin-left: 10px;
+        font-family: 'Courier New', monospace;
+    ">⏸ PAUSE</button>
+</div>
+
 <div id="story-header">
     <button id="back-btn" onclick="goBack()">◀ BACK</button>
     <div id="story-title">—</div>
@@ -259,7 +277,7 @@ const CHAR_IMG_STYLE = {
 const CHARACTERS = {
     kuro: {
         name: "큐로",
-        subtitle: "CURO · DAILY LOG",
+        subtitle: "CURO · DAILY LOG · XX19. 03. 20",
         stories: [
             `큐로: "..."\n\n터벅..터벅...\n키스네: "뭐해?"\n\n자연스럽게 책상 옆에 핫 초코를 두고 앉는다\n큐로: "아 키스네 너구나 지난번에 얻었던 구슬 있지?"\n\n주머니에 손을 넣은 뒤 꺼낸 것은 내부에서 유리처럼 투명하지만 파란색 불이 나있는 어느 손바닥만한 작은 구슬이 있다.\n\n큐로: "리에가 이 구슬 사용법이 적혀있을 거라고 해서 잠시 읽고 있었어"`,
             `키스네: "...지금 며칠동안 읽고 있는게 그거야?"\n\n큐로: "아마도 맞을 걸 한참을 읽어도 안 나와서 망정이지"\n\n키스네: "지난번에 상대했던..누구였지?"\n\n큐로: "알레프?"\n\n키스네: "아 맞다 걔, 걔 상대할 때 알아내지 않았어?"\n\n 큐로: "나도 그런거 같은데 감만 조금 잡히고 여전히 모르겠어 자갈 밭에서 핀셋 찾는 느낌이야"`,
@@ -268,24 +286,24 @@ const CHARACTERS = {
     },
     kisne: {
         name: "키스네",
-        subtitle: "KISUNE · DAILY LOG",
+        subtitle: "KISUNE · DAILY LOG · XX19. 03. 24",
         stories: [
-            ``,
-            ``,
-            ``
+            `스윽...\n\n똑똑\n\n키스네: "큐로오 아직이야?"\n\n잠시 정적이 일어나다 문이 열리기 시작한다.\n\n끼이익..\n\n큐로: "아 미안 너무 늦었나?"\n\n키스네: "지금 너무 그것만 하는거 아냐? 아무리 그래도 도서관에..방에 옮겨다니면서 계속 틀어박혀 있는데 정작 잘 나와주지도 않고.."\n\n큐로: "..아무리 그래도 이 구슬 사용법을 알아야 너네한테 조금이라도 도움이 되지 당장에 너도 지난번에 얻은 구슬 있잖아"`,
+            `키스네: "그거랑 이거는 다르지이 난 처음부터 사용법을 배워서 잘 쓰는데 너는 너무 그것만 보잖아..최근에 별로 만나주지도 않고..같은 집 써도 다른 집 같은 느낌이야.."\n\n큐로: "......"\n\n양 손이 키스네에 두 뺨에 천천히 올라간다\n\n키스네: "..큐로?"\n\n쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다\n\n큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
+            `.......\n\n큐로: "...키스네? 괜찮은거지?"\n\n키스네: "ㄴ..녜에.."\n\n큐로: "그..일단 더 원하면 말해 해주기는 할게 근데..그 이상은 좀 힘들어 나도 나인지라"\n\n키스네: "...."\n\n잠깐에 정적이 일어난 후 키스네는 천천히 큐로를 데리고 방을 같이 들어갔다.`
         ]
     },
     rie: {
         name: "리에",
-        subtitle: "LEAY · DAILY LOG",
+        subtitle: "LEAY · DAILY LOG · XX19. 04. 19",
         stories: [
-            ``,
-            ``,
-            ``
+            `리에: "...키스네? 근데 갑자기 걷다가 왜 그러는거야?"\n\n키스네: "당연히 사진은 남겨놔야지! 너도 알거 아냐 리셋 이후에는 가장 잘 남는게 사진이랑 이것저것이라구"\n\n리에: "그거는 알고 있는데.."\n\n키스네: "에이 그러지 말고 이렇게! 이렇게!"\n\n리에: "이..이렇게?"\n\n어정쩡하게 자세를 취하고 웃는다\n\n리에: "이게 맞나..."\n\n키스네: "딱 좋아! 이쁘다!"`,
+            `키스네: "큐로도 있었음 좋았을텐데.."\n\n리에: "잠시 일 도와주러 가는건데 뭐 어때\n\n찰칵 찰칵 하는 소리와 함께 키스네가 만족스러운 표정으로 핸드폰을 확인한다.\n\n키스네: "이정도면 잘 나왔네!"\n\n리에: "너무 이상하게 나오거나 어리게 나오지는 않았지?"\n\n키스네: "이쁘게 잘 나왔어! 게다가 어리게 나오면 오히려 좋은거지!"\n\n리에: "...그렇긴 한데 너무 어린애 취급 당하면 좀 그래서..ㅎ"`,
+            `리에: "그러고 보니 키스네 너는 몇 살이더라?"\n\n 키스네: "..원래 그런건 묻는 거 아냐 19살 이라고만 알아두면 좋고"\n\n리에: "19살? 악마 평균 수명이 훨씬 높을 텐데..게다가 노화도 덜 되서 아마 적어도 19살이면...190살 이ㅅ-"\n\n갑자기 텁 하는 소리와 함께 리에의 입을 키스네가 막아버린다\n\n키스네: "리에..아무리 그래도 너도 여자니까 알 텐데 그거는 하지 말자..할머니 소리는 듣기 싫어..인간들이 너무 많이 말했어.."\n\n리에: "아..ㅁ..미안 안그럴게"`
         ]
     }
 };
-    
+
 let currentPage = 0;
 let pages = [];
 let currentChar = 'kuro';
@@ -293,29 +311,91 @@ let currentChar = 'kuro';
 // ── 음악 이어받기 ──────────────────────────────
 // index.html에서 재생 중이던 오디오 상태를 sessionStorage로 넘겨받아 이어서 재생
 let bgAudio = null;
+let isStoryMusicPlaying = true; // 멈춤 상태 추적
+
+/* 오른쪽 하단 PAUSE/PLAY 버튼 */
+function toggleStoryMusic() {
+    const btn = document.getElementById('music-control-btn');
+    if (!bgAudio) return;
+    if (isStoryMusicPlaying) {
+        bgAudio.pause();
+        btn.textContent = '▶ PLAY';
+        isStoryMusicPlaying = false;
+        sessionStorage.setItem('musicPlaying', 'false');
+    } else {
+        bgAudio.play().catch(() => {});
+        btn.textContent = '⏸ PAUSE';
+        isStoryMusicPlaying = true;
+        sessionStorage.setItem('musicPlaying', 'true');
+    }
+}
 
 function resumeMusic() {
-    const src      = sessionStorage.getItem('musicSrc');
-    const timeStr  = sessionStorage.getItem('musicTime');
-    const playing  = sessionStorage.getItem('musicPlaying');
-    if (!src || playing !== 'true') return;
+    const src     = sessionStorage.getItem('musicSrc');
+    const timeStr = sessionStorage.getItem('musicTime');
+    const playing = sessionStorage.getItem('musicPlaying'); // 'true' or 'false'
+
+    // src가 없으면 메인 곡 기본값
+    const audioSrc = (src && src.includes('blob:') === false) ? src : 'bgm.mp3.mp3';
+
+    // 뮤직박스는 항상 표시 (멈춰있어도 박스는 보임)
+    const box = document.getElementById('music-info-box');
+    const btn = document.getElementById('music-control-btn');
+
     try {
-        bgAudio = new Audio(src);
+        bgAudio = new Audio(audioSrc);
         bgAudio.loop = true;
-        bgAudio.volume = 0.5;
-        if (timeStr) bgAudio.currentTime = parseFloat(timeStr);
-        bgAudio.play().catch(() => {});
-    } catch(e) {}
+        bgAudio.volume = 0.6;
+
+        bgAudio.addEventListener('canplay', () => {
+            if (timeStr) bgAudio.currentTime = parseFloat(timeStr);
+
+            if (playing === 'false') {
+                // ── 멈춰있던 상태 ──
+                bgAudio.pause();
+                isStoryMusicPlaying = false;
+                if (btn) btn.textContent = '▶ PLAY';
+            } else {
+                // ── 재생 중이던 상태 ──
+                bgAudio.play().catch(() => {
+                    // 자동재생 차단 시 멈춤 상태로
+                    isStoryMusicPlaying = false;
+                    if (btn) btn.textContent = '▶ PLAY';
+                });
+                isStoryMusicPlaying = true;
+                if (btn) btn.textContent = '⏸ PAUSE';
+            }
+        }, { once: true });
+
+        // 파일명으로 타이틀 표시
+        const titleEl = document.getElementById('music-title-box');
+        if (titleEl) {
+            const filename = audioSrc.split('/').pop().split('?')[0];
+            titleEl.textContent = 'Now Playing: ' + decodeURIComponent(filename);
+        }
+
+        if (box) box.style.display = 'flex';
+
+        // 2초마다 재생 위치 저장 (goBack 시 정확한 위치로)
+        setInterval(() => {
+            if (bgAudio) {
+                sessionStorage.setItem('musicTime', String(bgAudio.currentTime));
+                sessionStorage.setItem('musicPlaying', isStoryMusicPlaying ? 'true' : 'false');
+            }
+        }, 2000);
+
+    } catch(e) {
+        console.log('resumeMusic error:', e);
+    }
 }
 
 // ── 뒤로가기: 메인 화면(데이터베이스) ────────────
 function goBack() {
-    // 현재 재생 위치 저장 후 index로 이동
+    // 현재 재생 중이면 위치 저장
     if (bgAudio && !bgAudio.paused) {
-        sessionStorage.setItem('musicTime', bgAudio.currentTime);
+        sessionStorage.setItem('musicTime',    String(bgAudio.currentTime));
         sessionStorage.setItem('musicPlaying', 'true');
     }
-    // 메인 화면으로 (hash로 main-screen 바로 이동)
     window.location.href = 'index.html#main-screen';
 }
 

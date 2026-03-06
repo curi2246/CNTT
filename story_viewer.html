@@ -227,7 +227,14 @@
 </div>
 
 <div id="story-header">
-    <button id="back-btn" onclick="goBack()">◀ BACK</button>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+        <button id="back-btn" onclick="goBack()" style="margin-bottom:0;">◀ BACK</button>
+        <button id="lang-btn" onclick="toggleLang()" style="
+            background: none; border: 1px solid var(--neon-mint); color: var(--neon-mint);
+            padding: 5px 14px; font-family: 'Courier New', monospace; font-size: 11px;
+            letter-spacing: 2px; cursor: pointer; transition: all 0.2s;
+        ">KO / EN</button>
+    </div>
     <div id="story-title">—</div>
     <div id="story-subtitle">DAILY LOG</div>
     <div class="header-line"></div>
@@ -274,35 +281,286 @@ const CHAR_IMG_STYLE = {
     rie:   { fit: "contain", pos: "center center" }
 };
 
-const CHARACTERS = {
+// ══════════════════════════════════════
+// 언어별 캐릭터 데이터
+// ══════════════════════════════════════
+const CHARACTERS_KO = {
     kuro: {
         name: "큐로",
         subtitle: "CURO · DAILY LOG · XX19. 03. 20",
         stories: [
-            `큐로: "..."\n\n터벅..터벅...\n키스네: "뭐해?"\n\n자연스럽게 책상 옆에 핫 초코를 두고 앉는다\n큐로: "아 키스네 너구나 지난번에 얻었던 구슬 있지?"\n\n주머니에 손을 넣은 뒤 꺼낸 것은 내부에서 유리처럼 투명하지만 파란색 불이 나있는 어느 손바닥만한 작은 구슬이 있다.\n\n큐로: "리에가 이 구슬 사용법이 적혀있을 거라고 해서 잠시 읽고 있었어"`,
-            `키스네: "...지금 며칠동안 읽고 있는게 그거야?"\n\n큐로: "아마도 맞을 걸 한참을 읽어도 안 나와서 망정이지"\n\n키스네: "지난번에 상대했던..누구였지?"\n\n큐로: "알레프?"\n\n키스네: "아 맞다 걔, 걔 상대할 때 알아내지 않았어?"\n\n 큐로: "나도 그런거 같은데 감만 조금 잡히고 여전히 모르겠어 자갈 밭에서 핀셋 찾는 느낌이야"`,
-            `키스네: "흠..일단 알았어 일단 단거라도 먹어 너 좋아하잖아"\n\n큐로: "잘 먹을게 고마워"\n\n스윽..터벅...터벅...\n...후루룹`
+            `큐로: "..."
+
+터벅..터벅...
+키스네: "뭐해?"
+
+자연스럽게 책상 옆에 핫 초코를 두고 앉는다
+큐로: "아 키스네 너구나 지난번에 얻었던 구슬 있지?"
+
+주머니에 손을 넣은 뒤 꺼낸 것은 내부에서 유리처럼 투명하지만 파란색 불이 나있는 어느 손바닥만한 작은 구슬이 있다.
+
+큐로: "리에가 이 구슬 사용법이 적혀있을 거라고 해서 잠시 읽고 있었어"`,
+            `키스네: "...지금 며칠동안 읽고 있는게 그거야?"
+
+큐로: "아마도 맞을 걸 한참을 읽어도 안 나와서 망정이지"
+
+키스네: "지난번에 상대했던..누구였지?"
+
+큐로: "알레프?"
+
+키스네: "아 맞다 걔, 걔 상대할 때 알아내지 않았어?"
+
+큐로: "나도 그런거 같은데 감만 조금 잡히고 여전히 모르겠어 자갈 밭에서 핀셋 찾는 느낌이야"`,
+            `키스네: "흠..일단 알았어 일단 단거라도 먹어 너 좋아하잖아"
+
+큐로: "잘 먹을게 고마워"
+
+스윽..터벅...터벅...
+...후루룹`
         ]
     },
     kisne: {
         name: "키스네",
         subtitle: "KISUNE · DAILY LOG · XX19. 03. 24",
         stories: [
-            `스윽...\n\n똑똑\n\n키스네: "큐로오 아직이야?"\n\n잠시 정적이 일어나다 문이 열리기 시작한다.\n\n끼이익..\n\n큐로: "아 미안 너무 늦었나?"\n\n키스네: "지금 너무 그것만 하는거 아냐? 아무리 그래도 도서관에..방에 옮겨다니면서 계속 틀어박혀 있는데 정작 잘 나와주지도 않고.."\n\n큐로: "..아무리 그래도 이 구슬 사용법을 알아야 너네한테 조금이라도 도움이 되지 당장에 너도 지난번에 얻은 구슬 있잖아"`,
-            `키스네: "그거랑 이거는 다르지이 난 처음부터 사용법을 배워서 잘 쓰는데 너는 너무 그것만 보잖아..최근에 별로 만나주지도 않고..같은 집 써도 다른 집 같은 느낌이야.."\n\n큐로: "......"\n\n양 손이 키스네에 두 뺨에 천천히 올라간다\n\n키스네: "..큐로?"\n\n쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다\n\n큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
-            `.......\n\n큐로: "...키스네? 괜찮은거지?"\n\n키스네: "ㄴ..녜에.."\n\n큐로: "그..일단 더 원하면 말해 해주기는 할게 근데..그 이상은 좀 힘들어 나도 나인지라"\n\n키스네: "...."\n\n잠깐에 정적이 일어난 후 키스네는 천천히 큐로를 데리고 방을 같이 들어갔다.`
+            `스윽...
+
+똑똑
+
+키스네: "큐로오 아직이야?"
+
+잠시 정적이 일어나다 문이 열리기 시작한다.
+
+끼이익..
+
+큐로: "아 미안 너무 늦었나?"
+
+키스네: "지금 너무 그것만 하는거 아냐? 아무리 그래도 도서관에..방에 옮겨다니면서 계속 틀어박혀 있는데 정작 잘 나와주지도 않고.."
+
+큐로: "..아무리 그래도 이 구슬 사용법을 알아야 너네한테 조금이라도 도움이 되지 당장에 너도 지난번에 얻은 구슬 있잖아"`,
+            `키스네: "그거랑 이거는 다르지이 난 처음부터 사용법을 배워서 잘 쓰는데 너는 너무 그것만 보잖아..최근에 별로 만나주지도 않고..같은 집 써도 다른 집 같은 느낌이야.."
+
+큐로: "......"
+
+양 손이 키스네에 두 뺨에 천천히 올라간다
+
+키스네: "..큐로?"
+
+쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다
+
+큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
+            `.......
+
+큐로: "...키스네? 괜찮은거지?"
+
+키스네: "ㄴ..녜에.."
+
+큐로: "그..일단 더 원하면 말해 해주기는 할게 근데..그 이상은 좀 힘들어 나도 나인지라"
+
+키스네: "...."
+
+잠깐에 정적이 일어난 후 키스네는 천천히 큐로를 데리고 방을 같이 들어갔다.`
         ]
     },
     rie: {
         name: "리에",
         subtitle: "LEAY · DAILY LOG · XX19. 04. 19",
         stories: [
-            `리에: "...키스네? 근데 갑자기 걷다가 왜 그러는거야?"\n\n키스네: "당연히 사진은 남겨놔야지! 너도 알거 아냐 리셋 이후에는 가장 잘 남는게 사진이랑 이것저것이라구"\n\n리에: "그거는 알고 있는데.."\n\n키스네: "에이 그러지 말고 이렇게! 이렇게!"\n\n리에: "이..이렇게?"\n\n어정쩡하게 자세를 취하고 웃는다\n\n리에: "이게 맞나..."\n\n키스네: "딱 좋아! 이쁘다!"`,
-            `키스네: "큐로도 있었음 좋았을텐데.."\n\n리에: "잠시 일 도와주러 가는건데 뭐 어때\n\n찰칵 찰칵 하는 소리와 함께 키스네가 만족스러운 표정으로 핸드폰을 확인한다.\n\n키스네: "이정도면 잘 나왔네!"\n\n리에: "너무 이상하게 나오거나 어리게 나오지는 않았지?"\n\n키스네: "이쁘게 잘 나왔어! 게다가 어리게 나오면 오히려 좋은거지!"\n\n리에: "...그렇긴 한데 너무 어린애 취급 당하면 좀 그래서..ㅎ"`,
-            `리에: "그러고 보니 키스네 너는 몇 살이더라?"\n\n 키스네: "..원래 그런건 묻는 거 아냐 19살 이라고만 알아두면 좋고"\n\n리에: "19살? 악마 평균 수명이 훨씬 높을 텐데..게다가 노화도 덜 되서 아마 적어도 19살이면...190살 이ㅅ-"\n\n갑자기 텁 하는 소리와 함께 리에의 입을 키스네가 막아버린다\n\n키스네: "리에..아무리 그래도 너도 여자니까 알 텐데 그거는 하지 말자..할머니 소리는 듣기 싫어..인간들이 너무 많이 말했어.."\n\n리에: "아..ㅁ..미안 안그럴게"`
+            `리에: "...키스네? 근데 갑자기 걷다가 왜 그러는거야?"
+
+키스네: "당연히 사진은 남겨놔야지! 너도 알거 아냐 리셋 이후에는 가장 잘 남는게 사진이랑 이것저것이라구"
+
+리에: "그거는 알고 있는데.."
+
+키스네: "에이 그러지 말고 이렇게! 이렇게!"
+
+리에: "이..이렇게?"
+
+어정쩡하게 자세를 취하고 웃는다
+
+리에: "이게 맞나..."
+
+키스네: "딱 좋아! 이쁘다!"`,
+            `키스네: "큐로도 있었음 좋았을텐데.."
+
+리에: "잠시 일 도와주러 가는건데 뭐 어때"
+
+찰칵 찰칵 하는 소리와 함께 키스네가 만족스러운 표정으로 핸드폰을 확인한다.
+
+키스네: "이정도면 잘 나왔네!"
+
+리에: "너무 이상하게 나오거나 어리게 나오지는 않았지?"
+
+키스네: "이쁘게 잘 나왔어! 게다가 어리게 나오면 오히려 좋은거지!"
+
+리에: "...그렇긴 한데 너무 어린애 취급 당하면 좀 그래서..ㅎ"`,
+            `리에: "그러고 보니 키스네 너는 몇 살이더라?"
+
+키스네: "..원래 그런건 묻는 거 아냐 19살 이라고만 알아두면 좋고"
+
+리에: "19살? 악마 평균 수명이 훨씬 높을 텐데..게다가 노화도 덜 되서 아마 적어도 19살이면...190살 이ㅅ-"
+
+갑자기 텁 하는 소리와 함께 리에의 입을 키스네가 막아버린다
+
+키스네: "리에..아무리 그래도 너도 여자니까 알 텐데 그거는 하지 말자..할머니 소리는 듣기 싫어..인간들이 너무 많이 말했어.."
+
+리에: "아..ㅁ..미안 안그럴게"`
         ]
     }
 };
+
+const CHARACTERS_EN = {
+    kuro: {
+        name: "Kuro",
+        subtitle: "CURO · DAILY LOG · XX19. 03. 20",
+        stories: [
+            `Kuro: "..."
+
+Step... step...
+Kisne: "What are you up to?"
+
+She casually sets a hot chocolate beside the desk and takes a seat.
+Kuro: "Oh, Kisne. You know that orb I got last time?"
+
+He reaches into his pocket and pulls out a small orb — roughly palm-sized, transparent as glass with a faint blue glow flickering inside.
+
+Kuro: "Leay said there'd be instructions somewhere on how to use it, so I've been going through it."`,
+            `Kisne: "...That thing you've been reading for days — that's it?"
+
+Kuro: "Probably. I've been at it a while and still nothing. At least that's something."
+
+Kisne: "That person we fought last time... what was their name again?"
+
+Kuro: "Aleph?"
+
+Kisne: "Right, them. Didn't you figure something out when you were dealing with them?"
+
+Kuro: "I thought so too, but I've only got a vague feel for it. Still no idea, really. It's like looking for a pin in a gravel pit."`,
+            `Kisne: "Hmm... alright. At least eat something sweet. You like them, don't you."
+
+Kuro: "I will. Thanks."
+
+Shuffle... step... step...
+...sip`
+        ]
+    },
+    kisne: {
+        name: "Kisne",
+        subtitle: "KISUNE · DAILY LOG · XX19. 03. 24",
+        stories: [
+            `Slide...
+
+Knock knock.
+
+Kisne: "Kuro, you ready yet?"
+
+A brief silence, then the door slowly creaks open.
+
+Creak...
+
+Kuro: "Ah, sorry. Was I too late?"
+
+Kisne: "Don't you think you've been overdoing it lately? Going back and forth between the library and your room, just holed up the whole time... you barely come out anymore."
+
+Kuro: "Even so, I need to figure out how to use this orb. It's the least I can do for you guys. And you have your own orb from last time, right?"`,
+            `Kisne: "That's different. I learned how to use mine from the start. But you — you just stare at that thing nonstop. You've barely been around lately... even living in the same place, it feels like we're in different houses."
+
+Kuro: "......"
+
+His hands slowly rise to cup Kisne's cheeks.
+
+Kisne: "...Kuro?"
+
+A soft squishing sound, then he pulls away immediately.
+
+Kuro: "...Well... part of it is my fault for not responding either. And I told you before — it's all for you guys. If you're still feeling hurt, I'll try harder."`,
+            `.......
+
+Kuro: "...Kisne? You okay?"
+
+Kisne: "Y... yeah..."
+
+Kuro: "If you want more, just say so. I can do that much. But... beyond that is a little hard for me. I'm only me, after all."
+
+Kisne: "...."
+
+After a brief silence, Kisne slowly took Kuro by the hand and led him into the room.`
+        ]
+    },
+    rie: {
+        name: "Leay",
+        subtitle: "LEAY · DAILY LOG · XX19. 04. 19",
+        stories: [
+            `Leay: "...Kisne? Why'd you stop all of a sudden?"
+
+Kisne: "We have to take pictures, obviously! You know how it is — after a reset, photos and stuff like that are what stick around best."
+
+Leay: "I know that, but..."
+
+Kisne: "Come on, don't be like that — like this! Like this!"
+
+Leay: "L... like this?"
+
+She strikes an awkward pose and smiles.
+
+Leay: "Is this right...?"
+
+Kisne: "Perfect! You look great!"`,
+            `Kisne: "It would've been nice if Kuro were here too..."
+
+Leay: "He just went to help out for a bit, it's fine."
+
+Click, click — Kisne checks her phone with a satisfied look.
+
+Kisne: "These turned out great!"
+
+Leay: "I didn't come out too weird or too young-looking, did I?"
+
+Kisne: "You came out really pretty! And looking younger is a good thing!"
+
+Leay: "...I mean, fair enough, but being treated like a little kid gets a bit awkward... heh."`,
+            `Leay: "Come to think of it, how old are you again, Kisne?"
+
+Kisne: "...You're not really supposed to ask that. Just know I'm 19."
+
+Leay: "19? Demons live way longer than that on average... and you barely age, so at 19 you'd be at least... 190 ye-"
+
+A sudden thwap — Kisne claps a hand over Leay's mouth.
+
+Kisne: "Leay... even so, you're a girl too, so you should understand — let's not go there. I don't want to hear the word 'granny'... humans said it way too many times."
+
+Leay: "Ah... m... sorry, I won't."`
+        ]
+    }
+};
+
+// 현재 언어에 따라 선택 (index.html의 currentLang 연동 or URL 파라미터)
+let currentLang = new URLSearchParams(window.location.search).get('lang')
+                || sessionStorage.getItem('currentLang') || 'ko';
+
+function getCharacters() {
+    return currentLang === 'en' ? CHARACTERS_EN : CHARACTERS_KO;
+}
+
+// 언어 전환 버튼
+function toggleLang() {
+    currentLang = currentLang === 'ko' ? 'en' : 'ko';
+    sessionStorage.setItem('currentLang', currentLang);
+    // 현재 캐릭터 + 페이지 유지하면서 텍스트만 교체
+    const chars = getCharacters();
+    const char  = chars[currentChar] || chars['kuro'];
+    document.getElementById('story-title').textContent    = char.name;
+    document.getElementById('story-subtitle').textContent = char.subtitle;
+    document.title = char.name + ' · STORY ARCHIVE';
+    pages = char.stories;
+    // 페이지 범위 초과 방지
+    if (currentPage >= pages.length) currentPage = pages.length - 1;
+    renderPage(false);
+    renderDots();
+    // 버튼 표시 업데이트
+    const btn = document.getElementById('lang-btn');
+    if (btn) btn.textContent = currentLang === 'ko' ? 'KO / EN' : 'EN / KO';
+}
 
 let currentPage = 0;
 let pages = [];
@@ -403,11 +661,15 @@ function goBack() {
 function init() {
     const params = new URLSearchParams(window.location.search);
     currentChar = params.get('char') || 'kuro';
-    const char = CHARACTERS[currentChar] || CHARACTERS['kuro'];
+    const chars = getCharacters();
+    const char  = chars[currentChar] || chars['kuro'];
 
-    document.getElementById('story-title').textContent = char.name;
+    document.getElementById('story-title').textContent    = char.name;
     document.getElementById('story-subtitle').textContent = char.subtitle;
     document.title = char.name + ' · STORY ARCHIVE';
+    // 언어 버튼 초기 텍스트
+    const langBtn = document.getElementById('lang-btn');
+    if (langBtn) langBtn.textContent = currentLang === 'ko' ? 'KO / EN' : 'EN / KO';
 
     // 사진 삽입
     const box = document.getElementById('photo-box');
@@ -425,6 +687,8 @@ function init() {
     currentPage = 0;
     renderPage(false);
     renderDots();
+    // index.html에서 넘어온 언어 설정 반영
+    sessionStorage.setItem('currentLang', currentLang);
 
     resumeMusic();
 }

@@ -643,48 +643,26 @@
     <div id="main-screen" class="screen hidden">
         <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
 
-            <!-- 제목 + 양옆 스토리 박스 -->
-            <div style="display: flex; align-items: center; justify-content: center; width: 100%; max-width: 900px; gap: 0; margin-bottom: 0;">
-
-                <!-- 왼쪽: 일상 스토리 박스 -->
-                <div id="daily-story-box" onclick="toggleDailyStoryMenu()" style="
-                    flex: 1;
-                    border: 1px solid var(--neon-pink);
-                    padding: 18px 20px;
-                    cursor: pointer;
-                    background: rgba(0,0,0,0.5);
-                    transition: all 0.2s;
-                    position: relative;
-                ">
-                    <div style="font-size: 1.1rem; font-weight: 900; letter-spacing: 4px; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">일상　스토리</div>
-                    <div style="font-size: 9px; letter-spacing: 3px; color: rgba(255,94,94,0.55); margin-top: 5px;">DAILY · LOG · ARCHIVE</div>
-                    <!-- 드롭다운 캐릭터 목록 -->
-                    <div id="daily-story-menu" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:50; background:rgba(2,13,13,0.97); border:1px solid var(--neon-pink); border-top:none;">
-                        <div onclick="event.stopPropagation(); openStory('kuro')"  style="padding:12px 20px; cursor:pointer; font-size:11px; letter-spacing:2px; color:var(--neon-mint); border-bottom:1px solid rgba(94,255,235,0.1);">▸ <span class="story-name-kuro">큐로</span><span style="font-size:9px; opacity:0.5; margin-left:8px;">CURO · DAILY LOG</span></div>
-                        <div onclick="event.stopPropagation(); openStory('kisne')" style="padding:12px 20px; cursor:pointer; font-size:11px; letter-spacing:2px; color:var(--neon-mint); border-bottom:1px solid rgba(94,255,235,0.1);">▸ <span class="story-name-kisne">키스네</span><span style="font-size:9px; opacity:0.5; margin-left:8px;">KISUNE · DAILY LOG</span></div>
-                        <div onclick="event.stopPropagation(); openStory('rie')"   style="padding:12px 20px; cursor:pointer; font-size:11px; letter-spacing:2px; color:var(--neon-mint);">▸ <span class="story-name-rie">리에</span><span style="font-size:9px; opacity:0.5; margin-left:8px;">LEAY · DAILY LOG</span></div>
-                    </div>
+            <!-- 일상/소설 스토리 박스 (CENTRAL DATABASE 위) -->
+            <div style="display:flex; width:100%; max-width:700px; margin-bottom: 0;">
+                <div onclick="openStorySelect()" style="
+                    flex:1; border:1px solid var(--neon-pink); padding:16px 22px;
+                    cursor:pointer; background:rgba(0,0,0,0.5);
+                    transition: background 0.2s;
+                " onmouseover="this.style.background='rgba(255,94,94,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">
+                    <div style="font-size:1rem; font-weight:900; letter-spacing:4px; color:var(--neon-pink);">일상　스토리</div>
+                    <div style="font-size:9px; letter-spacing:3px; color:rgba(255,94,94,0.5); margin-top:5px;">DAILY · LOG · ARCHIVE</div>
                 </div>
-
-                <!-- 가운데: CENTRAL DATABASE 제목 -->
-                <div class="header" style="flex: 1.4; text-align:center; padding: 0 10px;">
-                    <h1 id="ui-title-db">CENTRAL DATABASE</h1>
-                </div>
-
-                <!-- 오른쪽: 소설 스토리 박스 (준비중) -->
                 <div style="
-                    flex: 1;
-                    border: 1px solid var(--neon-pink);
-                    padding: 18px 20px;
-                    background: rgba(0,0,0,0.3);
-                    opacity: 0.45;
-                    cursor: default;
+                    flex:1; border:1px solid var(--neon-pink); border-left:none; padding:16px 22px;
+                    background:rgba(0,0,0,0.25); opacity:0.4; cursor:default;
                 ">
-                    <div style="font-size: 1.1rem; font-weight: 900; letter-spacing: 4px; color: var(--neon-pink);">소설　스토리</div>
-                    <div style="font-size: 9px; letter-spacing: 3px; color: rgba(255,94,94,0.55); margin-top: 5px;">NOVEL · STORY · FILE</div>
+                    <div style="font-size:1rem; font-weight:900; letter-spacing:4px; color:var(--neon-pink);">소설　스토리</div>
+                    <div style="font-size:9px; letter-spacing:3px; color:rgba(255,94,94,0.5); margin-top:5px;">NOVEL · STORY · FILE</div>
                 </div>
-
             </div>
+
+            <div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
             <div class="terminal"><div id="terminal-text"></div></div>
             <div class="directory" id="directory"></div>
 
@@ -693,6 +671,38 @@
                 <div class="timeline-box" id="box-future" onclick="triggerFuture()">
                     <div class="timeline-box-label">FUTURE</div>
                     <div class="timeline-box-sub">ACCESS TIMELINE DATA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 캐릭터 선택 화면 -->
+        <div id="story-select-screen" class="hidden" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+            <div style="display:flex; align-items:center; justify-content:space-between; width:100%; max-width:700px; padding: 20px 0 30px;">
+                <button onclick="closeStorySelect()" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:8px 16px; cursor:pointer; font-family:'Courier New',monospace; font-size:12px; letter-spacing:2px;">← BACK</button>
+                <div style="font-size:1rem; font-weight:900; letter-spacing:6px; color:var(--neon-pink);">일상　스토리</div>
+                <div style="width:80px;"></div>
+            </div>
+            <div style="width:100%; max-width:700px; display:flex; flex-direction:column; gap:10px;">
+                <div onclick="openStory('kuro')" style="border:1px solid #1a3a3a; padding:18px 24px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.2s;" onmouseover="this.style.background='rgba(94,255,235,0.05)'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <div style="font-size:1rem; font-weight:700; letter-spacing:3px; color:var(--neon-mint);" id="story-select-name-kuro">큐로</div>
+                        <div style="font-size:9px; letter-spacing:2px; color:rgba(94,255,235,0.4); margin-top:4px;">CURO · DAILY LOG</div>
+                    </div>
+                    <div style="color:var(--neon-mint); opacity:0.5;">▶</div>
+                </div>
+                <div onclick="openStory('kisne')" style="border:1px solid #1a3a3a; padding:18px 24px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.2s;" onmouseover="this.style.background='rgba(94,255,235,0.05)'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <div style="font-size:1rem; font-weight:700; letter-spacing:3px; color:var(--neon-mint);" id="story-select-name-kisne">키스네</div>
+                        <div style="font-size:9px; letter-spacing:2px; color:rgba(94,255,235,0.4); margin-top:4px;">KISUNE · DAILY LOG</div>
+                    </div>
+                    <div style="color:var(--neon-mint); opacity:0.5;">▶</div>
+                </div>
+                <div onclick="openStory('rie')" style="border:1px solid #1a3a3a; padding:18px 24px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.2s;" onmouseover="this.style.background='rgba(94,255,235,0.05)'" onmouseout="this.style.background='transparent'">
+                    <div>
+                        <div style="font-size:1rem; font-weight:700; letter-spacing:3px; color:var(--neon-mint);" id="story-select-name-rie">리에</div>
+                        <div style="font-size:9px; letter-spacing:2px; color:rgba(94,255,235,0.4); margin-top:4px;">LEAY · DAILY LOG</div>
+                    </div>
+                    <div style="color:var(--neon-mint); opacity:0.5;">▶</div>
                 </div>
             </div>
         </div>
@@ -1906,61 +1916,6 @@
         }
 
         // ── story_viewer에서 돌아왔을 때 처리 ──────────────
-        // 모든 함수 정의 완료 후 맨 끝에서 즉시 실행
-        if (sessionStorage.getItem("returnedFromStory") === "1") {
-            sessionStorage.removeItem("returnedFromStory");
-
-            document.getElementById("auth-screen").classList.add("hidden");
-            document.getElementById("main-screen").classList.remove("hidden");
-
-            document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
-            document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
-            document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
-
-            buildDirectory();
-            startMainTyping();
-
-            // 음악 복원
-            const _time    = sessionStorage.getItem("musicTime");
-            const _playing = sessionStorage.getItem("musicPlaying");
-            const _bgm     = document.getElementById("main-bgm");
-            const _box     = document.getElementById("music-info-box");
-            const _btn     = document.getElementById("music-control-btn");
-
-            if (_bgm) {
-                if (_time) _bgm.currentTime = parseFloat(_time);
-                if (_playing === "false") {
-                    _bgm.pause();
-                    isMusicPlaying = false;
-                    if (_btn) _btn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
-                } else {
-                    _bgm.play().catch(() => {});
-                    currentBGM = _bgm;
-                    isMusicPlaying = true;
-                    if (_btn) _btn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
-                }
-                if (_box) _box.style.display = "flex";
-            }
-        }
-
-        // ── 일상 스토리 드롭다운 ──────────────────────────
-        function toggleDailyStoryMenu() {
-            const menu = document.getElementById('daily-story-menu');
-            const box  = document.getElementById('daily-story-box');
-            const isOpen = menu.style.display === 'block';
-            menu.style.display = isOpen ? 'none' : 'block';
-            box.style.background = isOpen ? 'rgba(0,0,0,0.5)' : 'rgba(255,94,94,0.07)';
-        }
-        // 바깥 클릭 시 닫기
-        document.addEventListener('click', function(e) {
-            const box = document.getElementById('daily-story-box');
-            if (box && !box.contains(e.target)) {
-                document.getElementById('daily-story-menu').style.display = 'none';
-                box.style.background = 'rgba(0,0,0,0.5)';
-            }
-        });
-
-        // ── 스토리 열기: 음악 상태 저장 후 이동 ──────────
         function openStory(charKey) {
             try {
                 const mainBgm   = document.getElementById('main-bgm');
@@ -1985,28 +1940,60 @@
             window.location.href = 'story_viewer.html?char=' + charKey;
         }
 
-        // ── 언어 바뀌면 박스 이름도 업데이트 ─────────────
-        const _storyBoxNames = {
-            ko: { title: "일상　스토리", sub: "DAILY · LOG · ARCHIVE",
-                  kuro: "큐로", kisne: "키스네", rie: "리에" },
-            en: { title: "Daily　Story",  sub: "DAILY · LOG · ARCHIVE",
-                  kuro: "Curo", kisne: "Kisune", rie: "Leay" }
-        };
-        const _origSetLangIndex = typeof setLang === 'function' ? setLang : null;
-        function setLang(lang) {
-            if (_origSetLangIndex) _origSetLangIndex(lang);
-            const n = _storyBoxNames[lang] || _storyBoxNames['en'];
-            const box = document.getElementById('daily-story-box');
-            if (box) {
-                box.querySelector('div').textContent = n.title;
-                const subs = box.querySelectorAll('.story-name-kuro, .story-name-kisne, .story-name-rie');
+        // ── 캐릭터 선택 화면 열기/닫기 ──
+        function openStorySelect() {
+            // 언어에 따라 이름 업데이트
+            const names = {
+                ko: { kuro: "큐로", kisne: "키스네", rie: "리에" },
+                en: { kuro: "Curo", kisne: "Kisune", rie: "Leay" }
+            }[currentLang] || { kuro: "Curo", kisne: "Kisune", rie: "Leay" };
+            document.getElementById("story-select-name-kuro").textContent  = names.kuro;
+            document.getElementById("story-select-name-kisne").textContent = names.kisne;
+            document.getElementById("story-select-name-rie").textContent   = names.rie;
+
+            document.getElementById("database-view").classList.add("hidden");
+            document.getElementById("story-select-screen").classList.remove("hidden");
+        }
+
+        function closeStorySelect() {
+            document.getElementById("story-select-screen").classList.add("hidden");
+            document.getElementById("database-view").classList.remove("hidden");
+        }
+
+        // ── story_viewer에서 돌아왔을 때: 모든 함수 정의 후 즉시 실행 ──
+        if (sessionStorage.getItem("returnedFromStory") === "1") {
+            sessionStorage.removeItem("returnedFromStory");
+
+            document.getElementById("auth-screen").classList.add("hidden");
+            document.getElementById("main-screen").classList.remove("hidden");
+
+            document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+            document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+            document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
+
+            buildDirectory();
+            startMainTyping();
+
+            const _time    = sessionStorage.getItem("musicTime");
+            const _playing = sessionStorage.getItem("musicPlaying");
+            const _bgm     = document.getElementById("main-bgm");
+            const _box     = document.getElementById("music-info-box");
+            const _btn     = document.getElementById("music-control-btn");
+
+            if (_bgm) {
+                if (_time) _bgm.currentTime = parseFloat(_time);
+                if (_playing === "false") {
+                    _bgm.pause();
+                    isMusicPlaying = false;
+                    if (_btn) _btn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
+                } else {
+                    _bgm.play().catch(() => {});
+                    currentBGM = _bgm;
+                    isMusicPlaying = true;
+                    if (_btn) _btn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
+                }
+                if (_box) _box.style.display = "flex";
             }
-            const k = document.querySelector('.story-name-kuro');
-            const s = document.querySelector('.story-name-kisne');
-            const r = document.querySelector('.story-name-rie');
-            if (k) k.textContent = n.kuro;
-            if (s) s.textContent = n.kisne;
-            if (r) r.textContent = n.rie;
         }
     </script>
 </body>

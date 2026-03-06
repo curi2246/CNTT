@@ -107,18 +107,27 @@
             justify-content: center;
             min-height: 460px;
         }
-        .photo-box img {
+        /* 메인 이미지 */
+        .photo-box img.main-photo {
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: block;
             position: absolute;
             top: 0; left: 0;
+            z-index: 2;
         }
-        /* 세로형 이미지 (키스네처럼 세로가 훨씬 긴 경우) */
-        .photo-box img.portrait {
+        /* 블러 배경 (contain일 때 빈 공간을 채워줌) */
+        .photo-box img.bg-photo {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            object-position: center top;
+            display: block;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+            filter: blur(18px) brightness(0.35) saturate(0.7);
+            transform: scale(1.1);
         }
 
         .corner { position: absolute; width: 12px; height: 12px; border-color: var(--neon-mint); border-style: solid; opacity: 0.6; z-index: 2; }
@@ -276,8 +285,11 @@ const CHAR_IMAGES = {
 // kisne: 세로형 얼굴 클로즈업 → cover top
 // rie: 세로형 전신 → contain (전체 보이게)
 const CHAR_IMG_STYLE = {
-    kuro:  { fit: "cover",   pos: "center center" },
-    kisne: { fit: "cover",   pos: "center top"    },
+    // 큐로 736x932 (1.27) — 살짝 세로가 길어서 cover + 상단 약간 올려서 얼굴 중심
+    kuro:  { fit: "cover",   pos: "center 15%"   },
+    // 키스네 736x1041 (1.41) — contain으로 전체 보이게 (박스 배경 어두워서 자연스러움)
+    kisne: { fit: "contain", pos: "center center" },
+    // 리에 704x1470 (2.09) — 전신샷, contain으로 전체 보이게
     rie:   { fit: "contain", pos: "center center" }
 };
 
@@ -292,11 +304,9 @@ const CHARACTERS_KO = {
             `큐로: "..."
 
 터벅..터벅...
-
 키스네: "뭐해?"
 
 자연스럽게 책상 옆에 핫 초코를 두고 앉는다
-
 큐로: "아 키스네 너구나 지난번에 얻었던 구슬 있지?"
 
 주머니에 손을 넣은 뒤 꺼낸 것은 내부에서 유리처럼 투명하지만 파란색 불이 나있는 어느 손바닥만한 작은 구슬이 있다.
@@ -318,7 +328,6 @@ const CHARACTERS_KO = {
 큐로: "잘 먹을게 고마워"
 
 스윽..터벅...터벅...
-
 ...후루룹`
         ]
     },
@@ -349,7 +358,7 @@ const CHARACTERS_KO = {
 
 키스네: "..큐로?"
 
-쪽- 하는 소리와 함께 이후 두 손을 내려놓고 다시 키스네를 쳐다본다.
+쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다
 
 큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
             `.......
@@ -420,11 +429,9 @@ const CHARACTERS_EN = {
             `Curo: "..."
 
 Thud... thud...
-
 Kisune: "Hey, what're you up to?"
 
 She sets a hot chocolate down next to the desk like it's the most natural thing in the world and takes a seat.
-
 Curo: "Oh, Kisune. Hey — you remember that orb I picked up last time?"
 
 He digs into his pocket and pulls out a small orb, about the size of his palm — glass-clear on the inside, a faint blue light pulsing through it.
@@ -476,7 +483,7 @@ His hands slowly move up to cup Kisune's face.
 
 Kisune: "...Curo?"
 
-chu- sound can be heard — and just like that, he pulls back.
+A soft, squishing sound — and just like that, he pulls back.
 
 Curo: "...Look... part of it's on me too, for shutting everyone out. And I did tell you — all of this is for you guys. If it's still bothering you, I'll make more of an effort."`,
             `.......
@@ -678,14 +685,23 @@ function init() {
     const langBtn = document.getElementById('lang-btn');
     if (langBtn) langBtn.textContent = currentLang === 'ko' ? 'KO / EN' : 'EN / KO';
 
-    // 사진 삽입
-    const box = document.getElementById('photo-box');
+    // 사진 삽입 (블러 배경 + 메인 이미지)
+    const box    = document.getElementById('photo-box');
     const imgSrc = CHAR_IMAGES[currentChar];
     const style  = CHAR_IMG_STYLE[currentChar];
     if (imgSrc) {
+        // 블러 배경 (빈 공간 채움)
+        const bg = document.createElement('img');
+        bg.src = imgSrc;
+        bg.className = 'bg-photo';
+        bg.style.objectPosition = style.pos;
+        box.appendChild(bg);
+
+        // 메인 이미지
         const img = document.createElement('img');
         img.src = imgSrc;
-        img.style.objectFit     = style.fit;
+        img.className = 'main-photo';
+        img.style.objectFit      = style.fit;
         img.style.objectPosition = style.pos;
         box.appendChild(img);
     }

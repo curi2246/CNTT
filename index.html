@@ -808,47 +808,7 @@
             });
         }
 
-        // story_viewer에서 돌아왔을 때 자동 로그인 (비번 화면 건너뜀)
-        if (sessionStorage.getItem("returnedFromStory") === "1") {
-            sessionStorage.removeItem("returnedFromStory");
-            window.addEventListener("DOMContentLoaded", () => {
-                document.getElementById("auth-screen").classList.add("hidden");
-                document.getElementById("main-screen").classList.remove("hidden");
-
-                // 언어 버튼 상태 초기화
-                document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
-                document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
-                document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
-
-                buildDirectory();
-                startMainTyping();
-
-                // 음악 복원
-                const timeStr  = sessionStorage.getItem("musicTime");
-                const playing  = sessionStorage.getItem("musicPlaying");
-                const mainBgm  = document.getElementById("main-bgm");
-                const musicBox = document.getElementById("music-info-box");
-                const musicBtn = document.getElementById("music-control-btn");
-
-                if (mainBgm) {
-                    if (timeStr) mainBgm.currentTime = parseFloat(timeStr);
-
-                    if (playing === "false") {
-                        // 멈춰있던 상태 → 그대로 멈춤
-                        mainBgm.pause();
-                        isMusicPlaying = false;
-                        if (musicBtn) musicBtn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
-                    } else {
-                        // 재생 중이었던 상태 → 이어서 재생
-                        mainBgm.play().catch(() => {});
-                        currentBGM = mainBgm;
-                        isMusicPlaying = true;
-                        if (musicBtn) musicBtn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
-                    }
-                    if (musicBox) musicBox.style.display = "flex";
-                }
-            });
-        }
+        // returnedFromStory 플래그는 스크립트 맨 끝에서 처리 (함수 정의 후 실행)
 
         const uiText = {
             en: {
@@ -1943,6 +1903,44 @@
         function triggerPast() {
             playPastSound();
             setTimeout(() => startClock("past"), 200);
+        }
+
+        // ── story_viewer에서 돌아왔을 때 처리 ──────────────
+        // 모든 함수 정의 완료 후 맨 끝에서 즉시 실행
+        if (sessionStorage.getItem("returnedFromStory") === "1") {
+            sessionStorage.removeItem("returnedFromStory");
+
+            document.getElementById("auth-screen").classList.add("hidden");
+            document.getElementById("main-screen").classList.remove("hidden");
+
+            document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
+            document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
+            document.getElementById("ui-title-db").textContent = uiText[currentLang].dbTitle;
+
+            buildDirectory();
+            startMainTyping();
+
+            // 음악 복원
+            const _time    = sessionStorage.getItem("musicTime");
+            const _playing = sessionStorage.getItem("musicPlaying");
+            const _bgm     = document.getElementById("main-bgm");
+            const _box     = document.getElementById("music-info-box");
+            const _btn     = document.getElementById("music-control-btn");
+
+            if (_bgm) {
+                if (_time) _bgm.currentTime = parseFloat(_time);
+                if (_playing === "false") {
+                    _bgm.pause();
+                    isMusicPlaying = false;
+                    if (_btn) _btn.textContent = currentLang === "ko" ? "▶ 재생" : "▶ PLAY";
+                } else {
+                    _bgm.play().catch(() => {});
+                    currentBGM = _bgm;
+                    isMusicPlaying = true;
+                    if (_btn) _btn.textContent = currentLang === "ko" ? "⏸ 정지" : "⏸ PAUSE";
+                }
+                if (_box) _box.style.display = "flex";
+            }
         }
 
         // ── 일상 스토리 드롭다운 ──────────────────────────

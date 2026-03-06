@@ -87,11 +87,11 @@
         .file:hover { color: var(--neon-mint); text-shadow: 0 0 6px var(--neon-mint); }
 
         @keyframes expandWidth {
-            from { width: 0; opacity: 0; clip-path: inset(0 100% 0 0); }
-            to   { width: 100%; opacity: 1; clip-path: inset(0 0% 0 0); }
+            from { clip-path: inset(0 50% 0 50%); opacity: 0.3; }
+            to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
         .terminal-expand {
-            animation: expandWidth 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: expandWidth 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
         }
         .hidden { display: none !important; }
@@ -873,7 +873,12 @@
         const fileSystem = {
             en: {
                 "The main character": {
-                    "Leay_Full_Archive.txt": { src: "files/en/Leay_Full_Archive.txt" },
+                    "Leay_Full_Archive.txt": {
+                        pages: [
+                            "Name: Leay\n\n[Species]\nHuman, Noein\n\n[Gender]\nFemale\n\n[Profile]\nHeight: 169cm\nWeight: 51.2kg\nPersonality: Kind yet self-interested — she occasionally weighs personal gain in her decisions.\nAppearance: White hair with a slightly slender build. Usually wears a light gray hoodie and keeps her hat on most of the time. She has been seen without it on occasion, showing various fashion choices, but typically keeps herself covered.\n\n[Abilities]\nHas the basic physical capabilities of a human female, but retains memories across Resets — a rare trait. Due to experiencing multiple overlapping events, she has developed the sharpest dynamic vision among all known living beings.\n\n[Companions]\nMostly travels with Curo and Kisune. Where they sleep or eat remains unknown.\n\n[Known Contacts]\nArein, Tory, Shiro, Silk, Ekis, Kisune Corden, and others. She is known to have connections with most characters, and most of those relationships involve some degree of familiarity.",
+                            "[ Leay — Additional Data ]\n\nDummy Data"
+                        ]
+                    },
                     "Curo_Half_Archive.txt": {
                         pages: [
                             "Name: Curo\n\n[Species]\nYokai, Nine-Tail Fox\n\n[Gender]\nMale\n\n[Profile]\nHeight: 180cm\nWeight: 72.1kg\nPersonality: Warm yet coldly pragmatic — he can be nurturing while remaining calculating when needed.\nAppearance: Black hair. Wears a black short-sleeve shirt under a light sky-blue zip-up hoodie. Has one fox tail and matching ears — the tips are bright red with light gray on the outside. His eyes were originally both ocean-blue, but after a forced experiment in childhood, his left eye turned ruby-red, giving him heterochromia.\n\n[Abilities]\nPrimarily uses blue glitch-rippling portals and a blaster. The blaster has no fixed form — it extends radially from a central core of shattered crystals and metal fragments. It resembles something between wings and a cannon barrel, intentionally asymmetrical. The main material is dark teal and blue-gray metal, embedded with glowing emerald energy core fragments that pulse faintly. When charging, light bleeds through the cracks like it's cutting the air. An alternate form has been observed where the blaster manifests as a massive dragon — the user can ride it, fold its mouth back to fire while boosting forward. The blaster's rear is particularly unstable, with black particles and ink-like debris always drifting nearby. It never fully disperses.\n\n[Companions]\nPrimarily stays with Kisune and Leay. Appears to be romantically involved with Kisune.\n\n[Known Contacts]\nArein, Tory, Shiro, Silk, Ekis, Aleph, Kisune Corden. His relationship with Ekis is extremely hostile — Ekis forcibly conducted inhumane experiments on him in childhood. When Ekis is mentioned, the air around Curo noticeably drops in temperature.",

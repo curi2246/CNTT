@@ -39,6 +39,48 @@
                     rgba(255, 220, 140, 0.07) 0%,
                     transparent 60%);
         }
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 100% 18% at 50% 100%,
+                    rgba(255, 120, 40, 0.08) 0%,
+                    rgba(255, 80,  20, 0.04) 50%,
+                    transparent 100%),
+                radial-gradient(ellipse 60% 10% at 60% 100%,
+                    rgba(255, 160, 60, 0.05) 0%,
+                    transparent 80%);
+        }
+        .dawn-mist {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 28%;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(to top,
+                rgba(30, 12, 4, 0.18) 0%,
+                rgba(20, 8, 2, 0.06) 50%,
+                transparent 100%);
+            animation: mistFloat 8s ease-in-out infinite;
+        }
+        @keyframes mistFloat {
+            0%, 100% { opacity: 0.7; transform: translateY(0); }
+            50%       { opacity: 1;   transform: translateY(-4px); }
+        }
+        .dawn-stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .dawn-star {
+            position: absolute; border-radius: 50%;
+            background: var(--star-color, rgba(180, 255, 240, 0.9));
+            animation: starTwinkle var(--dur) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+        @keyframes starTwinkle {
+            0%, 100% { opacity: var(--min-op); transform: scale(1); }
+            50%       { opacity: var(--max-op); transform: scale(1.3); }
+        }
 
         .bg-sigil {
             position: fixed; top: 50%; left: 50%;
@@ -248,6 +290,8 @@
 <body>
 <div class="bg-sigil">✦</div>
 <div class="scanline"></div>
+<div class="dawn-mist"></div>
+<div class="dawn-stars" id="dawn-stars"></div>
 
 <!-- 오른쪽 하단 음악 박스 (index.html과 동일) -->
 <div id="music-info-box" style="
@@ -336,11 +380,9 @@ const CHARACTERS_KO = {
             `큐로: "..."
 
 터벅..터벅...
-
 키스네: "뭐해?"
 
 자연스럽게 책상 옆에 핫 초코를 두고 앉는다
-
 큐로: "아 키스네 너구나 지난번에 얻었던 구슬 있지?"
 
 주머니에 손을 넣은 뒤 꺼낸 것은 내부에서 유리처럼 투명하지만 파란색 불이 나있는 어느 손바닥만한 작은 구슬이 있다.
@@ -392,7 +434,7 @@ const CHARACTERS_KO = {
 
 키스네: "..큐로?"
 
-쪽- 하는 소리와 함께 다시 키스네를 바라본다.
+쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다
 
 큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
             `.......
@@ -517,7 +559,7 @@ His hands slowly move up to cup Kisune's face.
 
 Kisune: "...Curo?"
 
-chu- sound briefly echoes — and just like that, he pulls back.
+A soft, squishing sound — and just like that, he pulls back.
 
 Curo: "...Look... part of it's on me too, for shutting everyone out. And I did tell you — all of this is for you guys. If it's still bothering you, I'll make more of an effort."`,
             `.......
@@ -706,6 +748,38 @@ function goBack() {
 }
 
 // ── 초기화 ──────────────────────────────────────
+// 새벽 별 생성
+(function() {
+    const container = document.getElementById('dawn-stars');
+    if (!container) return;
+    // 민트·핑크·흰빛 팔레트 — 테마와 어울리게
+    const palette = [
+        { color: 'rgba(94,255,235,0.85)',  glow: 'rgba(94,255,235,0.25)'  },  // 민트
+        { color: 'rgba(180,255,245,0.80)', glow: 'rgba(94,255,235,0.15)'  },  // 연민트
+        { color: 'rgba(255,200,210,0.75)', glow: 'rgba(255,94,94,0.18)'   },  // 연핑크
+        { color: 'rgba(220,210,255,0.70)', glow: 'rgba(180,140,255,0.15)' },  // 연보라
+        { color: 'rgba(200,240,255,0.75)', glow: 'rgba(94,200,255,0.15)'  },  // 흰청
+    ];
+    const count = 36; // 너무 많으면 거슬림
+    for (let i = 0; i < count; i++) {
+        const s = document.createElement('div');
+        s.className = 'dawn-star';
+        const size = Math.random() * 1.4 + 0.3;
+        const x = Math.random() * 100;
+        const y = Math.random() * 58; // 상단 하늘에만
+        const dur   = (Math.random() * 4 + 3).toFixed(1) + 's'; // 느리게
+        const delay = (Math.random() * 6).toFixed(1) + 's';
+        // 일출 방향(오른쪽 상단) 근처는 더 흐리게
+        const distFromSun = Math.sqrt(Math.pow(x - 85, 2) + Math.pow(y, 2));
+        const fade  = Math.min(1, distFromSun / 55);
+        const minOp = (0.03 * fade).toFixed(2);
+        const maxOp = (0.22 * fade).toFixed(2); // 전체적으로 낮게
+        const p = palette[Math.floor(Math.random() * palette.length)];
+        s.style.cssText = `width:${size}px;height:${size}px;left:${x}%;top:${y}%;--dur:${dur};--delay:${delay};--min-op:${minOp};--max-op:${maxOp};--star-color:${p.color};box-shadow:0 0 ${size*2}px ${p.glow};`;
+        container.appendChild(s);
+    }
+})();
+
 function init() {
     const params = new URLSearchParams(window.location.search);
     currentChar = params.get('char') || 'kuro';

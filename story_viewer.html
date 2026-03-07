@@ -24,6 +24,22 @@
             flex-direction: column;
         }
 
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 60% 45% at 82% -5%,
+                    rgba(255, 210, 120, 0.10) 0%,
+                    rgba(255, 175, 60,  0.05) 40%,
+                    transparent 70%),
+                radial-gradient(ellipse 35% 55% at 95% 10%,
+                    rgba(255, 220, 140, 0.07) 0%,
+                    transparent 60%);
+        }
+
         .bg-sigil {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -376,7 +392,7 @@ const CHARACTERS_KO = {
 
 키스네: "..큐로?"
 
-쭈와아아아아아아아압 소리와 함께 곧바로 얼굴을 떼어낸다
+쪽- 하는 소리와 함께 다시 키스네를 바라본다.
 
 큐로: "...뭐..워낙 나도 반응을 안한 잘못도 있으니..게다가 이전에 말해줬잖아 너네를 위해서라고 정 서운하면은 좀 더 노력할게"`,
             `.......
@@ -447,11 +463,9 @@ const CHARACTERS_EN = {
             `Curo: "..."
 
 Thud... thud...
-
 Kisune: "Hey, what're you up to?"
 
 She sets a hot chocolate down next to the desk like it's the most natural thing in the world and takes a seat.
-
 Curo: "Oh, Kisune. Hey — you remember that orb I picked up last time?"
 
 He digs into his pocket and pulls out a small orb, about the size of his palm — glass-clear on the inside, a faint blue light pulsing through it.
@@ -503,7 +517,7 @@ His hands slowly move up to cup Kisune's face.
 
 Kisune: "...Curo?"
 
-A soft, squishing sound — and just like that, he pulls back.
+chu- sound briefly echoes — and just like that, he pulls back.
 
 Curo: "...Look... part of it's on me too, for shutting everyone out. And I did tell you — all of this is for you guys. If it's still bothering you, I'll make more of an effort."`,
             `.......

@@ -165,6 +165,43 @@
             animation: expandWidth 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
         }
+
+        /* 글리치 비번 입력창 */
+        #glitch-input-overlay {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 8000;
+            clip-path: inset(0 50% 0 50%);
+            opacity: 0;
+            transition: none;
+        }
+        #glitch-input-overlay.reveal {
+            animation: expandWidth 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        #glitch-input-box {
+            background: rgba(2, 8, 8, 0.95);
+            border: 1px solid var(--neon-mint);
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 18px rgba(94,255,235,0.15);
+            white-space: nowrap;
+        }
+        #glitch-input-field {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--neon-mint);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            letter-spacing: 3px;
+            width: 120px;
+            caret-color: var(--neon-mint);
+        }
+        #glitch-input-field::placeholder { color: transparent; }
         .hidden { display: none !important; }
         
         .typing-cursor::after { content: "|"; animation: blink 0.8s infinite; }
@@ -700,6 +737,13 @@
 
     <audio id="main-bgm" loop src="bgm.mp3.mp3"></audio>
     <audio id="glitch-bgm" loop src="hidden.mp3.mp3"></audio>
+
+    <!-- 글리치 히든 입력창 -->
+    <div id="glitch-input-overlay">
+        <div id="glitch-input-box">
+            <input id="glitch-input-field" type="password" maxlength="10" autocomplete="off" spellcheck="false" />
+        </div>
+    </div>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
 
     <div id="music-info-box">
@@ -1162,26 +1206,85 @@
             }
         }
 
-        window.addEventListener('keydown', (e) => {
-            inputBuffer += e.key.toLowerCase();
-            if (inputBuffer.length > 6) inputBuffer = inputBuffer.substring(inputBuffer.length - 6);
-            console.log("Key pressed:", e.key, "Buffer:", inputBuffer); // 디버그
-            if (inputBuffer === "glitch" && !isGlitchUnlocked) {
-                console.log("GLITCH ACTIVATED!"); // 디버그
-                isGlitchUnlocked = true;
-                const mainBgm = document.getElementById("main-bgm");
-                const glitchBgm = document.getElementById("glitch-bgm");
-                if (mainBgm) mainBgm.pause();
-                if (glitchBgm) { 
-                    glitchBgm.currentTime = 0; 
-                    glitchBgm.play().catch(err => console.log("재생 실패", err)); 
-                    currentBGM = glitchBgm;
+        // ── 글리치 히든 입력창 제어 ──
+        let glitchOverlayOpen = false;
+
+        function openGlitchInput() {
+            if (glitchOverlayOpen || isGlitchUnlocked) return;
+            const overlay = document.getElementById('glitch-input-overlay');
+            const field   = document.getElementById('glitch-input-field');
+            overlay.style.display = 'block';
+            overlay.classList.remove('reveal');
+            void overlay.offsetWidth;
+            overlay.classList.add('reveal');
+            glitchOverlayOpen = true;
+            setTimeout(() => { field.focus(); }, 100);
+        }
+
+        function closeGlitchInput() {
+            const overlay = document.getElementById('glitch-input-overlay');
+            const field   = document.getElementById('glitch-input-field');
+            overlay.style.display = 'none';
+            overlay.classList.remove('reveal');
+            field.value = '';
+            glitchOverlayOpen = false;
+        }
+
+        function activateGlitch() {
+            isGlitchUnlocked = true;
+            closeGlitchInput();
+            const mainBgm  = document.getElementById("main-bgm");
+            const glitchBgm = document.getElementById("glitch-bgm");
+            if (mainBgm)  mainBgm.pause();
+            if (glitchBgm) {
+                glitchBgm.currentTime = 0;
+                glitchBgm.play().catch(() => {});
+                currentBGM = glitchBgm;
+            }
+            document.getElementById("music-title").textContent = currentLang === "en" ? "Now Playing: error.mp3" : "재생 중: error.mp3.mp3";
+            document.body.classList.add('glitch-active');
+            setTimeout(() => document.body.classList.remove('glitch-active'), 1500);
+        }
+
+        // 글리치 입력창에서 엔터 → 확인 / Escape → 닫기
+        document.getElementById('glitch-input-field').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = document.getElementById('glitch-input-field').value.toLowerCase().trim();
+                if (val === 'glitch') {
+                    activateGlitch();
+                } else {
+                    // 틀리면 그냥 닫기
+                    closeGlitchInput();
                 }
-                document.getElementById("music-title").textContent = currentLang === "en" ? "Now Playing: error.mp3" : "재생 중: error.mp3.mp3";
-                document.body.classList.add('glitch-active');
-                setTimeout(() => document.body.classList.remove('glitch-active'), 1500);
+            } else if (e.key === 'Escape') {
+                closeGlitchInput();
             }
         });
+
+        // 메인 화면에서 엔터 → 입력창 열기
+        window.addEventListener('keydown', (e) => {
+            if (isGlitchUnlocked) return;
+            // 다른 input에 포커스 중이면 무시
+            const tag = document.activeElement.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                openGlitchInput();
+            }
+        });
+
+        // 모바일 더블탭 → 입력창 열기
+        let lastTap = 0;
+        document.addEventListener('touchend', (e) => {
+            if (isGlitchUnlocked) return;
+            const now = Date.now();
+            if (now - lastTap < 300) {
+                e.preventDefault();
+                openGlitchInput();
+            }
+            lastTap = now;
+        }, { passive: false });
 
         document.getElementById("auth-form").onsubmit = (e) => {
             e.preventDefault();

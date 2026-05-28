@@ -819,9 +819,9 @@
                 </div>
             </div>
 
-            <div class="header" style="text-align:center;">
+            <div class="header" style="text-align:center; width:100%; overflow:hidden;">
                 <h1 id="ui-title-db" class="db-title-glitch" data-text="CENTRAL DATABASE">CENTRAL DATABASE</h1>
-                <canvas id="glitch-db-canvas" style="display:block;margin:0 auto 4px;image-rendering:pixelated;"></canvas>
+                <canvas id="glitch-db-canvas" style="display:block;margin:0 auto 4px;image-rendering:pixelated;max-width:100%;"></canvas>
                 <div class="db-subtitle-blink" id="ui-subtitle-db">[ CLASSIFIED DATABASE // YEAR 3064 // ACCESS GRANTED ]</div>
             </div>
             <div class="terminal"><div id="terminal-text"></div></div>
@@ -1000,12 +1000,19 @@
 
             ctx.font = FONT;
             const metrics = ctx.measureText(text);
-            const W = Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24;
+            const maxW = Math.min(
+                Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24,
+                window.innerWidth - 40
+            );
+            const W = maxW;
             const H = FONT_SZ * 2.2;
             canvas.width  = W;
             canvas.height = H;
             canvas.style.width  = W + 'px';
             canvas.style.height = H + 'px';
+            canvas.style.maxWidth = '100%';
+            canvas.style.display = 'block';
+            canvas.style.margin  = '0 auto';
 
             const CX = W / 2;
             const CY = H / 2 + FONT_SZ * 0.35;
@@ -1041,7 +1048,10 @@
                 ctx.font = newFont;
                 const m = ctx.measureText(text);
                 const newTracking = isKo ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
-                const nW = Math.ceil(m.width + newTracking * (text.length - 1)) + 24;
+                const nW = Math.min(
+                    Math.ceil(m.width + newTracking * (text.length - 1)) + 24,
+                    window.innerWidth - 40
+                );
                 canvas.width  = nW;
                 canvas.height = H;
                 canvas.style.width  = nW + 'px';

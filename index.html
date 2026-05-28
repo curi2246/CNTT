@@ -32,6 +32,8 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
+            opacity: 0;
+            transition: opacity 0.8s ease-out;
             background:
                 radial-gradient(ellipse 60% 45% at 82% -5%,
                     rgba(255, 210, 120, 0.10) 0%,
@@ -41,6 +43,7 @@
                     rgba(255, 220, 140, 0.07) 0%,
                     transparent 60%);
         }
+        body.bg-revealed::before { opacity: 1; }
 
         /* 새벽 지평선 글로우 — 하단 */
         body::after {
@@ -49,6 +52,8 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease-out;
             background:
                 radial-gradient(ellipse 100% 18% at 50% 100%,
                     rgba(255, 120, 40, 0.08) 0%,
@@ -58,6 +63,7 @@
                     rgba(255, 160, 60, 0.05) 0%,
                     transparent 80%);
         }
+        body.bg-revealed::after { opacity: 1; }
 
         /* 새벽 안개층 */
         .dawn-mist {
@@ -66,12 +72,15 @@
             height: 28%;
             pointer-events: none;
             z-index: 0;
+            opacity: 0;
+            transition: opacity 1.2s ease-out;
             background: linear-gradient(to top,
                 rgba(30, 12, 4, 0.18) 0%,
                 rgba(20, 8, 2, 0.06) 50%,
                 transparent 100%);
             animation: mistFloat 8s ease-in-out infinite;
         }
+        body.bg-revealed .dawn-mist { opacity: 0.7; }
         @keyframes mistFloat {
             0%, 100% { opacity: 0.7; transform: translateY(0); }
             50%       { opacity: 1;   transform: translateY(-4px); }
@@ -83,7 +92,10 @@
             inset: 0;
             pointer-events: none;
             z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease-out 0.3s;
         }
+        body.bg-revealed .dawn-stars { opacity: 1; }
         .dawn-star {
             position: absolute;
             border-radius: 50%;
@@ -100,8 +112,11 @@
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-size: min(70vh, 70vw); color: rgba(94, 255, 235, 0.05);
             z-index: 1; pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease-out 0.2s;
             animation: pulse-neon 3s ease-in-out infinite;
         }
+        body.bg-revealed .bg-sigil { opacity: 1; }
 
         @keyframes pulse-neon {
             0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; text-shadow: 0 0 10px rgba(94, 255, 235, 0.1); }
@@ -1500,6 +1515,7 @@
             const t = uiText[currentLang];
             if(val === PASSWORD) {
                 document.body.classList.add("auth-success-flash");
+                document.body.classList.add("bg-revealed"); // 배경 요소 페이드인
                 msg.textContent = t.accessGranted; msg.style.color = "var(--neon-mint)";
                 // SECURITY CHECK 타이틀 exit 애니메이션
                 const authTitle = document.getElementById("ui-title-auth");

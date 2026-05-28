@@ -1000,19 +1000,16 @@
 
             ctx.font = FONT;
             const metrics = ctx.measureText(text);
-            const maxW = Math.min(
-                Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24,
-                window.innerWidth - 40
-            );
-            const W = maxW;
+            const W = Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24;
             const H = FONT_SZ * 2.2;
             canvas.width  = W;
             canvas.height = H;
-            canvas.style.width  = W + 'px';
-            canvas.style.height = H + 'px';
-            canvas.style.maxWidth = '100%';
-            canvas.style.display = 'block';
-            canvas.style.margin  = '0 auto';
+            // CSS로만 크기 제한 — canvas 내부 좌표는 건드리지 않음
+            canvas.style.width    = '100%';
+            canvas.style.maxWidth = W + 'px';
+            canvas.style.height   = 'auto';
+            canvas.style.display  = 'block';
+            canvas.style.margin   = '0 auto';
 
             const CX = W / 2;
             const CY = H / 2 + FONT_SZ * 0.35;
@@ -1048,13 +1045,10 @@
                 ctx.font = newFont;
                 const m = ctx.measureText(text);
                 const newTracking = isKo ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
-                const nW = Math.min(
-                    Math.ceil(m.width + newTracking * (text.length - 1)) + 24,
-                    window.innerWidth - 40
-                );
+                const nW = Math.ceil(m.width + newTracking * (text.length - 1)) + 24;
                 canvas.width  = nW;
                 canvas.height = H;
-                canvas.style.width  = nW + 'px';
+                canvas.style.maxWidth = nW + 'px';
                 [offR, offG, offB].forEach(o => { o.width = nW; o.height = H; });
                 // render에서 쓸 수 있게 갱신
                 canvas._font = newFont;

@@ -999,26 +999,57 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
 
-            const FONT_SZ  = fontSize || (window.innerWidth < 500 ? 26 : 36);
-            // 한글 포함 여부에 따라 폰트 전환
-            const hasKorean = /[가-힣]/.test(text);
-            const FONT = hasKorean
-                ? `900 ${FONT_SZ}px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
-                : `900 ${FONT_SZ}px "Courier New", monospace`;
-            const TRACKING = hasKorean ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
+            const FONT_SZ = fontSize || (window.innerWidth < 500 ? 26 : 36);
+            const PADDING = 16;
 
-            ctx.font = FONT;
-            const metrics = ctx.measureText(text);
-            const W = Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24;
-            const H = FONT_SZ * 2.2;
-            canvas.width  = W;
-            canvas.height = H;
-            // style 건드리지 않음 — CSS wrap이 중앙 정렬 담당
+            function getFont(t) {
+                return /[가-힣]/.test(t)
+                    ? `900 ${FONT_SZ}px "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif`
+                    : `900 ${FONT_SZ}px "Courier New",monospace`;
+            }
+            function getTracking(t) {
+                return /[가-힣]/.test(t) ? FONT_SZ * 0.12 : FONT_SZ * 0.18;
+            }
 
-            // letterSpacing이 마지막 글자 오른쪽에도 붙어서 텍스트가 오른쪽으로 치우침
-            // 보정: 마지막 글자의 spacing 절반만큼 CX를 왼쪽으로 이동
-            const CX = W / 2 - (TRACKING / 2);
-            const CY = H / 2 + FONT_SZ * 0.35;
+            // 글자 하나씩 measureText로 정확한 총 너비 계산
+            function measureTotal(t, font, tracking) {
+                ctx.font = font;
+                let total = 0;
+                for (let i = 0; i < t.length; i++) {
+                    total += ctx.measureText(t[i]).width;
+                    if (i < t.length - 1) total += tracking;
+                }
+                return total;
+            }
+
+            // 글자 하나씩 직접 그리기 (letterSpacing CSS 사용 안 함)
+            function drawBase(offCtx, t, font, tracking, color, ox, oy, canvasW) {
+                offCtx.clearRect(0, 0, canvasW, H);
+                offCtx.font = font;
+                offCtx.textAlign = 'left';
+                offCtx.textBaseline = 'middle';
+                offCtx.fillStyle = color;
+                const totalW = measureTotal(t, font, tracking);
+                let x = (canvasW - totalW) / 2 + ox;
+                const y = CY + oy;
+                for (let i = 0; i < t.length; i++) {
+                    offCtx.fillText(t[i], x, y);
+                    x += offCtx.measureText(t[i]).width + tracking;
+                }
+            }
+
+            let FONT     = getFont(text);
+            let TRACKING = getTracking(text);
+            let totalW   = measureTotal(text, FONT, TRACKING);
+            let W        = Math.ceil(totalW) + PADDING * 2;
+            const H      = FONT_SZ * 2.2;
+            const CY     = H / 2 + FONT_SZ * 0.35;
+
+            function resizeCanvas(newW) {
+                canvas.width  = newW;
+                canvas.height = H;
+                [offR, offG, offB].forEach(o => { o.width = newW; o.height = H; });
+            }
 
             function makeOff() {
                 const c = document.createElement('canvas');
@@ -1029,36 +1060,17 @@
             const ctxR = offR.getContext('2d');
             const ctxG = offG.getContext('2d');
             const ctxB = offB.getContext('2d');
-
-            function drawBase(offCtx, color, ox, oy) {
-                offCtx.clearRect(0, 0, W, H);
-                offCtx.font = canvas._font || FONT;
-                offCtx.textAlign = 'center';
-                offCtx.textBaseline = 'middle';
-                offCtx.letterSpacing = (canvas._tracking || TRACKING) + 'px';
-                offCtx.fillStyle = color;
-                offCtx.fillText(text, CX + ox, CY + oy);
-            }
+            resizeCanvas(W);
 
             let frame = 0;
-            // 외부에서 텍스트 변경할 수 있게
+
             canvas._updateText = function(newText) {
-                text = newText;
-                const isKo = /[가-힣]/.test(text);
-                const newFont = isKo
-                    ? `900 ${FONT_SZ}px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
-                    : `900 ${FONT_SZ}px "Courier New", monospace`;
-                ctx.font = newFont;
-                const m = ctx.measureText(text);
-                const newTracking = isKo ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
-                const nW = Math.ceil(m.width + newTracking * (text.length - 1)) + 24;
-                canvas.width  = nW;
-                canvas.height = H;
-                // style은 CSS wrap이 담당
-                [offR, offG, offB].forEach(o => { o.width = nW; o.height = H; });
-                // render에서 쓸 수 있게 갱신
-                canvas._font = newFont;
-                canvas._tracking = newTracking;
+                text     = newText;
+                FONT     = getFont(text);
+                TRACKING = getTracking(text);
+                totalW   = measureTotal(text, FONT, TRACKING);
+                W        = Math.ceil(totalW) + PADDING * 2;
+                resizeCanvas(W);
             };
 
             function render() {
@@ -1073,9 +1085,10 @@
                 const bX = burst ? (Math.random() - 0.5) * 14 : 0;
                 const bY = burst ? (Math.random() - 0.5) * 4  : 0;
 
-                drawBase(ctxR, '#ff3030',  splitX + bX,  splitY + bY);
-                drawBase(ctxG, '#ffffff',  0, 0);
-                drawBase(ctxB, '#00e8ff', -splitX - bX, -splitY - bY);
+                const cW = canvas.width;
+                drawBase(ctxR, text, FONT, TRACKING, '#ff3030',  splitX + bX,  splitY + bY, cW);
+                drawBase(ctxG, text, FONT, TRACKING, '#ffffff',  0, 0, cW);
+                drawBase(ctxB, text, FONT, TRACKING, '#00e8ff', -splitX - bX, -splitY - bY, cW);
 
                 ctx.save();
                 ctx.globalCompositeOperation = 'screen';

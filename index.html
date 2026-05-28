@@ -1015,7 +1015,9 @@
             canvas.height = H;
             // style 건드리지 않음 — CSS wrap이 중앙 정렬 담당
 
-            const CX = W / 2;
+            // letterSpacing이 마지막 글자 오른쪽에도 붙어서 텍스트가 오른쪽으로 치우침
+            // 보정: 마지막 글자의 spacing 절반만큼 CX를 왼쪽으로 이동
+            const CX = W / 2 - (TRACKING / 2);
             const CY = H / 2 + FONT_SZ * 0.35;
 
             function makeOff() {

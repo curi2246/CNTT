@@ -579,6 +579,30 @@
             100% { background-position: 0 0; filter: hue-rotate(360deg); }
         }
 
+        /* SECURITY CHECK — 글리치 캔버스 타이틀 */
+        .glitch-auth-title { display: none; } /* h1 숨기고 canvas로 대체 */
+        #glitch-title-canvas {
+            display: block;
+            margin: 0 auto 6px;
+            image-rendering: pixelated;
+        }
+
+        /* CENTRAL DATABASE 타이틀 — canvas 글리치로 대체 */
+        .db-title-glitch { display: none; }
+
+        /* 서브텍스트 민트 깜빡이 */
+        .db-subtitle-blink {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--neon-mint);
+            opacity: 0.7;
+            animation: subtitlePulse 4s ease-in-out infinite;
+        }
+        @keyframes subtitlePulse {
+            0%, 100% { opacity: 0.5; }
+            50%       { opacity: 0.9; }
+        }
+
         .title-rgb-glitch {
             font-size: 2.5rem; letter-spacing: 12px; font-weight: 900; color: #fff;
             position: relative; display: inline-block;
@@ -759,7 +783,10 @@
     </div>
 
     <div id="auth-screen" class="screen">
-        <div class="header"><h1 id="ui-title-auth">SECURITY CHECK</h1></div>
+        <div class="header" style="text-align:center;">
+            <h1 id="ui-title-auth" class="glitch-auth-title">SECURITY CHECK</h1>
+            <canvas id="glitch-title-canvas"></canvas>
+        </div>
         <div id="auth-message">ENTER ACCESS KEY</div>
         <div class="terminal" style="margin-top:10px;">
             <form id="auth-form">
@@ -790,7 +817,11 @@
                 </div>
             </div>
 
-            <div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
+            <div class="header" style="text-align:center;">
+                <h1 id="ui-title-db" class="db-title-glitch" data-text="CENTRAL DATABASE">CENTRAL DATABASE</h1>
+                <canvas id="glitch-db-canvas" style="display:block;margin:0 auto 4px;image-rendering:pixelated;"></canvas>
+                <div class="db-subtitle-blink" id="ui-subtitle-db">[ CLASSIFIED DATABASE // YEAR 3064 // ACCESS GRANTED ]</div>
+            </div>
             <div class="terminal"><div id="terminal-text"></div></div>
             <div class="directory" id="directory"></div>
 
@@ -951,6 +982,137 @@
             }
         })();
 
+        // ── 공통 글리치 캔버스 엔진 ──
+        function startGlitchCanvas(canvasId, text, fontSize) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const FONT_SZ  = fontSize || (window.innerWidth < 500 ? 26 : 36);
+            const FONT     = `900 ${FONT_SZ}px "Courier New", monospace`;
+            const TRACKING = FONT_SZ * 0.22;
+
+            ctx.font = FONT;
+            const metrics = ctx.measureText(text);
+            const W = Math.ceil(metrics.width + TRACKING * (text.length - 1)) + 24;
+            const H = FONT_SZ * 2.2;
+            canvas.width  = W;
+            canvas.height = H;
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+
+            const CX = W / 2;
+            const CY = H / 2 + FONT_SZ * 0.35;
+
+            function makeOff() {
+                const c = document.createElement('canvas');
+                c.width = W; c.height = H;
+                return c;
+            }
+            const offR = makeOff(), offG = makeOff(), offB = makeOff();
+            const ctxR = offR.getContext('2d');
+            const ctxG = offG.getContext('2d');
+            const ctxB = offB.getContext('2d');
+
+            function drawBase(offCtx, color, ox, oy) {
+                offCtx.clearRect(0, 0, W, H);
+                offCtx.font = FONT;
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
+                offCtx.letterSpacing = TRACKING + 'px';
+                offCtx.fillStyle = color;
+                offCtx.fillText(text, CX + ox, CY + oy);
+            }
+
+            let frame = 0;
+            // 외부에서 텍스트 변경할 수 있게
+            canvas._updateText = function(newText) {
+                text = newText;
+                ctx.font = FONT;
+                const m = ctx.measureText(text);
+                const nW = Math.ceil(m.width + TRACKING * (text.length - 1)) + 24;
+                canvas.width  = nW;
+                canvas.height = H;
+                canvas.style.width  = nW + 'px';
+                [offR, offG, offB].forEach(o => { o.width = nW; o.height = H; });
+            };
+
+            function render() {
+                const W = canvas.width;
+                ctx.clearRect(0, 0, W, H);
+                frame++;
+
+                const t = frame * 0.04;
+                const splitX = Math.sin(t * 0.7) * 3 + Math.sin(t * 2.3) * 1.5;
+                const splitY = Math.cos(t * 0.5) * 1;
+                const burst  = Math.random() < 0.04;
+                const bX = burst ? (Math.random() - 0.5) * 14 : 0;
+                const bY = burst ? (Math.random() - 0.5) * 4  : 0;
+
+                drawBase(ctxR, '#ff3030',  splitX + bX,  splitY + bY);
+                drawBase(ctxG, '#ffffff',  0, 0);
+                drawBase(ctxB, '#00e8ff', -splitX - bX, -splitY - bY);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                ctx.globalAlpha = 0.75;
+                ctx.drawImage(offR, 0, 0);
+                ctx.drawImage(offB, 0, 0);
+                ctx.restore();
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.92;
+                ctx.drawImage(offG, 0, 0);
+                ctx.restore();
+
+                // 수평 스캔라인
+                for (let i = 0; i < 5; i++) {
+                    if (Math.random() > 0.3) continue;
+                    const ly    = Math.random() * H;
+                    const lh    = Math.random() * 3 + 1;
+                    const shift = (Math.random() - 0.5) * 18;
+                    ctx.save();
+                    ctx.globalAlpha = Math.random() * 0.15 + 0.03;
+                    ctx.drawImage(canvas, shift, ly, W, lh, 0, ly, W, lh);
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.fillRect(0, ly, W, lh);
+                    ctx.restore();
+                }
+
+                // 깜빡임
+                if (Math.random() < 0.05) {
+                    ctx.save();
+                    ctx.globalAlpha = Math.random() * 0.35;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.restore();
+                }
+
+                // 픽셀 왜곡
+                if (Math.random() < 0.07 || burst) {
+                    const n = burst ? 4 : 2;
+                    for (let b = 0; b < n; b++) {
+                        const by = Math.random() * H;
+                        const bh = Math.random() * (FONT_SZ * 0.4) + 2;
+                        const bx = (Math.random() - 0.5) * 20;
+                        ctx.save();
+                        ctx.globalAlpha = 0.85;
+                        ctx.drawImage(canvas, 0, by, W, bh, bx, by, W, bh);
+                        ctx.restore();
+                    }
+                }
+
+                requestAnimationFrame(render);
+            }
+            render();
+            return canvas;
+        }
+
+        // SECURITY CHECK 캔버스
+        startGlitchCanvas('glitch-title-canvas', 'SECURITY CHECK', window.innerWidth < 500 ? 26 : 36);
+        // CENTRAL DATABASE 캔버스 (언어 반영은 setLang에서)
+        startGlitchCanvas('glitch-db-canvas', window.__dbTitleText || 'CENTRAL DATABASE', window.innerWidth < 500 ? 24 : 32);
+
         let currentLang = sessionStorage.getItem("savedLang") || "en";
         let currentOpenFile = null;
         let currentPageIndex = 0; // 🔥 추가
@@ -984,6 +1146,7 @@
                 accessGranted: "> ACCESS GRANTED. SYNCHRONIZING...",
                 accessDenied: "> ACCESS DENIED",
                 dbTitle: "CENTRAL DATABASE",
+                dbSubtitle: "[ CLASSIFIED DATABASE // YEAR 3064 // ACCESS GRANTED ]",
                 typingLine1: "> Access granted. Welcome, Contractor.",
                 typingLine2: "> Database records successfully loaded.",
                 fileReading: "> Loading record...",
@@ -1002,6 +1165,7 @@
                 accessGranted: "> 접속 승인. 동기화 중...",
                 accessDenied: "> 접속 거부",
                 dbTitle: "중앙 데이터베이스",
+                dbSubtitle: "[ 기밀 데이터베이스 // 년도 3064 // 접속 승인 ]",
                 typingLine1: "> 접속 승인. 환영합니다, 계약자님.",
                 typingLine2: "> 데이터베이스 기록을 성공적으로 불러왔습니다.",
                 fileReading: "> 기록 열람을 시작합니다...",
@@ -1180,6 +1344,11 @@
             document.getElementById("ui-title-auth").textContent = t.authTitle;
             document.getElementById("auth-message").textContent = t.enterKey;
             document.getElementById("ui-title-db").textContent = t.dbTitle;
+            document.getElementById("ui-title-db").setAttribute("data-text", t.dbTitle);
+            if (document.getElementById("ui-subtitle-db")) document.getElementById("ui-subtitle-db").textContent = t.dbSubtitle;
+            // canvas 텍스트 교체
+            const dbCanvas = document.getElementById("glitch-db-canvas");
+            if (dbCanvas && dbCanvas._updateText) dbCanvas._updateText(t.dbTitle);
             document.getElementById("ui-hidden-error").textContent = t.hiddenError;
             document.getElementById("back-btn").textContent = t.backBtn;
             document.getElementById("music-title").textContent = t.nowPlaying;
@@ -1295,6 +1464,9 @@
             if(val === PASSWORD) {
                 document.body.classList.add("auth-success-flash");
                 msg.textContent = t.accessGranted; msg.style.color = "var(--neon-mint)";
+                // SECURITY CHECK 타이틀 exit 애니메이션
+                const authTitle = document.getElementById("ui-title-auth");
+                // exit 제거됨
                 if(bgm) {
                     bgm.play().catch(e => console.log("자동재생 차단됨"));
                     currentBGM = bgm;

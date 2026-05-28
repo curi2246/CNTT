@@ -2,6 +2,8 @@
 <html lang="ko" style="background-color: #020d0d;">
 <head>
     <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@900&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CENTRAL DATABASE - SYSTEM ERROR</title>
     <style>
@@ -989,8 +991,12 @@
             const ctx = canvas.getContext('2d');
 
             const FONT_SZ  = fontSize || (window.innerWidth < 500 ? 26 : 36);
-            const FONT     = `900 ${FONT_SZ}px "Courier New", monospace`;
-            const TRACKING = FONT_SZ * 0.22;
+            // 한글 포함 여부에 따라 폰트 전환
+            const hasKorean = /[가-힣]/.test(text);
+            const FONT = hasKorean
+                ? `900 ${FONT_SZ}px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
+                : `900 ${FONT_SZ}px "Courier New", monospace`;
+            const TRACKING = hasKorean ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
 
             ctx.font = FONT;
             const metrics = ctx.measureText(text);
@@ -1016,10 +1022,10 @@
 
             function drawBase(offCtx, color, ox, oy) {
                 offCtx.clearRect(0, 0, W, H);
-                offCtx.font = FONT;
+                offCtx.font = canvas._font || FONT;
                 offCtx.textAlign = 'center';
                 offCtx.textBaseline = 'middle';
-                offCtx.letterSpacing = TRACKING + 'px';
+                offCtx.letterSpacing = (canvas._tracking || TRACKING) + 'px';
                 offCtx.fillStyle = color;
                 offCtx.fillText(text, CX + ox, CY + oy);
             }
@@ -1028,13 +1034,21 @@
             // 외부에서 텍스트 변경할 수 있게
             canvas._updateText = function(newText) {
                 text = newText;
-                ctx.font = FONT;
+                const isKo = /[가-힣]/.test(text);
+                const newFont = isKo
+                    ? `900 ${FONT_SZ}px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
+                    : `900 ${FONT_SZ}px "Courier New", monospace`;
+                ctx.font = newFont;
                 const m = ctx.measureText(text);
-                const nW = Math.ceil(m.width + TRACKING * (text.length - 1)) + 24;
+                const newTracking = isKo ? FONT_SZ * 0.15 : FONT_SZ * 0.22;
+                const nW = Math.ceil(m.width + newTracking * (text.length - 1)) + 24;
                 canvas.width  = nW;
                 canvas.height = H;
                 canvas.style.width  = nW + 'px';
                 [offR, offG, offB].forEach(o => { o.width = nW; o.height = H; });
+                // render에서 쓸 수 있게 갱신
+                canvas._font = newFont;
+                canvas._tracking = newTracking;
             };
 
             function render() {

@@ -21,8 +21,7 @@
 
         body {
             margin: 0; background: var(--bg-black); color: var(--neon-pink);
-            overflow-x: hidden; overflow-y: auto; 
-            transition: none; 
+            overflow-x: hidden; overflow-y: auto;
         }
 
         /* 햇빛 오버레이 — 오른쪽 상단에서 비스듬히 */
@@ -155,18 +154,7 @@
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
-        .hidden-trigger-zone { 
-            margin-top: 50px; 
-            padding-top: 100vh; 
-            padding-bottom: 200px;
-            text-align: center; 
-            display: none; 
-            transition: opacity 0.5s;
-            opacity: 0;
-        }
 
-        .hidden-button { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle, #ff0000, #000); border: 2px solid #fff; cursor: pointer; margin: 20px auto; box-shadow: 0 0 15px #ff0000; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .directory { width: 100%; max-width: 600px; }
         .folder { border: 1px solid var(--neon-mint); color: var(--neon-mint); padding: 12px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.2s, background 0.2s; }
@@ -248,7 +236,7 @@
             box-shadow: 0 0 10px var(--neon-mint);
         }
 
-        /* 🔥 언어 전환 버튼 */
+        /* 언어 전환 버튼 */
         #lang-switcher {
             position: fixed;
             bottom: 20px;
@@ -467,7 +455,7 @@
             100% { transform: translate(0,0); filter: brightness(1); }
         }
 
-        /* 🕐 시계 조각 파괴 애니메이션 */
+        /* 시계 조각 파괴 애니메이션 */
         .clock-shard {
             position: absolute;
             background: white;
@@ -500,7 +488,7 @@
             100% { transform: translate(0, 280px) rotate(-60deg); opacity: 0; }
         }
 
-        /* 🌊 시계 멈출 때 물결 파동 효과 */
+        /* 시계 멈출 때 물결 파동 효과 */
         .clock-ripple {
             position: absolute;
             top: 50%;
@@ -531,7 +519,7 @@
             }
         }
 
-        /* 🔥 좌우 화살표 네비게이션 */
+        /* 좌우 화살표 네비게이션 */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -554,7 +542,7 @@
         .nav-arrow-left { left: -50px; }
         .nav-arrow-right { right: -50px; }
 
-        /* 🔥 페이지 내부 화살표 (터미널 하단 모서리) */
+        /* 페이지 내부 화살표 (터미널 하단 모서리) */
         .page-arrow {
             position: absolute;
             bottom: 8px;
@@ -569,7 +557,7 @@
         .page-arrow-left { left: 12px; }
         .page-arrow-right { right: 12px; }
 
-        /* 🔥 페이지 인디케이터 */
+        /* 페이지 인디케이터 */
         .page-indicator {
             position: absolute;
             bottom: 10px;
@@ -1163,7 +1151,7 @@
         // SECURITY CHECK 캔버스
         startGlitchCanvas('glitch-title-canvas', 'SECURITY CHECK', window.innerWidth < 500 ? 26 : 36);
         // CENTRAL DATABASE 캔버스 (언어 반영은 setLang에서)
-        startGlitchCanvas('glitch-db-canvas', window.__dbTitleText || 'CENTRAL DATABASE', window.innerWidth < 500 ? 24 : 32);
+        startGlitchCanvas('glitch-db-canvas', 'CENTRAL DATABASE', window.innerWidth < 500 ? 24 : 32);
 
         let currentLang = sessionStorage.getItem("savedLang") || "en";
         let currentOpenFile = null;
@@ -1517,11 +1505,9 @@
                 document.body.classList.add("auth-success-flash");
                 document.body.classList.add("bg-revealed"); // 배경 요소 페이드인
                 msg.textContent = t.accessGranted; msg.style.color = "var(--neon-mint)";
-                // SECURITY CHECK 타이틀 exit 애니메이션
-                const authTitle = document.getElementById("ui-title-auth");
-                // exit 제거됨
+
                 if(bgm) {
-                    bgm.play().catch(e => console.log("자동재생 차단됨"));
+                    bgm.play().catch(() => {});
                     currentBGM = bgm;
                 }
                 document.getElementById("music-info-box").style.display = "block";

@@ -31,7 +31,8 @@ const fileSystemEN = {
             ]
         },
         "Miro_Full_Archive.txt": "Dummy Data",
-        "Niro_Full_Archive.txt": "Dummy Data"
+        "Niro_Full_Archive.txt": "Dummy Data",
+        "Tory_Full_Archive.txt": "Dummy Data"
     },
     "The enemy": {
         "enemies.txt": "A list of enemies — or former enemies — that Curo, Kisune, and Leay have faced. They include Ekis, Kisune Corden, Aleph, and Aiden. Events, phenomena, and natural disasters they have encountered are recorded in the World files.",

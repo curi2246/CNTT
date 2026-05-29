@@ -1436,25 +1436,93 @@
             type();
         }
 
+        const FOLDER_PAGE_SIZE = 6;
+        const folderPageState = {}; // { folderName: currentPage }
+
         function buildDirectory() {
             const dir = document.getElementById("directory");
             dir.innerHTML = "";
             const fs = getFileSystem(currentLang);
             Object.keys(fs).forEach(folder => {
-                const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
-                const list = document.createElement("div"); list.className = "hidden";
+                // 폴더 헤더
+                const fDiv = document.createElement("div");
+                fDiv.className = "folder";
+                fDiv.textContent = "📁 " + folder;
+
+                // 파일 목록 컨테이너
+                const list = document.createElement("div");
+                list.className = "hidden";
+
+                // 폴더 열기/닫기
                 fDiv.onclick = () => list.classList.toggle("hidden");
-                Object.keys(fs[folder]).forEach(file => {
-                    if (file === "Curo_REAL_Hidden_Content") return;
-                    const fd = fs[folder][file];
-                    const isMap = fd && fd.type === "map";
-                    const fi = document.createElement("div"); fi.className = "file";
-                    fi.textContent = (isMap ? "🗺️ " : "📄 ") + file;
-                    if (isMap) fi.style.color = "var(--neon-mint)";
-                    fi.onclick = (e) => { e.stopPropagation(); openFileWithNav(folder, file); };
-                    list.appendChild(fi);
-                });
-                dir.appendChild(fDiv); dir.appendChild(list);
+
+                // 숨겨진 파일 제외한 전체 파일 배열
+                const files = Object.keys(fs[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
+
+                // 현재 페이지 (폴더별로 독립 유지)
+                if (folderPageState[folder] === undefined) folderPageState[folder] = 0;
+
+                function renderPage() {
+                    list.innerHTML = "";
+                    const page = folderPageState[folder];
+                    const total = files.length;
+                    const totalPages = Math.ceil(total / FOLDER_PAGE_SIZE);
+                    const start = page * FOLDER_PAGE_SIZE;
+                    const end   = Math.min(start + FOLDER_PAGE_SIZE, total);
+
+                    // 파일 항목 렌더
+                    for (let i = start; i < end; i++) {
+                        const file = files[i];
+                        const fd = fs[folder][file];
+                        const isMap = fd && fd.type === "map";
+                        const fi = document.createElement("div");
+                        fi.className = "file";
+                        fi.textContent = (isMap ? "🗺️ " : "📄 ") + file;
+                        if (isMap) fi.style.color = "var(--neon-mint)";
+                        fi.onclick = (e) => { e.stopPropagation(); openFileWithNav(folder, file); };
+                        list.appendChild(fi);
+                    }
+
+                    // 페이지가 2장 이상일 때만 화살표 표시
+                    if (totalPages > 1) {
+                        const nav = document.createElement("div");
+                        nav.style.cssText = "display:flex; align-items:center; justify-content:flex-end; gap:6px; padding:6px 10px 2px; margin-left:15px;";
+
+                        // 페이지 인디케이터
+                        const indicator = document.createElement("span");
+                        indicator.style.cssText = "font-size:10px; color:#444; letter-spacing:2px; margin-right:auto;";
+                        indicator.textContent = (page + 1) + " / " + totalPages;
+                        nav.appendChild(indicator);
+
+                        // 왼쪽 화살표 (첫 페이지면 숨김)
+                        if (page > 0) {
+                            const btnL = document.createElement("span");
+                            btnL.textContent = "◀";
+                            btnL.style.cssText = "cursor:pointer; color:var(--neon-mint); font-size:11px; padding:2px 6px; border:1px solid rgba(94,255,235,0.3); transition:all 0.15s;";
+                            btnL.onmouseover = () => { btnL.style.boxShadow = "0 0 6px var(--neon-mint)"; btnL.style.borderColor = "var(--neon-mint)"; };
+                            btnL.onmouseout  = () => { btnL.style.boxShadow = "none"; btnL.style.borderColor = "rgba(94,255,235,0.3)"; };
+                            btnL.onclick = (e) => { e.stopPropagation(); folderPageState[folder]--; renderPage(); };
+                            nav.appendChild(btnL);
+                        }
+
+                        // 오른쪽 화살표 (마지막 페이지면 숨김)
+                        if (page < totalPages - 1) {
+                            const btnR = document.createElement("span");
+                            btnR.textContent = "▶";
+                            btnR.style.cssText = "cursor:pointer; color:var(--neon-mint); font-size:11px; padding:2px 6px; border:1px solid rgba(94,255,235,0.3); transition:all 0.15s;";
+                            btnR.onmouseover = () => { btnR.style.boxShadow = "0 0 6px var(--neon-mint)"; btnR.style.borderColor = "var(--neon-mint)"; };
+                            btnR.onmouseout  = () => { btnR.style.boxShadow = "none"; btnR.style.borderColor = "rgba(94,255,235,0.3)"; };
+                            btnR.onclick = (e) => { e.stopPropagation(); folderPageState[folder]++; renderPage(); };
+                            nav.appendChild(btnR);
+                        }
+
+                        list.appendChild(nav);
+                    }
+                }
+
+                renderPage();
+                dir.appendChild(fDiv);
+                dir.appendChild(list);
             });
         }
 

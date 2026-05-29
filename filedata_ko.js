@@ -31,7 +31,8 @@ const fileSystemKO = {
             ]
         },
         "Miro_Full_Archive.txt": "더미 데이터",
-        "Niro_Full_Archive.txt": "더미 데이터"
+        "Niro_Full_Archive.txt": "더미 데이터",
+        "Tory_Full_Archive.txt": "더미 데이터"
     },
     "The enemy": {
         "enemies.txt": "여태까지 큐로, 키스네, 리에가 상대하던 적들, 혹은 적 이였던 존재들을 나열한 파일이다. 각각 애키스(ekis), 키스네 코든(kisune_corden), 알레프(aleph), 아이든(aiden)이 있다. 그들이 상대, 혹은 겪었던 현상과 자연재해들은 전부 World 파일에 있으니 참고.",

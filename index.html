@@ -1634,9 +1634,8 @@
             tc.classList.add("terminal-expand");
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
-                // 애니메이션 끝나면 래퍼 해제 → normal flow 복귀
-                tcWrap.style.cssText = "";
-                tcWrap.style.width = "100%";
+                // 래퍼는 그냥 투명 패스스루로 — 터미널 자체 스타일 유지
+                tcWrap.style.cssText = "display:contents;";
             }, { once: true });
 
             // 기존 화살표 전부 제거

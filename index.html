@@ -171,9 +171,9 @@
             0%   { transform: scaleX(0.015) scaleY(6);    opacity: 0;   }
             12%  { transform: scaleX(0.015) scaleY(6);    opacity: 1;   }
             28%  { transform: scaleX(1)     scaleY(0.04); opacity: 1;   }
-            55%  { transform: scaleX(1)     scaleY(0.04); opacity: 1;   }
-            75%  { transform: scaleX(1)     scaleY(1.04); opacity: 1;   }
-            88%  { transform: scaleX(1)     scaleY(0.98); opacity: 1;   }
+            44%  { transform: scaleX(1)     scaleY(0.04); opacity: 1;   }
+            68%  { transform: scaleX(1)     scaleY(1.04); opacity: 1;   }
+            83%  { transform: scaleX(1)     scaleY(0.98); opacity: 1;   }
             100% { transform: scaleX(1)     scaleY(1);    opacity: 1;   }
         }
         .terminal-expand {
@@ -776,6 +776,124 @@
         }
         .map-info-tag span { color: #fff; font-size: 12px; }
         .map-info-tag.danger { border-color: rgba(255,94,94,0.4); color: var(--neon-pink); background: rgba(255,94,94,0.06); }
+
+        /* ── 캐릭터 카드 UI ── */
+        .char-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 4px 0 30px;
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .char-card-top {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .char-card-img {
+            width: 160px;
+            min-width: 160px;
+            height: 200px;
+            border: 1px solid var(--neon-pink);
+            background: rgba(255,94,94,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            color: rgba(255,94,94,0.35);
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .char-card-img-icon { font-size: 28px; opacity: 0.3; }
+        .char-card-right { flex: 1; min-width: 0; }
+        .char-card-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--neon-pink);
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            font-family: 'Noto Sans KR', 'Courier New', monospace;
+        }
+        .char-card-species {
+            font-size: 11px;
+            color: var(--neon-pink);
+            letter-spacing: 2px;
+            margin-bottom: 14px;
+            opacity: 0.8;
+        }
+        .char-stat-bars { display: flex; flex-direction: column; gap: 7px; margin-bottom: 4px; }
+        .char-stat-row { display: flex; align-items: center; gap: 10px; }
+        .char-stat-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #aaa;
+            width: 100px;
+            flex-shrink: 0;
+        }
+        .char-stat-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,94,94,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .char-stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-pink), #ff9090);
+            box-shadow: 0 0 6px var(--neon-pink);
+        }
+        .char-card-divider {
+            border: none;
+            border-top: 1px dashed rgba(255,94,94,0.2);
+            margin: 4px 0;
+        }
+        .char-section-title {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--neon-pink);
+            margin: 14px 0 8px;
+        }
+        .char-section-title::before { content: "[ "; }
+        .char-section-title::after  { content: " ]"; }
+        .char-profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 16px;
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+        .char-profile-item span { color: #666; margin-right: 4px; }
+        .char-section-body {
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.75;
+            border-left: 2px solid rgba(255,94,94,0.3);
+            padding-left: 12px;
+            margin-bottom: 4px;
+        }
+        .char-ability-item {
+            background: rgba(255,94,94,0.04);
+            border: 1px solid rgba(255,94,94,0.15);
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.7;
+        }
+        .char-illness-box {
+            background: rgba(255,40,40,0.06);
+            border: 1px solid rgba(255,94,94,0.3);
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #ffaaaa;
+        }
     </style>
 </head>
 <body>
@@ -1447,6 +1565,152 @@
             type();
         }
 
+
+        // ── 캐릭터 텍스트 파싱 ──
+        function parseCharacterData(text) {
+            if (!text.includes("Name:") || !text.includes("[Profile]")) return null;
+            const get = (label) => {
+                const re = new RegExp("\\[" + label + "\\]\\s*([\\s\\S]*?)(?=\\n\\[|$)");
+                const m = text.match(re);
+                return m ? m[1].trim() : "";
+            };
+            const nameMatch = text.match(/Name:\s*(.+)/);
+            const name = nameMatch ? nameMatch[1].trim() : "";
+            const species = get("Species") || get("종족");
+            const gender  = get("Gender")  || get("성별");
+            const profile = get("Profile") || get("프로필");
+            const abilities = get("Abilities") || get("능력");
+            const companions = get("Companions") || get("일행");
+            const contacts = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
+            const illness = get("Current Illness") || get("현재 가지고 있는 병");
+
+            // Profile 파싱
+            const profileLines = {};
+            profile.split("\n").forEach(l => {
+                const m = l.match(/^(.+?):\s*(.+)/);
+                if (m) profileLines[m[1].trim()] = m[2].trim();
+            });
+
+            return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness };
+        }
+
+        // ── 캐릭터 카드 렌더 ──
+        function renderCharacterCard(d) {
+            const card = document.createElement("div");
+            card.className = "char-card";
+
+            // 상단: 이미지 + 이름/스탯
+            const top = document.createElement("div");
+            top.className = "char-card-top";
+
+            // 이미지 플레이스홀더
+            const imgBox = document.createElement("div");
+            imgBox.className = "char-card-img";
+            imgBox.innerHTML = `<div class="char-card-img-icon">◈</div><div>IMAGE<br>PENDING</div>`;
+            top.appendChild(imgBox);
+
+            // 우측 정보
+            const right = document.createElement("div");
+            right.className = "char-card-right";
+
+            const nameEl = document.createElement("div");
+            nameEl.className = "char-card-name";
+            nameEl.textContent = d.name;
+            right.appendChild(nameEl);
+
+            if (d.species) {
+                const sp = document.createElement("div");
+                sp.className = "char-card-species";
+                sp.textContent = "분류: " + d.species + (d.gender ? "  ·  " + d.gender : "");
+                right.appendChild(sp);
+            }
+
+            // 스탯 바 (Height/Weight 기반으로 임시 고정값)
+            const statData = [
+                { label: currentLang === "en" ? "THREAT LEVEL" : "위협 수준", val: 55 },
+                { label: currentLang === "en" ? "COMBAT POWER" : "전투력",   val: 70 },
+                { label: currentLang === "en" ? "DANGER LEVEL" : "위험도",   val: 45 },
+            ];
+            // 이름으로 스탯 변형
+            const seed = d.name.split("").reduce((a,c) => a + c.charCodeAt(0), 0);
+            statData[0].val = 40 + (seed * 3  % 50);
+            statData[1].val = 35 + (seed * 7  % 55);
+            statData[2].val = 30 + (seed * 11 % 60);
+
+            const bars = document.createElement("div");
+            bars.className = "char-stat-bars";
+            statData.forEach(s => {
+                const row = document.createElement("div"); row.className = "char-stat-row";
+                const lbl = document.createElement("div"); lbl.className = "char-stat-label"; lbl.textContent = s.label;
+                const trk = document.createElement("div"); trk.className = "char-stat-track";
+                const fil = document.createElement("div"); fil.className = "char-stat-fill"; fil.style.width = s.val + "%";
+                trk.appendChild(fil); row.appendChild(lbl); row.appendChild(trk);
+                bars.appendChild(row);
+            });
+            right.appendChild(bars);
+            top.appendChild(right);
+            card.appendChild(top);
+
+            const hr = document.createElement("hr"); hr.className = "char-card-divider";
+            card.appendChild(hr);
+
+            // Profile
+            if (Object.keys(d.profile).length) {
+                const t = document.createElement("div"); t.className = "char-section-title";
+                t.textContent = currentLang === "en" ? "PERSONAL RECORD" : "프로필";
+                card.appendChild(t);
+                const grid = document.createElement("div"); grid.className = "char-profile-grid";
+                Object.entries(d.profile).forEach(([k, v]) => {
+                    const item = document.createElement("div"); item.className = "char-profile-item";
+                    item.innerHTML = `<span>${k}</span>${v}`;
+                    grid.appendChild(item);
+                });
+                card.appendChild(grid);
+            }
+
+            // Abilities
+            if (d.abilities) {
+                const t = document.createElement("div"); t.className = "char-section-title";
+                t.textContent = currentLang === "en" ? "ABILITIES & TRAITS" : "능력";
+                card.appendChild(t);
+                const box = document.createElement("div"); box.className = "char-ability-item";
+                box.textContent = d.abilities;
+                card.appendChild(box);
+            }
+
+            // Companions
+            if (d.companions) {
+                const t = document.createElement("div"); t.className = "char-section-title";
+                t.textContent = currentLang === "en" ? "COMPANIONS" : "일행";
+                card.appendChild(t);
+                const box = document.createElement("div"); box.className = "char-section-body";
+                box.textContent = d.companions;
+                card.appendChild(box);
+            }
+
+            // Known Contacts
+            if (d.contacts) {
+                const t = document.createElement("div"); t.className = "char-section-title";
+                t.textContent = currentLang === "en" ? "KNOWN CONTACTS" : "접점 인물";
+                card.appendChild(t);
+                const box = document.createElement("div"); box.className = "char-section-body";
+                box.textContent = d.contacts;
+                card.appendChild(box);
+            }
+
+            // Illness
+            if (d.illness) {
+                const t = document.createElement("div"); t.className = "char-section-title";
+                t.textContent = currentLang === "en" ? "CURRENT STATUS" : "현재 상태";
+                card.appendChild(t);
+                const box = document.createElement("div"); box.className = "char-illness-box";
+                box.textContent = d.illness;
+                card.appendChild(box);
+            }
+
+            return card;
+        }
+
         const FOLDER_PAGE_SIZE = 6;
         const folderPageState = {}; // { folderName: currentPage }
 
@@ -1674,20 +1938,20 @@
                 pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
             }
 
-            const sysMsg = document.createElement("p");
-            sysMsg.style.color = "var(--neon-mint)";
-            sysMsg.textContent = uiText[currentLang].fileReading;
-            textTarget.appendChild(sysMsg);
-
             setTimeout(() => {
-                sysMsg.remove();
-                const bodyMsg = document.createElement("div");
-                bodyMsg.style.color = "#fff";
-                bodyMsg.style.whiteSpace = "pre-wrap";
-                bodyMsg.style.lineHeight = "1.6";
-                bodyMsg.style.paddingBottom = "30px";
-                bodyMsg.textContent = content;
-                textTarget.appendChild(bodyMsg);
+                // 캐릭터 카드 파싱 시도
+                const parsed = parseCharacterData(content);
+                if (parsed) {
+                    textTarget.appendChild(renderCharacterCard(parsed));
+                } else {
+                    const bodyMsg = document.createElement("div");
+                    bodyMsg.style.color = "#fff";
+                    bodyMsg.style.whiteSpace = "pre-wrap";
+                    bodyMsg.style.lineHeight = "1.6";
+                    bodyMsg.style.paddingBottom = "30px";
+                    bodyMsg.textContent = content;
+                    textTarget.appendChild(bodyMsg);
+                }
 
                 if (name.includes("Curo") && isGlitchUnlocked) {
                     hZone.style.display = "block";

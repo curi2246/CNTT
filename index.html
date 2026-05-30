@@ -166,17 +166,18 @@
             from { clip-path: inset(0 50% 0 50%); opacity: 0.3; }
             to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
-        /* 세로선 → 가로선 → 박스로 쫀득하게 펼쳐지는 애니메이션 */
+        /* 세로선 → 가로선 → 박스로 펼쳐지는 애니메이션 */
         @keyframes fileOpen {
             0%   { transform: scaleX(0.015) scaleY(6);    opacity: 0.7; }
-            30%  { transform: scaleX(0.015) scaleY(6);    opacity: 1;   }
-            55%  { transform: scaleX(1.04)  scaleY(0.06); opacity: 1;   }
-            72%  { transform: scaleX(0.97)  scaleY(1.05); opacity: 1;   }
-            85%  { transform: scaleX(1.02)  scaleY(0.98); opacity: 1;   }
+            28%  { transform: scaleX(0.015) scaleY(6);    opacity: 1;   }
+            42%  { transform: scaleX(0.015) scaleY(0.08); opacity: 1;   }
+            52%  { transform: scaleX(1.03)  scaleY(0.08); opacity: 1;   }
+            68%  { transform: scaleX(0.98)  scaleY(1.03); opacity: 1;   }
+            82%  { transform: scaleX(1.01)  scaleY(0.99); opacity: 1;   }
             100% { transform: scaleX(1)     scaleY(1);    opacity: 1;   }
         }
         .terminal-expand {
-            animation: fileOpen 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: fileOpen 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
             transform-origin: center center;
         }

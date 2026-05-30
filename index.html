@@ -166,9 +166,18 @@
             from { clip-path: inset(0 50% 0 50%); opacity: 0.3; }
             to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
+        /* 세로 가늘게 → 가로로 쫀득하게 펼쳐지는 애니메이션 */
+        @keyframes fileOpen {
+            0%   { clip-path: inset(48% 0% 48% 0%); transform: scaleX(0.55); opacity: 0.2; }
+            38%  { clip-path: inset(0%  0% 0%  0%); transform: scaleX(0.55); opacity: 0.85; }
+            62%  { clip-path: inset(0%  0% 0%  0%); transform: scaleX(1.04); opacity: 1; }
+            80%  { clip-path: inset(0%  0% 0%  0%); transform: scaleX(0.97); opacity: 1; }
+            100% { clip-path: inset(0%  0% 0%  0%); transform: scaleX(1);    opacity: 1; }
+        }
         .terminal-expand {
-            animation: expandWidth 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: fileOpen 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
+            transform-origin: center center;
         }
 
         /* 글리치 비번 입력창 */
@@ -1644,37 +1653,32 @@
             }
 
             const sysMsg = document.createElement("p");
-            sysMsg.style.color = "var(--neon-mint)"; sysMsg.className = "typing-cursor";
+            sysMsg.style.color = "var(--neon-mint)";
             sysMsg.textContent = uiText[currentLang].fileReading;
             textTarget.appendChild(sysMsg);
 
             setTimeout(() => {
-                sysMsg.classList.remove("typing-cursor");
+                sysMsg.remove();
                 const bodyMsg = document.createElement("div");
-                bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
+                bodyMsg.style.color = "#fff";
+                bodyMsg.style.whiteSpace = "pre-wrap";
+                bodyMsg.style.lineHeight = "1.6";
                 bodyMsg.style.paddingBottom = "30px";
+                bodyMsg.textContent = content;
                 textTarget.appendChild(bodyMsg);
-                let charIdx = 0;
-                function typeBody() {
-                    if(charIdx < content.length) {
-                        bodyMsg.textContent += content[charIdx]; charIdx++;
-                        setTimeout(typeBody, 1);
-                    } else {
-                        if (name.includes("Curo") && isGlitchUnlocked) {
-                            hZone.style.display = "block";
-                            window.onscroll = () => {
-                                const scrollY = window.scrollY;
-                                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                                const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
-                                document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
-                                if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
-                                else hZone.style.opacity = "0";
-                            };
-                        }
-                    }
+
+                if (name.includes("Curo") && isGlitchUnlocked) {
+                    hZone.style.display = "block";
+                    window.onscroll = () => {
+                        const scrollY = window.scrollY;
+                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                        const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
+                        document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
+                        if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
+                        else hZone.style.opacity = "0";
+                    };
                 }
-                typeBody();
-            }, 800);
+            }, 420);
         }
 
         function navigateFile(direction) {

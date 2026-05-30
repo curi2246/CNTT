@@ -1615,26 +1615,28 @@
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
-            // 터미널 expand 애니메이션 — 중앙에서 시작
+            // 터미널 expand 애니메이션 — 래퍼로 중앙 고정, 터미널은 애니메이션만
             const tc = document.getElementById("file-terminal-container");
-            tc.style.position = "fixed";
-            tc.style.top = "50%";
-            tc.style.left = "50%";
-            tc.style.transform = "translate(-50%, -50%)";
-            tc.style.zIndex = "100";
-            tc.style.width = "min(600px, 92vw)";
+
+            // 래퍼가 없으면 생성
+            let tcWrap = document.getElementById("file-terminal-wrap");
+            if (!tcWrap) {
+                tcWrap = document.createElement("div");
+                tcWrap.id = "file-terminal-wrap";
+                tc.parentNode.insertBefore(tcWrap, tc);
+                tcWrap.appendChild(tc);
+            }
+            // 래퍼: 뷰포트 중앙 고정
+            tcWrap.style.cssText = "position:fixed; top:50%; left:50%; width:min(600px,92vw); transform:translate(-50%,-50%); z-index:100;";
+
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth;
             tc.classList.add("terminal-expand");
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
-                // 애니메이션 끝나면 normal flow로 복귀
-                tc.style.position = "";
-                tc.style.top = "";
-                tc.style.left = "";
-                tc.style.transform = "";
-                tc.style.zIndex = "";
-                tc.style.width = "";
+                // 애니메이션 끝나면 래퍼 해제 → normal flow 복귀
+                tcWrap.style.cssText = "";
+                tcWrap.style.width = "100%";
             }, { once: true });
 
             // 기존 화살표 전부 제거

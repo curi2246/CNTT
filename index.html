@@ -1732,6 +1732,49 @@
                 showAbyssText(t.abyssMsg1, "#ff0000", 0, "2rem");
                 showAbyssText(t.abyssMsg2, "#fff", 3000, "1.2rem");
                 showAbyssText(t.abyssMsg3, "#fff", 6500, "1.2rem");
+                // BGM 없이도 시퀀스 완료되도록 폴백 타임아웃 (32초)
+                const abyssFallback = setTimeout(() => {
+                    if (!abyssLayer.dataset.ended) triggerAbyssEnd();
+                }, 32000);
+
+                function triggerAbyssEnd() {
+                    if (abyssLayer.dataset.ended) return;
+                    abyssLayer.dataset.ended = "true";
+                    clearInterval(warningInterval);
+                    clearTimeout(abyssFallback);
+                    createAbyssFlash("#fff", 3000);
+                    mainTextBox.innerHTML = "";
+                    setTimeout(() => {
+                        const rawData = getFileSystem(currentLang)["The main character"]["Curo_REAL_Hidden_Content"];
+                        const curoData = typeof rawData === "string" ? rawData : (rawData?.pages?.[0] ?? "DATA UNAVAILABLE");
+                        mainTextBox.innerHTML = `<div style="text-align:center; width:100%;"><h1 class="title-rgb-glitch" style="margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1><p id="curo-typing-area" class="fast-glitch-typing" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p></div>`;
+                        const typingArea = document.getElementById("curo-typing-area");
+                        let charIdx = 0;
+                        function typeCuroContent() {
+                            if (charIdx < curoData.length) {
+                                typingArea.textContent += curoData[charIdx++]; setTimeout(typeCuroContent, 25);
+                            } else {
+                                typingArea.classList.remove("fast-glitch-typing"); typingArea.classList.add("stable-text");
+                                const backBtn = document.createElement("button");
+                                backBtn.textContent = currentLang === "en" ? "← BACK" : "← 뒤로";
+                                backBtn.style.cssText = "margin-top:40px; background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px 20px; cursor:pointer; font-family:inherit; letter-spacing:2px; display:block; margin-left:auto; margin-right:auto;";
+                                backBtn.onmouseover = () => { backBtn.style.boxShadow = "0 0 10px var(--neon-mint)"; };
+                                backBtn.onmouseout  = () => { backBtn.style.boxShadow = "none"; };
+                                backBtn.onclick = () => {
+                                    if (abyssBgm) { abyssBgm.pause(); abyssBgm.currentTime = 0; }
+                                    abyssLayer.remove();
+                                    document.getElementById("file-screen").classList.add("hidden");
+                                    document.getElementById("database-view").classList.remove("hidden");
+                                    document.body.style.backgroundColor = "var(--bg-black)";
+                                    currentOpenFile = null;
+                                };
+                                mainTextBox.appendChild(backBtn);
+                            }
+                        }
+                        typeCuroContent();
+                    }, 500);
+                }
+
                 const warningInterval = setInterval(() => {
                     if (abyssBgm.currentTime >= 10.0 && abyssBgm.currentTime < 19.6) {
                         const warn = document.createElement("div"); warn.textContent = t.warningText;
@@ -1745,33 +1788,7 @@
                     }
                     if (abyssBgm.currentTime >= 28.5 && !abyssLayer.dataset.cleared) { abyssLayer.dataset.cleared = "true"; mainTextBox.innerHTML = ""; }
                     if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
-                        abyssLayer.dataset.ended = "true"; clearInterval(warningInterval); createAbyssFlash("#fff", 3000); mainTextBox.innerHTML = "";
-                        setTimeout(() => {
-                            const rawData = getFileSystem(currentLang)["The main character"]["Curo_REAL_Hidden_Content"];
-                            const curoData = typeof rawData === "string" ? rawData : (rawData?.pages?.[0] ?? "DATA UNAVAILABLE");
-                            mainTextBox.innerHTML = `<div style="text-align:center; width:100%;"><h1 class="title-rgb-glitch" style="margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1><p id="curo-typing-area" class="fast-glitch-typing" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p></div>`;
-                            const typingArea = document.getElementById("curo-typing-area");
-                            let charIdx = 0;
-                            function typeCuroContent() { if (charIdx < curoData.length) { typingArea.textContent += curoData[charIdx++]; setTimeout(typeCuroContent, 25); } else {
-                                typingArea.classList.remove("fast-glitch-typing"); typingArea.classList.add("stable-text");
-                                const backBtn = document.createElement("button");
-                                backBtn.textContent = currentLang === "en" ? "← BACK" : "← 뒤로";
-                                backBtn.style.cssText = "margin-top:40px; background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px 20px; cursor:pointer; font-family:inherit; letter-spacing:2px; display:block; margin-left:auto; margin-right:auto;";
-                                backBtn.onmouseover = () => { backBtn.style.boxShadow = "0 0 10px var(--neon-mint)"; };
-                                backBtn.onmouseout  = () => { backBtn.style.boxShadow = "none"; };
-                                backBtn.onclick = () => {
-                                    if (abyssBgm) { abyssBgm.pause(); abyssBgm.currentTime = 0; }
-                                    clearInterval(warningInterval);
-                                    abyssLayer.remove();
-                                    document.getElementById("file-screen").classList.add("hidden");
-                                    document.getElementById("database-view").classList.remove("hidden");
-                                    document.body.style.backgroundColor = "var(--bg-black)";
-                                    currentOpenFile = null;
-                                };
-                                mainTextBox.appendChild(backBtn);
-                            } }
-                            typeCuroContent();
-                        }, 500);
+                        triggerAbyssEnd();
                     }
                 }, 100);
             }, 9800);

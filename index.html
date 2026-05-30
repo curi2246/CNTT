@@ -1752,7 +1752,24 @@
                             mainTextBox.innerHTML = `<div style="text-align:center; width:100%;"><h1 class="title-rgb-glitch" style="margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1><p id="curo-typing-area" class="fast-glitch-typing" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p></div>`;
                             const typingArea = document.getElementById("curo-typing-area");
                             let charIdx = 0;
-                            function typeCuroContent() { if (charIdx < curoData.length) { typingArea.textContent += curoData[charIdx++]; setTimeout(typeCuroContent, 25); } else { typingArea.classList.remove("fast-glitch-typing"); typingArea.classList.add("stable-text"); } }
+                            function typeCuroContent() { if (charIdx < curoData.length) { typingArea.textContent += curoData[charIdx++]; setTimeout(typeCuroContent, 25); } else {
+                                typingArea.classList.remove("fast-glitch-typing"); typingArea.classList.add("stable-text");
+                                const backBtn = document.createElement("button");
+                                backBtn.textContent = currentLang === "en" ? "← BACK" : "← 뒤로";
+                                backBtn.style.cssText = "margin-top:40px; background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px 20px; cursor:pointer; font-family:inherit; letter-spacing:2px; display:block; margin-left:auto; margin-right:auto;";
+                                backBtn.onmouseover = () => { backBtn.style.boxShadow = "0 0 10px var(--neon-mint)"; };
+                                backBtn.onmouseout  = () => { backBtn.style.boxShadow = "none"; };
+                                backBtn.onclick = () => {
+                                    if (abyssBgm) { abyssBgm.pause(); abyssBgm.currentTime = 0; }
+                                    clearInterval(warningInterval);
+                                    abyssLayer.remove();
+                                    document.getElementById("file-screen").classList.add("hidden");
+                                    document.getElementById("database-view").classList.remove("hidden");
+                                    document.body.style.backgroundColor = "var(--bg-black)";
+                                    currentOpenFile = null;
+                                };
+                                mainTextBox.appendChild(backBtn);
+                            } }
                             typeCuroContent();
                         }, 500);
                     }

@@ -166,17 +166,17 @@
             from { clip-path: inset(0 50% 0 50%); opacity: 0.3; }
             to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
-        /* 중앙에서 세로로 길쭉 → 가로로 쫀득하게 펼쳐지는 애니메이션 */
+        /* 세로선 → 가로선 → 박스로 쫀득하게 펼쳐지는 애니메이션 */
         @keyframes fileOpen {
-            0%   { transform: scaleX(0.08) scaleY(1.6);  opacity: 0;    }
-            20%  { transform: scaleX(0.08) scaleY(1.55); opacity: 0.6;  }
-            48%  { transform: scaleX(1.06) scaleY(0.92); opacity: 1;    }
-            66%  { transform: scaleX(0.97) scaleY(1.02); opacity: 1;    }
-            80%  { transform: scaleX(1.02) scaleY(0.99); opacity: 1;    }
-            100% { transform: scaleX(1)    scaleY(1);    opacity: 1;    }
+            0%   { transform: scaleX(0.015) scaleY(1);    opacity: 0.7; }
+            30%  { transform: scaleX(0.015) scaleY(1);    opacity: 1;   }
+            55%  { transform: scaleX(1.04)  scaleY(0.06); opacity: 1;   }
+            72%  { transform: scaleX(0.97)  scaleY(1.05); opacity: 1;   }
+            85%  { transform: scaleX(1.02)  scaleY(0.98); opacity: 1;   }
+            100% { transform: scaleX(1)     scaleY(1);    opacity: 1;   }
         }
         .terminal-expand {
-            animation: fileOpen 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: fileOpen 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
             transform-origin: center center;
         }
@@ -900,7 +900,7 @@
                     </div>
                 </div>
             </div>
-            <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer; margin-bottom: 50px;">← BACK</button>
+            <button id="back-btn" style="background:none; border:1px solid var(--neon-mint); color:var(--neon-mint); padding:10px; cursor:pointer; margin-bottom: 50px; opacity:0; pointer-events:none;">← BACK</button>
         </div>
     </div>
 
@@ -1615,6 +1615,7 @@
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
+            const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
             // 터미널 expand 애니메이션 — 래퍼로 중앙 고정, 터미널은 애니메이션만
             const tc = document.getElementById("file-terminal-container");
 
@@ -1634,8 +1635,10 @@
             tc.classList.add("terminal-expand");
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
-                // 래퍼는 그냥 투명 패스스루로 — 터미널 자체 스타일 유지
                 tcWrap.style.cssText = "display:contents;";
+                const bb = document.getElementById("back-btn");
+                bb.style.opacity = "1";
+                bb.style.pointerEvents = "auto";
             }, { once: true });
 
             // 기존 화살표 전부 제거

@@ -1619,6 +1619,7 @@
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth; // reflow
             tc.classList.add("terminal-expand");
+            tc.addEventListener("animationend", () => tc.classList.remove("terminal-expand"), { once: true });
 
             // 기존 화살표 전부 제거
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());

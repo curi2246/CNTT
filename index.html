@@ -1604,7 +1604,15 @@
                 if (m) profileLines[m[1].trim()] = m[2].trim();
             });
 
-            return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness };
+            // Stats 파싱
+            const statsRaw = get("Stats") || get("스탯");
+            const stats = {};
+            statsRaw.split("\n").forEach(l => {
+                const m = l.match(/^(.+?):\s*(\d+)/);
+                if (m) stats[m[1].trim()] = parseInt(m[2]);
+            });
+
+            return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness, stats };
         }
 
         // ── 캐릭터 카드 렌더 ──
@@ -1638,17 +1646,13 @@
                 right.appendChild(sp);
             }
 
-            // 스탯 바 (Height/Weight 기반으로 임시 고정값)
-            const statData = [
-                { label: currentLang === "en" ? "THREAT LEVEL" : "위협 수준", val: 55 },
-                { label: currentLang === "en" ? "COMBAT POWER" : "전투력",   val: 70 },
-                { label: currentLang === "en" ? "DANGER LEVEL" : "위험도",   val: 45 },
+            // 스탯 바 — 데이터 파일 [Stats]/[스탯] 에서 읽기
+            const statKeys = Object.keys(d.stats || {});
+            const statData = statKeys.length ? statKeys.map(k => ({ label: k, val: d.stats[k] })) : [
+                { label: currentLang === "en" ? "THREAT LEVEL" : "위협 수준", val: 50 },
+                { label: currentLang === "en" ? "COMBAT POWER" : "전투력",   val: 50 },
+                { label: currentLang === "en" ? "DANGER LEVEL" : "위험도",   val: 50 },
             ];
-            // 이름으로 스탯 변형
-            const seed = d.name.split("").reduce((a,c) => a + c.charCodeAt(0), 0);
-            statData[0].val = 40 + (seed * 3  % 50);
-            statData[1].val = 35 + (seed * 7  % 55);
-            statData[2].val = 30 + (seed * 11 % 60);
 
             const bars = document.createElement("div");
             bars.className = "char-stat-bars";

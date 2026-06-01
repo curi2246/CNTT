@@ -1621,7 +1621,7 @@
             if (d.species) {
                 const sp = document.createElement("div");
                 sp.className = "char-card-species";
-                sp.textContent = "분류: " + d.species + (d.gender ? "  ·  " + d.gender : "");
+                sp.textContent = (currentLang === "en" ? "CLASS: " : "분류: ") + d.species + (d.gender ? "  ·  " + d.gender : "");
                 right.appendChild(sp);
             }
 
@@ -1657,7 +1657,7 @@
             // Profile
             if (Object.keys(d.profile).length) {
                 const t = document.createElement("div"); t.className = "char-section-title";
-                t.textContent = currentLang === "en" ? "PERSONAL RECORD" : "프로필";
+                t.textContent = currentLang === "en" ? "PERSONAL RECORD" : "프로필 정보";
                 card.appendChild(t);
                 const grid = document.createElement("div"); grid.className = "char-profile-grid";
                 Object.entries(d.profile).forEach(([k, v]) => {
@@ -1671,7 +1671,7 @@
             // Abilities
             if (d.abilities) {
                 const t = document.createElement("div"); t.className = "char-section-title";
-                t.textContent = currentLang === "en" ? "ABILITIES & TRAITS" : "능력";
+                t.textContent = currentLang === "en" ? "ABILITIES & TRAITS" : "능력 및 특성";
                 card.appendChild(t);
                 const box = document.createElement("div"); box.className = "char-ability-item";
                 box.textContent = d.abilities;
@@ -1681,7 +1681,7 @@
             // Companions
             if (d.companions) {
                 const t = document.createElement("div"); t.className = "char-section-title";
-                t.textContent = currentLang === "en" ? "COMPANIONS" : "일행";
+                t.textContent = currentLang === "en" ? "COMPANIONS" : "동행";
                 card.appendChild(t);
                 const box = document.createElement("div"); box.className = "char-section-body";
                 box.textContent = d.companions;
@@ -1881,26 +1881,29 @@
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
             const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
-            // 터미널 expand 애니메이션 — 래퍼로 중앙 고정, 터미널은 애니메이션만
+            // 터미널 expand 애니메이션 — 터미널만 중앙에서 애니메이션, 제목은 그 자리
             const tc = document.getElementById("file-terminal-container");
-
-            // 래퍼가 없으면 생성
-            let tcWrap = document.getElementById("file-terminal-wrap");
-            if (!tcWrap) {
-                tcWrap = document.createElement("div");
-                tcWrap.id = "file-terminal-wrap";
-                tc.parentNode.insertBefore(tcWrap, tc);
-                tcWrap.appendChild(tc);
-            }
-            // 래퍼: 뷰포트 중앙 고정
-            tcWrap.style.cssText = "position:fixed; top:50%; left:50%; width:min(600px,92vw); transform:translate(-50%,-50%); z-index:100;";
+            tc.style.position = "fixed";
+            tc.style.top = "50%";
+            tc.style.left = "50%";
+            tc.style.marginTop = "0";
+            tc.style.width = "min(600px, 92vw)";
+            tc.style.zIndex = "100";
+            // translate는 keyframe과 충돌하므로 margin으로 센터
+            tc.style.marginLeft = "calc(-1 * min(300px, 46vw))";
 
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth;
             tc.classList.add("terminal-expand");
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
-                tcWrap.style.cssText = "display:contents;";
+                tc.style.position = "";
+                tc.style.top = "";
+                tc.style.left = "";
+                tc.style.marginTop = "";
+                tc.style.marginLeft = "";
+                tc.style.width = "";
+                tc.style.zIndex = "";
                 const bb = document.getElementById("back-btn");
                 bb.style.opacity = "1";
                 bb.style.pointerEvents = "auto";

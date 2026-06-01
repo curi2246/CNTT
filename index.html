@@ -1568,23 +1568,36 @@
 
         // ── 캐릭터 텍스트 파싱 ──
         function parseCharacterData(text) {
-            if (!text.includes("Name:") || !text.includes("[Profile]")) return null;
+            // 영문(Name:+[Profile]) 또는 한글(명칭:+[프로필) 둘 다 인식
+            const isKo = text.includes("명칭:") && text.includes("[프로필");
+            const isEn = text.includes("Name:") && text.includes("[Profile]");
+            if (!isKo && !isEn) return null;
+
             const get = (label) => {
                 const re = new RegExp("\\[" + label + "\\]\\s*([\\s\\S]*?)(?=\\n\\[|$)");
                 const m = text.match(re);
                 return m ? m[1].trim() : "";
             };
-            const nameMatch = text.match(/Name:\s*(.+)/);
-            const name = nameMatch ? nameMatch[1].trim() : "";
-            const species = get("Species") || get("종족");
-            const gender  = get("Gender")  || get("성별");
-            const profile = get("Profile") || get("프로필");
-            const abilities = get("Abilities") || get("능력");
-            const companions = get("Companions") || get("일행");
-            const contacts = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
-            const illness = get("Current Illness") || get("현재 가지고 있는 병");
 
-            // Profile 파싱
+            let name = "";
+            if (isEn) {
+                const m = text.match(/Name:\s*(.+)/);
+                name = m ? m[1].trim() : "";
+            } else {
+                const m = text.match(/명칭:\s*(.+)/);
+                // "명칭: 큐로(Curo)" → "큐로(Curo)"
+                name = m ? m[1].trim() : "";
+            }
+
+            const species    = get("Species")    || get("종족");
+            const gender     = get("Gender")     || get("성별");
+            const profile    = get("Profile")    || get("프로필");
+            const abilities  = get("Abilities")  || get("능력");
+            const companions = get("Companions") || get("일행");
+            const contacts   = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
+            const illness    = get("Current Illness") || get("현재 가지고 있는 병");
+
+            // Profile 파싱 (키: 값)
             const profileLines = {};
             profile.split("\n").forEach(l => {
                 const m = l.match(/^(.+?):\s*(.+)/);

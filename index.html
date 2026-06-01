@@ -1881,29 +1881,19 @@
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
             const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
-            // 터미널 expand 애니메이션 — 터미널만 중앙에서 애니메이션, 제목은 그 자리
+            // 터미널 expand 애니메이션 — file-screen을 잠시 flex 중앙 정렬
             const tc = document.getElementById("file-terminal-container");
-            tc.style.position = "fixed";
-            tc.style.top = "50%";
-            tc.style.left = "50%";
-            tc.style.marginTop = "0";
-            tc.style.width = "min(600px, 92vw)";
-            tc.style.zIndex = "100";
-            // translate는 keyframe과 충돌하므로 margin으로 센터
-            tc.style.marginLeft = "calc(-1 * min(300px, 46vw))";
+            const fs = document.getElementById("file-screen");
+            fs.style.justifyContent = "center";
+            fs.style.minHeight = "100vh";
 
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth;
             tc.classList.add("terminal-expand");
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
-                tc.style.position = "";
-                tc.style.top = "";
-                tc.style.left = "";
-                tc.style.marginTop = "";
-                tc.style.marginLeft = "";
-                tc.style.width = "";
-                tc.style.zIndex = "";
+                fs.style.justifyContent = "";
+                fs.style.minHeight = "";
                 const bb = document.getElementById("back-btn");
                 bb.style.opacity = "1";
                 bb.style.pointerEvents = "auto";

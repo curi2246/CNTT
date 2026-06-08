@@ -1819,6 +1819,7 @@
         }
 
         function openFileWithNav(folder, file) {
+            try { new Audio("sfx.mp3").play(); } catch(e) {}
             currentFolder = folder;
             currentFileList = Object.keys(getFileSystem(currentLang)[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
             currentFileIndex = currentFileList.indexOf(file);
@@ -1914,6 +1915,7 @@
                 const bb = document.getElementById("back-btn");
                 bb.style.opacity = "1";
                 bb.style.pointerEvents = "auto";
+                try { new Audio("text.sfx.mp3").play(); } catch(e) {}
             }, { once: true });
 
             // 기존 화살표 전부 제거

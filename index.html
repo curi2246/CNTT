@@ -1819,7 +1819,6 @@
         }
 
         function openFileWithNav(folder, file) {
-            try { new Audio("sfx.mp3.wav").play(); } catch(e) {}
             currentFolder = folder;
             currentFileList = Object.keys(getFileSystem(currentLang)[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
             currentFileIndex = currentFileList.indexOf(file);
@@ -1828,6 +1827,7 @@
             const fd = getFileSystem(currentLang)[folder][file];
             // 🔥 지도 타입이면 별도 처리
             if (fd && fd.type === "map") {
+                try { new Audio("sfx.mp3.wav").play(); } catch(e) {}
                 openMapFile(file);
                 return;
             }
@@ -1836,6 +1836,7 @@
                 openFileWithFetch(file, fd, 0);
                 return;
             }
+            // 텍스트 파일은 sfx 없이 — text.sfx.mp3는 애니메이션 끝난 후 재생
             openFile(file, fd, 0);
         }
 

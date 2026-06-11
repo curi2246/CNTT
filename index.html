@@ -912,6 +912,8 @@
         </div>
     </div>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
+    <audio id="sfx-click" src="sfx.mp3.wav"></audio>
+    <audio id="sfx-text" src="text.sfx.mp3"></audio>
 
     <div id="music-info-box">
         <span style="margin-right: 5px;">🎵</span>
@@ -1819,7 +1821,7 @@
         }
 
         function openFileWithNav(folder, file) {
-            try { new Audio("sfx.mp3.wav").play(); } catch(e) {}
+            const _sfx = document.getElementById("sfx-click"); if(_sfx){ _sfx.currentTime=0; _sfx.play().catch(()=>{}); }
             currentFolder = folder;
             currentFileList = Object.keys(getFileSystem(currentLang)[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
             currentFileIndex = currentFileList.indexOf(file);
@@ -1908,7 +1910,7 @@
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth;
             tc.classList.add("terminal-expand");
-            try { new Audio("text.sfx.mp3").play(); } catch(e) {}
+            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");
                 fs.style.justifyContent = "";

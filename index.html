@@ -1496,6 +1496,12 @@
             }
         });
 
+        // 전역 클릭 효과음
+        document.addEventListener('click', () => {
+            const sfx = document.getElementById("sfx-click");
+            if (sfx) { sfx.currentTime = 0; sfx.play().catch(() => {}); }
+        });
+
         // 모바일 더블탭 → 입력창 열기
         let lastTap = 0;
         document.addEventListener('touchend', (e) => {
@@ -1821,7 +1827,6 @@
         }
 
         function openFileWithNav(folder, file) {
-            const _sfx = document.getElementById("sfx-click"); if(_sfx){ _sfx.currentTime=0; _sfx.play().catch(()=>{}); }
             currentFolder = folder;
             currentFileList = Object.keys(getFileSystem(currentLang)[folder]).filter(f => f !== "Curo_REAL_Hidden_Content");
             currentFileIndex = currentFileList.indexOf(file);

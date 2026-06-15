@@ -166,20 +166,31 @@
             from { clip-path: inset(0 50% 0 50%); opacity: 0.3; }
             to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
-        /* 세로선 → 가로선(텀) → 박스로 펼쳐지는 애니메이션 */
+        /* 중앙의 별(다이아몬드) 모양이 양옆으로 펼쳐지며 박스가 되는 애니메이션 */
         @keyframes fileOpen {
-            0%   { transform: scaleX(0.015) scaleY(6);    opacity: 0;   }
-            12%  { transform: scaleX(0.015) scaleY(6);    opacity: 1;   }
-            28%  { transform: scaleX(1)     scaleY(0.04); opacity: 1;   }
-            44%  { transform: scaleX(1)     scaleY(0.04); opacity: 1;   }
-            68%  { transform: scaleX(1)     scaleY(1.04); opacity: 1;   }
-            83%  { transform: scaleX(1)     scaleY(0.98); opacity: 1;   }
-            100% { transform: scaleX(1)     scaleY(1);    opacity: 1;   }
+            0%   { clip-path: polygon(50% 0%, 64% 50%, 50% 100%, 36% 50%); opacity: 0.6; }
+            100% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); opacity: 1;   }
         }
         .terminal-expand {
             animation: fileOpen 1.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             overflow: hidden;
             transform-origin: center center;
+        }
+
+        /* 텍스트 파일 박스 — 반투명 하늘색 배경 + 진한 하늘색 테두리 */
+        #file-terminal-container {
+            background: rgba(135, 206, 250, 0.12);
+            border: 1px solid #1565c0;
+        }
+
+        /* 내부 텍스트 페이드인 */
+        #file-scroll-container.content-fade-in {
+            animation: fileTextFadeIn 0.9s ease forwards;
+        }
+        @keyframes fileTextFadeIn {
+            0%   { opacity: 0; }
+            45%  { opacity: 0; }
+            100% { opacity: 1; }
         }
 
         /* 글리치 비번 입력창 */
@@ -913,7 +924,7 @@
     </div>
     <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
     <audio id="sfx-click" src="sfx.mp3.wav"></audio>
-    <audio id="sfx-text" src="text.sfx.mp3.mp3"></audio>
+    <audio id="sfx-text" src="text.sfx.mp3"></audio>
 
     <div id="music-info-box">
         <span style="margin-right: 5px;">🎵</span>
@@ -1915,6 +1926,11 @@
             tc.classList.remove("terminal-expand");
             void tc.offsetWidth;
             tc.classList.add("terminal-expand");
+            // 내부 텍스트 페이드인 애니메이션 리셋
+            const fsc = document.getElementById("file-scroll-container");
+            fsc.classList.remove("content-fade-in");
+            void fsc.offsetWidth;
+            fsc.classList.add("content-fade-in");
             const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
             tc.addEventListener("animationend", () => {
                 tc.classList.remove("terminal-expand");

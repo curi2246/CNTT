@@ -1035,11 +1035,9 @@
 
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div class="terminal" id="file-terminal-container">
-                <svg class="file-box-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <path id="file-box-path" class="file-box-path"></path>
-                </svg>
-                <div id="file-scroll-container">
+            <div id="file-terminal-container" style="position:relative; width:100%; max-width:700px;">
+                <canvas id="file-box-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+                <div id="file-scroll-container" style="position:relative; z-index:1; padding: 24px 48px;">
                     <div id="file-text"></div>
                     <div id="hidden-zone" style="display:none; padding:10px 0;">
                         <p id="ui-hidden-error" style="color:red; font-weight:bold; margin:0 0 10px;">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>
@@ -1932,78 +1930,97 @@
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
             const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
-            // 터미널 expand 애니메이션 — file-screen을 잠시 flex 중앙 정렬
-            const tc = document.getElementById("file-terminal-container");
+            // ── Canvas 별 → 박스 애니메이션 ──
             const fs = document.getElementById("file-screen");
             fs.style.justifyContent = "center";
             fs.style.minHeight = "100vh";
 
-            // ── JS 보간: 별(다이아몬드) → 찢어진 박스 애니메이션 ──
-            const boxPath = document.getElementById("file-box-path");
-
-            // 좌표 쌍 배열 [x, y] — 포인트 수 동일해야 보간 가능
-            // 시작: 세로로 긴 4점 다이아몬드(별) — 위아래로 길고 좌우로 좁음
-            const starPts = [
-                [50, -8],[56, 12],[50,108],[44,88],   // 위뾰족, 오른살짝, 아래뾰족, 왼살짝
-                // 찢어진 박스 포인트 수(14)에 맞게 별을 14점으로 정의
-                [50,-8],[57,5],[50,50],[57,95],[50,108],[43,95],[50,50],[43,5],
-                [50,-8],[50,50],[50,108],[50,50],[50,-8],[50,50]
-            ];
-            // 14점 별(다이아몬드) — 위에서 시계방향
-            const star14 = [
-                [50, -5],
-                [52,  8],[55, 30],[52, 50],
-                [55, 70],[52, 92],[50,105],
-                [48, 92],[45, 70],[48, 50],
-                [45, 30],[48,  8],[50, -5],[50,50]
-            ];
-            // 14점 찢어진 박스 — 스케치 참고 (왼쪽 물결, 오른쪽 물결)
-            const box14 = [
-                [ 4,  0],
-                [88,  0],[92,  8],[98, 20],[92, 38],
-                [98, 60],[92, 78],[88,100],
-                [ 4,100],[ 0, 92],[ 4, 78],[ 0, 60],
-                [ 4, 20],[ 0,  8]
-            ];
-
-            const DURATION = 900; // ms
-            const ease = t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease-in-out
-            let startTime = null;
-
-            function lerp(a, b, t) { return a + (b - a) * t; }
-            function buildD(pts) {
-                return "M " + pts.map(p => p[0].toFixed(2) + " " + p[1].toFixed(2)).join(" L ") + " Z";
-            }
-
-            // 초기 별 모양 세팅
-            boxPath.setAttribute("d", buildD(star14));
-
-            // 텍스트 페이드인
             const fsc = document.getElementById("file-scroll-container");
-            fsc.classList.remove("content-fade-in");
-            void fsc.offsetWidth;
-            fsc.classList.add("content-fade-in");
-
+            fsc.style.opacity = "0";
             const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
-            function animateBox(ts) {
-                if (!startTime) startTime = ts;
-                const elapsed = ts - startTime;
-                const t = ease(Math.min(elapsed / DURATION, 1));
-                const interp = star14.map((s, i) => [lerp(s[0], box14[i][0], t), lerp(s[1], box14[i][1], t)]);
-                boxPath.setAttribute("d", buildD(interp));
-                if (elapsed < DURATION) {
-                    requestAnimationFrame(animateBox);
-                } else {
-                    boxPath.setAttribute("d", buildD(box14));
-                    fs.style.justifyContent = "";
-                    fs.style.minHeight = "";
-                    const bb = document.getElementById("back-btn");
-                    bb.style.opacity = "1";
-                    bb.style.pointerEvents = "auto";
+            // canvas를 container 크기에 맞춤
+            const tc = document.getElementById("file-terminal-container");
+            const cvs = document.getElementById("file-box-canvas");
+
+            function runBoxAnim() {
+                const W = tc.offsetWidth || 700;
+                const H = tc.offsetHeight || 220;
+                cvs.width = W; cvs.height = H;
+                const ctx = cvs.getContext("2d");
+                const CX = W/2, CY = H/2;
+                const STAR_RX = 14, STAR_RY = 70;
+                const BOX_W = W * 0.92, BOX_H = H * 0.88;
+
+                function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
+                function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
+
+                function drawStar(cx,cy,rx,ry){
+                    ctx.beginPath();
+                    ctx.moveTo(cx,cy-ry);
+                    ctx.quadraticCurveTo(cx+rx*0.15,cy-ry*0.15,cx+rx,cy);
+                    ctx.quadraticCurveTo(cx+rx*0.15,cy+ry*0.15,cx,cy+ry);
+                    ctx.quadraticCurveTo(cx-rx*0.15,cy+ry*0.15,cx-rx,cy);
+                    ctx.quadraticCurveTo(cx-rx*0.15,cy-ry*0.15,cx,cy-ry);
+                    ctx.closePath();
                 }
+
+                function drawBox(cx,cy,w,h){
+                    const x=cx-w/2, y=cy-h/2;
+                    const tip = w * 0.052;
+                    const curve = 0.18;
+                    ctx.beginPath();
+                    ctx.moveTo(x,y);
+                    ctx.lineTo(x+w,y);
+                    ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
+                    ctx.quadraticCurveTo(x+w,y+h*(1-curve),x+w,y+h);
+                    ctx.lineTo(x,y+h);
+                    ctx.quadraticCurveTo(x,y+h*(1-curve),x-tip,cy);
+                    ctx.quadraticCurveTo(x,y+h*curve,x,y);
+                    ctx.closePath();
+                }
+
+                let t = 0, rafId = null;
+                function render(){
+                    ctx.clearRect(0,0,W,H);
+                    if(t<=0.25){
+                        const p=easeOutBack(t/0.25);
+                        drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
+                        ctx.globalAlpha=Math.min(1,p);
+                        ctx.fillStyle="rgba(135,206,250,0.15)"; ctx.fill();
+                        ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.8; ctx.stroke();
+                        ctx.globalAlpha=1;
+                    } else {
+                        const p=easeInOutBack((t-0.25)/0.75);
+                        const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
+                        const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
+                        if(p<0.82){
+                            drawStar(CX,CY,rx,ry);
+                        } else {
+                            const bp=(p-0.82)/0.18;
+                            drawBox(CX,CY,BOX_W*(0.65+0.35*bp),BOX_H);
+                        }
+                        ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
+                        ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
+                        // 텍스트 페이드인
+                        if(p>0.88){
+                            fsc.style.opacity = String((p-0.88)/0.12);
+                        }
+                    }
+                    if(t<1){t+=0.018; rafId=requestAnimationFrame(render);}
+                    else {
+                        fsc.style.opacity="1";
+                        fs.style.justifyContent="";
+                        fs.style.minHeight="";
+                        const bb=document.getElementById("back-btn");
+                        bb.style.opacity="1"; bb.style.pointerEvents="auto";
+                    }
+                }
+                render();
             }
-            requestAnimationFrame(animateBox);
+
+            // container가 렌더된 후 실행
+            requestAnimationFrame(runBoxAnim);
 
             // 기존 화살표 전부 제거
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());

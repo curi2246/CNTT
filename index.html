@@ -150,7 +150,7 @@
         }
 
         #auth-screen { justify-content: center; }
-        .terminal { width: 100%; max-width: 900px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
+        .terminal { width: 100%; max-width: 720px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
@@ -1035,7 +1035,7 @@
 
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div id="file-terminal-container" style="position:relative; width:100%; max-width:900px;">
+            <div id="file-terminal-container" style="position:relative; width:92%; max-width:720px;">
                 <canvas id="file-box-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
                 <div id="file-scroll-container" style="position:relative; z-index:1; padding: 24px 56px; max-height:60vh; overflow-y:auto;">
                     <div id="file-text"></div>
@@ -1946,8 +1946,11 @@
             function runBoxAnim() {
                 const W = tc.offsetWidth || 700;
                 const H = tc.offsetHeight || 220;
-                cvs.width = W; cvs.height = H;
+                const dpr = window.devicePixelRatio || 1;
+                cvs.width = W * dpr; cvs.height = H * dpr;
+                cvs.style.width = W + "px"; cvs.style.height = H + "px";
                 const ctx = cvs.getContext("2d");
+                ctx.scale(dpr, dpr);
                 const CX = W/2, CY = H/2;
                 const STAR_RX = 14, STAR_RY = 70;
                 const BOX_W = W * 0.92, BOX_H = H * 0.88;
@@ -2030,15 +2033,7 @@
             currentPageIndex = pageIdx ?? 0;
             const content = pages[currentPageIndex];
 
-            // 파일 간 이동 화살표
-            if (currentFileIndex > 0) {
-                const la = document.createElement("div"); la.className = "nav-arrow nav-arrow-left"; la.innerHTML = "◀";
-                la.onclick = () => navigateFile(-1); terminalContainer.appendChild(la);
-            }
-            if (currentFileIndex < currentFileList.length - 1) {
-                const ra = document.createElement("div"); ra.className = "nav-arrow nav-arrow-right"; ra.innerHTML = "▶";
-                ra.onclick = () => navigateFile(1); terminalContainer.appendChild(ra);
-            }
+            // 파일 간 이동 화살표 — 제거됨
 
             // 🔥 페이지 내부 화살표 (하단 모서리, 2페이지 이상일 때만)
             if (pages.length > 1) {

@@ -1930,122 +1930,109 @@
             const hZone = document.getElementById("hidden-zone");
             textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
             const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
-            // ── Canvas 별 → 박스 애니메이션 ──
+            // ── 별 → 박스 애니메이션: 화면 중앙 오버레이 위에서 실행 ──
             const fs = document.getElementById("file-screen");
-            fs.style.justifyContent = "center";
-            fs.style.minHeight = "100vh";
-
-            const fsc = document.getElementById("file-scroll-container");
-            fsc.style.opacity = "0";
-            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
-
-            // canvas를 container 크기에 맞춤
             const tc = document.getElementById("file-terminal-container");
+            const fsc = document.getElementById("file-scroll-container");
             const cvs = document.getElementById("file-box-canvas");
 
-            function runBoxAnim() {
-                // 텍스트가 먼저 렌더된 후 높이 측정
-                const W = tc.offsetWidth || 800;
-                const H = tc.offsetHeight || 300;
-                const dpr = window.devicePixelRatio || 1;
-                cvs.width = Math.round(W * dpr);
-                cvs.height = Math.round(H * dpr);
-                cvs.style.width = W + "px";
-                cvs.style.height = H + "px";
-                cvs.style.position = "absolute";
-                cvs.style.top = "0";
-                cvs.style.left = "0";
-                cvs.style.pointerEvents = "none";
-                cvs.style.zIndex = "0";
-                const ctx = cvs.getContext("2d");
-                ctx.scale(dpr, dpr);
-                const CX = W/2, CY = H/2;
-                const STAR_RX = 14, STAR_RY = 70;
-                const BOX_W = W * 0.92, BOX_H = H * 0.88;
+            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
-                function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
-                function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
+            // 1) 오버레이 canvas를 viewport 전체에 고정
+            cvs.style.position = "fixed";
+            cvs.style.top = "0";
+            cvs.style.left = "0";
+            cvs.style.zIndex = "9000";
+            cvs.style.pointerEvents = "none";
+            const dpr = window.devicePixelRatio || 1;
+            const VW = window.innerWidth;
+            const VH = window.innerHeight;
+            cvs.width = Math.round(VW * dpr);
+            cvs.height = Math.round(VH * dpr);
+            cvs.style.width = VW + "px";
+            cvs.style.height = VH + "px";
+            const ctx = cvs.getContext("2d");
+            ctx.scale(dpr, dpr);
 
-                function drawStar(cx,cy,rx,ry){
-                    ctx.beginPath();
-                    ctx.moveTo(cx,cy-ry);
-                    ctx.quadraticCurveTo(cx+rx*0.15,cy-ry*0.15,cx+rx,cy);
-                    ctx.quadraticCurveTo(cx+rx*0.15,cy+ry*0.15,cx,cy+ry);
-                    ctx.quadraticCurveTo(cx-rx*0.15,cy+ry*0.15,cx-rx,cy);
-                    ctx.quadraticCurveTo(cx-rx*0.15,cy-ry*0.15,cx,cy-ry);
-                    ctx.closePath();
-                }
+            const CX = VW / 2, CY = VH / 2;
+            const STAR_RX = 16, STAR_RY = 80;
+            const BOX_W = Math.min(VW * 0.85, 820);
+            const BOX_H = Math.min(VH * 0.65, 480);
 
-                function drawBox(cx,cy,w,h){
-                    const x=cx-w/2, y=cy-h/2;
-                    const tip = w * 0.052;
-                    const curve = 0.18;
-                    ctx.beginPath();
-                    ctx.moveTo(x,y);
-                    ctx.lineTo(x+w,y);
-                    ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
-                    ctx.quadraticCurveTo(x+w,y+h*(1-curve),x+w,y+h);
-                    ctx.lineTo(x,y+h);
-                    ctx.quadraticCurveTo(x,y+h*(1-curve),x-tip,cy);
-                    ctx.quadraticCurveTo(x,y+h*curve,x,y);
-                    ctx.closePath();
-                }
+            // 텍스트/콘텐츠는 숨겨둠
+            fsc.style.opacity = "0";
+            tc.style.opacity = "0";
+            fs.style.justifyContent = "center";
+            fs.style.minHeight = "100vh";
+            const backBtnAnim = document.getElementById("back-btn");
+            backBtnAnim.style.opacity = "0";
+            backBtnAnim.style.pointerEvents = "none";
 
-                let t = 0, rafId = null;
-                function render(){
-                    ctx.clearRect(0,0,W,H);
-                    if(t<=0.25){
-                        const p=easeOutBack(t/0.25);
-                        drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
-                        ctx.globalAlpha=Math.min(1,p);
-                        ctx.fillStyle="rgba(135,206,250,0.15)"; ctx.fill();
-                        ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.8; ctx.stroke();
-                        ctx.globalAlpha=1;
-                    } else {
-                        const p=easeInOutBack((t-0.25)/0.75);
-                        const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
-                        const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
-                        if(p<0.82){
-                            drawStar(CX,CY,rx,ry);
-                        } else {
-                            const bp=(p-0.82)/0.18;
-                            drawBox(CX,CY,BOX_W*(0.65+0.35*bp),BOX_H);
-                        }
-                        ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
-                        ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
-                        // 텍스트 페이드인
-                        if(p>0.88){
-                            fsc.style.opacity = String((p-0.88)/0.12);
-                        }
-                    }
-                    if(t<1){t+=0.018; rafId=requestAnimationFrame(render);}
-                    else {
-                        fsc.style.opacity="1";
-                        fs.style.justifyContent="";
-                        fs.style.minHeight="";
-                        const bb=document.getElementById("back-btn");
-                        bb.style.opacity="1"; bb.style.pointerEvents="auto";
-                        // 텍스트 완전히 렌더된 후 canvas 높이 재조정 및 박스 재드로우
-                        requestAnimationFrame(() => {
-                            const newH = tc.offsetHeight;
-                            const newW = tc.offsetWidth;
-                            if(Math.abs(newH - H) > 10) {
-                                cvs.height = Math.round(newH * dpr);
-                                cvs.style.height = newH + "px";
-                                ctx.scale(dpr, dpr);
-                                ctx.clearRect(0,0,newW,newH);
-                                drawBox(newW/2, newH/2, newW*0.92, newH*0.88);
-                                ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
-                                ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
-                            }
-                        });
-                    }
-                }
-                render();
+            function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
+            function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
+
+            function drawStar(cx,cy,rx,ry){
+                ctx.beginPath();
+                ctx.moveTo(cx,cy-ry);
+                ctx.quadraticCurveTo(cx+rx*0.15,cy-ry*0.15,cx+rx,cy);
+                ctx.quadraticCurveTo(cx+rx*0.15,cy+ry*0.15,cx,cy+ry);
+                ctx.quadraticCurveTo(cx-rx*0.15,cy+ry*0.15,cx-rx,cy);
+                ctx.quadraticCurveTo(cx-rx*0.15,cy-ry*0.15,cx,cy-ry);
+                ctx.closePath();
             }
 
-            // container가 렌더된 후 실행
-            requestAnimationFrame(runBoxAnim);
+            function drawBox(cx,cy,w,h){
+                const x=cx-w/2, y=cy-h/2;
+                const tip=w*0.05, curve=0.18;
+                ctx.beginPath();
+                ctx.moveTo(x,y); ctx.lineTo(x+w,y);
+                ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
+                ctx.quadraticCurveTo(x+w,y+h*(1-curve),x+w,y+h);
+                ctx.lineTo(x,y+h);
+                ctx.quadraticCurveTo(x,y+h*(1-curve),x-tip,cy);
+                ctx.quadraticCurveTo(x,y+h*curve,x,y);
+                ctx.closePath();
+            }
+
+            let animT = 0;
+            function render(){
+                ctx.clearRect(0,0,VW,VH);
+                if(animT<=0.25){
+                    const p=easeOutBack(animT/0.25);
+                    drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
+                    ctx.globalAlpha=Math.min(1,p);
+                    ctx.fillStyle="rgba(135,206,250,0.18)"; ctx.fill();
+                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=2; ctx.stroke();
+                    ctx.globalAlpha=1;
+                } else {
+                    const p=easeInOutBack((animT-0.25)/0.75);
+                    const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
+                    const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
+                    if(p<0.82){
+                        drawStar(CX,CY,rx,ry);
+                    } else {
+                        const bp=(p-0.82)/0.18;
+                        drawBox(CX,CY,BOX_W*(0.65+0.35*bp),BOX_H);
+                    }
+                    ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
+                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
+                }
+                if(animT<1){
+                    animT+=0.018;
+                    requestAnimationFrame(render);
+                } else {
+                    // 애니메이션 끝 → 오버레이 숨기고 실제 콘텐츠 표시
+                    ctx.clearRect(0,0,VW,VH);
+                    cvs.style.display = "none";
+                    tc.style.opacity = "1";
+                    fsc.style.opacity = "1";
+                    fs.style.justifyContent = "";
+                    fs.style.minHeight = "";
+                    backBtnAnim.style.opacity = "1";
+                    backBtnAnim.style.pointerEvents = "auto";
+                }
+            }
+            requestAnimationFrame(render);
 
             // 기존 화살표 전부 제거
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
@@ -2114,6 +2101,13 @@
             document.getElementById("database-view").classList.remove("hidden");
             currentOpenFile = null;
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
+            // canvas 오버레이 초기화
+            const cvs = document.getElementById("file-box-canvas");
+            cvs.style.display = "";
+            cvs.style.position = "";
+            cvs.style.zIndex = "";
+            const ctx2 = cvs.getContext("2d");
+            ctx2.clearRect(0, 0, cvs.width, cvs.height);
         };
 
         function createAbyssFlash(color, duration) {

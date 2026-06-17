@@ -150,7 +150,7 @@
         }
 
         #auth-screen { justify-content: center; }
-        .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
+        .terminal { width: 100%; max-width: 900px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
         
         #file-scroll-container { width: 100%; overflow: visible; }
         
@@ -1035,9 +1035,9 @@
 
         <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div id="file-terminal-container" style="position:relative; width:100%; max-width:700px;">
+            <div id="file-terminal-container" style="position:relative; width:100%; max-width:900px;">
                 <canvas id="file-box-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
-                <div id="file-scroll-container" style="position:relative; z-index:1; padding: 24px 48px;">
+                <div id="file-scroll-container" style="position:relative; z-index:1; padding: 24px 56px; max-height:60vh; overflow-y:auto;">
                     <div id="file-text"></div>
                     <div id="hidden-zone" style="display:none; padding:10px 0;">
                         <p id="ui-hidden-error" style="color:red; font-weight:bold; margin:0 0 10px;">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>

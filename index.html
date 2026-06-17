@@ -2021,9 +2021,12 @@
                     animT+=0.018;
                     requestAnimationFrame(render);
                 } else {
-                    // 애니메이션 끝 → 오버레이 숨기고 실제 콘텐츠 표시
+                    // 애니메이션 끝 → 오버레이 투명하게 + 실제 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
-                    cvs.style.display = "none";
+                    cvs.style.position = "absolute";
+                    cvs.style.zIndex = "0";
+                    cvs.style.width = "0";
+                    cvs.style.height = "0";
                     tc.style.opacity = "1";
                     fsc.style.opacity = "1";
                     fs.style.justifyContent = "";
@@ -2106,6 +2109,8 @@
             cvs.style.display = "";
             cvs.style.position = "";
             cvs.style.zIndex = "";
+            cvs.style.width = "";
+            cvs.style.height = "";
             const ctx2 = cvs.getContext("2d");
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
         };

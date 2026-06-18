@@ -1931,15 +1931,13 @@
             const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
             const backBtnAnim = document.getElementById("back-btn");
-
-            // 콘텐츠 숨김
-            fsc.style.opacity = "0";
-            tc.style.visibility = "hidden";
             backBtnAnim.style.opacity = "0";
             backBtnAnim.style.pointerEvents = "none";
 
-            // 2프레임 후에 canvas 세팅 & 애니메이션 시작 (DOM 렌더 보장)
-            requestAnimationFrame(() => requestAnimationFrame(() => {
+            // 검정 오버레이로 콘텐츠 가림 (tc/fsc 건드리지 않음)
+            const _overlay = document.createElement("div");
+            _overlay.style.cssText = "position:fixed;inset:0;background:#020d0d;z-index:8999;pointer-events:none;";
+            document.body.appendChild(_overlay);
 
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
@@ -2012,17 +2010,15 @@
                     animT+=0.018;
                     requestAnimationFrame(render);
                 } else {
+                    // 애니메이션 끝 → 오버레이/canvas 제거, 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "";
-                    tc.style.visibility = "";
-                    fsc.style.opacity = "1";
+                    _overlay.remove();
                     backBtnAnim.style.opacity = "1";
                     backBtnAnim.style.pointerEvents = "auto";
                 }
             }
             requestAnimationFrame(render);
-
-            })); // end double rAF
 
             // 기존 화살표 전부 제거
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());

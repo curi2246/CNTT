@@ -2045,45 +2045,12 @@
                     animT += 0.018;
                     requestAnimationFrame(render);
                 } else {
-                    // 애니메이션 끝 → canvas를 container에 붙여서 박스 유지
+                    // 애니메이션 끝 → canvas 치우고 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "";
-
-                    // container에 고정 canvas 새로 만들어 박스 유지
-                    requestAnimationFrame(() => {
-                        const CW = terminalContainer.offsetWidth;
-                        const CH = terminalContainer.offsetHeight;
-                        const boxCvs = document.createElement("canvas");
-                        const bdpr = window.devicePixelRatio || 1;
-                        boxCvs.width = Math.round(CW * bdpr);
-                        boxCvs.height = Math.round(CH * bdpr);
-                        boxCvs.style.cssText = "position:absolute;top:0;left:0;width:"+CW+"px;height:"+CH+"px;pointer-events:none;z-index:0;";
-                        const bctx = boxCvs.getContext("2d");
-                        bctx.scale(bdpr, bdpr);
-                        const bcx = CW/2, bcy = CH/2;
-                        const bw = CW, bh = CH;
-                        const tip = bw*0.05, curve = 0.18;
-                        const bx = bcx-bw/2, by = bcy-bh/2;
-                        bctx.beginPath();
-                        bctx.moveTo(bx,by); bctx.lineTo(bx+bw,by);
-                        bctx.quadraticCurveTo(bx+bw,by+bh*curve,bx+bw+tip,bcy);
-                        bctx.quadraticCurveTo(bx+bw,by+bh*(1-curve),bx+bw,by+bh);
-                        bctx.lineTo(bx,by+bh);
-                        bctx.quadraticCurveTo(bx,by+bh*(1-curve),bx-tip,bcy);
-                        bctx.quadraticCurveTo(bx,by+bh*curve,bx,by);
-                        bctx.closePath();
-                        bctx.fillStyle="rgba(135,206,250,0.08)"; bctx.fill();
-                        bctx.strokeStyle="#1e90ff"; bctx.lineWidth=1.5; bctx.stroke();
-                        // 기존 boxCanvas 있으면 제거
-                        const old = tc.querySelector(".box-canvas-static");
-                        if(old) old.remove();
-                        boxCvs.classList.add("box-canvas-static");
-                        tc.insertBefore(boxCvs, tc.firstChild);
-
-                        fsc.style.visibility = "";
-                        backBtnEl.style.opacity = "1";
-                        backBtnEl.style.pointerEvents = "auto";
-                    });
+                    fsc.style.visibility = "";
+                    backBtnEl.style.opacity = "1";
+                    backBtnEl.style.pointerEvents = "auto";
                 }
             }
             requestAnimationFrame(render);

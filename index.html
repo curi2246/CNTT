@@ -172,13 +172,10 @@
 
         /* 텍스트 파일 박스 */
         #file-terminal-container {
-            background: rgba(135, 206, 250, 0.07);
-            border: 1.5px solid rgba(30, 144, 255, 0.85);
+            background: transparent;
+            border: none;
             overflow: visible;
             position: relative;
-            padding: 28px 56px;
-            max-height: 65vh;
-            overflow-y: auto;
             width: 95%;
             max-width: 820px;
             box-sizing: border-box;
@@ -187,6 +184,10 @@
             position: relative;
             z-index: 1;
             width: 100%;
+            padding: 28px 56px;
+            max-height: 65vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
 
@@ -1971,6 +1972,11 @@
             const _tsfx = document.getElementById("sfx-text");
             if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
 
+            // 애니메이션 동안 콘텐츠 숨김
+            fsc.style.opacity = "0";
+            backBtnEl.style.opacity = "0";
+            backBtnEl.style.pointerEvents = "none";
+
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
             const VH = window.innerHeight;
@@ -2040,10 +2046,46 @@
                     animT += 0.018;
                     requestAnimationFrame(render);
                 } else {
+                    // 애니메이션 끝 → canvas를 container에 붙여서 박스 유지
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "";
-                    backBtnEl.style.opacity = "1";
-                    backBtnEl.style.pointerEvents = "auto";
+
+                    // container에 고정 canvas 새로 만들어 박스 유지
+                    requestAnimationFrame(() => {
+                        const CW = tc.offsetWidth;
+                        const CH = tc.offsetHeight;
+                        const boxCvs = document.createElement("canvas");
+                        const bdpr = window.devicePixelRatio || 1;
+                        boxCvs.width = Math.round(CW * bdpr);
+                        boxCvs.height = Math.round(CH * bdpr);
+                        boxCvs.style.cssText = "position:absolute;top:0;left:0;width:"+CW+"px;height:"+CH+"px;pointer-events:none;z-index:0;";
+                        const bctx = boxCvs.getContext("2d");
+                        bctx.scale(bdpr, bdpr);
+                        const bcx = CW/2, bcy = CH/2;
+                        const bw = CW, bh = CH;
+                        const tip = bw*0.05, curve = 0.18;
+                        const bx = bcx-bw/2, by = bcy-bh/2;
+                        bctx.beginPath();
+                        bctx.moveTo(bx,by); bctx.lineTo(bx+bw,by);
+                        bctx.quadraticCurveTo(bx+bw,by+bh*curve,bx+bw+tip,bcy);
+                        bctx.quadraticCurveTo(bx+bw,by+bh*(1-curve),bx+bw,by+bh);
+                        bctx.lineTo(bx,by+bh);
+                        bctx.quadraticCurveTo(bx,by+bh*(1-curve),bx-tip,bcy);
+                        bctx.quadraticCurveTo(bx,by+bh*curve,bx,by);
+                        bctx.closePath();
+                        bctx.fillStyle="rgba(135,206,250,0.08)"; bctx.fill();
+                        bctx.strokeStyle="#1e90ff"; bctx.lineWidth=1.5; bctx.stroke();
+                        // 기존 boxCanvas 있으면 제거
+                        const old = tc.querySelector(".box-canvas-static");
+                        if(old) old.remove();
+                        boxCvs.classList.add("box-canvas-static");
+                        tc.insertBefore(boxCvs, tc.firstChild);
+
+                        // 콘텐츠 표시
+                        fsc.style.opacity = "1";
+                        backBtnEl.style.opacity = "1";
+                        backBtnEl.style.pointerEvents = "auto";
+                    });
                 }
             }
             requestAnimationFrame(render);
@@ -2067,6 +2109,9 @@
             cvs.style.cssText = "";
             const ctx2 = cvs.getContext("2d");
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
+            const staticBox = document.querySelector(".box-canvas-static");
+            if(staticBox) staticBox.remove();
+            document.getElementById("file-scroll-container").style.opacity = "";
         };
 
         function createAbyssFlash(color, duration) {

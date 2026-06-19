@@ -1972,8 +1972,6 @@
             const _tsfx = document.getElementById("sfx-text");
             if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
 
-            // 애니메이션 동안 콘텐츠 숨김
-            fsc.style.opacity = "0";
             backBtnEl.style.opacity = "0";
             backBtnEl.style.pointerEvents = "none";
 
@@ -2081,8 +2079,6 @@
                         boxCvs.classList.add("box-canvas-static");
                         tc.insertBefore(boxCvs, tc.firstChild);
 
-                        // 콘텐츠 표시
-                        fsc.style.opacity = "1";
                         backBtnEl.style.opacity = "1";
                         backBtnEl.style.pointerEvents = "auto";
                     });
@@ -2111,7 +2107,7 @@
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
             const staticBox = document.querySelector(".box-canvas-static");
             if(staticBox) staticBox.remove();
-            document.getElementById("file-scroll-container").style.opacity = "";
+
         };
 
         function createAbyssFlash(color, duration) {

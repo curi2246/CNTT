@@ -1909,41 +1909,80 @@
         }
 
         function openFile(name, fileData, pageIdx) {
-            // 🗺️ 지도 파일 감지
-            if (fileData && fileData.type === "map") {
-                launchMapViewer();
-                return;
-            }
+            if (fileData && fileData.type === "map") { launchMapViewer(); return; }
             window.scrollTo(0, 0);
             document.getElementById("database-view").classList.add("hidden");
             document.getElementById("file-screen").classList.remove("hidden");
             document.getElementById("file-title").textContent = "FILE: " + name;
+
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
-            textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
-            const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
-            // ── 별 → 박스 애니메이션: 화면 중앙 오버레이 위에서 실행 ──
-            const fs = document.getElementById("file-screen");
-            const tc = document.getElementById("file-terminal-container");
+            const backBtnEl = document.getElementById("back-btn");
+            const terminalContainer = document.getElementById("file-terminal-container");
             const fsc = document.getElementById("file-scroll-container");
             const cvs = document.getElementById("file-box-canvas");
 
-            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
+            textTarget.innerHTML = "";
+            window.onscroll = null;
+            hZone.style.display = "none";
+            backBtnEl.style.opacity = "0";
+            backBtnEl.style.pointerEvents = "none";
+            document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
 
-            const backBtnAnim = document.getElementById("back-btn");
-            backBtnAnim.style.opacity = "0";
-            backBtnAnim.style.pointerEvents = "none";
+            const pages = getPages(fileData);
+            currentPageIndex = pageIdx ?? 0;
+            const pageContent = pages[currentPageIndex];
 
-            // 검정 오버레이로 콘텐츠 가림 (tc/fsc 건드리지 않음)
-            const _overlay = document.createElement("div");
-            _overlay.style.cssText = "position:fixed;inset:0;background:#020d0d;z-index:8999;pointer-events:none;";
-            document.body.appendChild(_overlay);
+            // 페이지 화살표
+            if (pages.length > 1) {
+                if (currentPageIndex > 0) {
+                    const pl = document.createElement("div"); pl.className = "page-arrow page-arrow-left"; pl.innerHTML = "&lt;";
+                    pl.onclick = () => openFile(name, fileData, currentPageIndex - 1); terminalContainer.appendChild(pl);
+                }
+                if (currentPageIndex < pages.length - 1) {
+                    const pr = document.createElement("div"); pr.className = "page-arrow page-arrow-right"; pr.innerHTML = "&gt;";
+                    pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalContainer.appendChild(pr);
+                }
+                const pi = document.createElement("div"); pi.className = "page-indicator";
+                pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
+            }
+
+            // 텍스트 먼저 채우기
+            setTimeout(() => {
+                const parsed = parseCharacterData(pageContent);
+                if (parsed) {
+                    textTarget.appendChild(renderCharacterCard(parsed));
+                } else {
+                    const bodyMsg = document.createElement("div");
+                    bodyMsg.style.color = "#fff";
+                    bodyMsg.style.whiteSpace = "pre-wrap";
+                    bodyMsg.style.lineHeight = "1.6";
+                    bodyMsg.style.paddingBottom = "30px";
+                    bodyMsg.textContent = pageContent;
+                    textTarget.appendChild(bodyMsg);
+                }
+                if (name.includes("Curo") && isGlitchUnlocked) {
+                    hZone.style.display = "block";
+                    window.onscroll = () => {
+                        const scrollY = window.scrollY;
+                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                        const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
+                        document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
+                        if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
+                        else hZone.style.opacity = "0";
+                    };
+                }
+            }, 50);
+
+            // ── 별 → 박스 canvas 애니메이션 (fixed 오버레이) ──
+            const _tsfx = document.getElementById("sfx-text");
+            if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
 
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
             const VH = window.innerHeight;
 
-            cvs.style.cssText = "position:fixed;top:0;left:0;z-index:9000;pointer-events:none;";
+            cvs.style.cssText = "position:fixed;top:0;left:0;pointer-events:none;z-index:9000;";
             cvs.width = Math.round(VW * dpr);
             cvs.height = Math.round(VH * dpr);
             cvs.style.width = VW + "px";
@@ -1952,7 +1991,7 @@
             const ctx = cvs.getContext("2d");
             ctx.scale(dpr, dpr);
 
-            const CX = VW/2, CY = VH/2;
+            const CX = VW / 2, CY = VH / 2;
             const STAR_RX = 16, STAR_RY = 80;
             const BOX_W = Math.min(VW * 0.82, 800);
             const BOX_H = Math.min(VH * 0.62, 460);
@@ -1971,8 +2010,7 @@
             }
 
             function drawBox(cx,cy,w,h){
-                const x=cx-w/2, y=cy-h/2;
-                const tip=w*0.05, curve=0.18;
+                const x=cx-w/2, y=cy-h/2, tip=w*0.05, curve=0.18;
                 ctx.beginPath();
                 ctx.moveTo(x,y); ctx.lineTo(x+w,y);
                 ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
@@ -1986,93 +2024,37 @@
             let animT = 0;
             function render(){
                 ctx.clearRect(0,0,VW,VH);
-                if(animT<=0.25){
-                    const p=easeOutBack(animT/0.25);
+                if(animT <= 0.25){
+                    const p = easeOutBack(animT/0.25);
                     drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
-                    ctx.globalAlpha=Math.min(1,p);
-                    ctx.fillStyle="rgba(135,206,250,0.18)"; ctx.fill();
-                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=2; ctx.stroke();
-                    ctx.globalAlpha=1;
+                    ctx.globalAlpha = Math.min(1,p);
+                    ctx.fillStyle = "rgba(135,206,250,0.18)"; ctx.fill();
+                    ctx.strokeStyle = "#1e90ff"; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.globalAlpha = 1;
                 } else {
-                    const p=easeInOutBack((animT-0.25)/0.75);
-                    const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
-                    const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
-                    if(p<0.82){
+                    const p = easeInOutBack((animT-0.25)/0.75);
+                    const rx = STAR_RX + (BOX_W/2 - STAR_RX)*p;
+                    const ry = STAR_RY + (BOX_H/2 - STAR_RY)*p;
+                    if(p < 0.82){
                         drawStar(CX,CY,rx,ry);
                     } else {
-                        const bp=(p-0.82)/0.18;
-                        drawBox(CX,CY,BOX_W*(0.65+0.35*bp),BOX_H);
+                        drawBox(CX,CY,BOX_W*(0.65+0.35*((p-0.82)/0.18)),BOX_H);
                     }
-                    ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
-                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
+                    ctx.fillStyle = "rgba(135,206,250,0.10)"; ctx.fill();
+                    ctx.strokeStyle = "#1e90ff"; ctx.lineWidth = 1.5; ctx.stroke();
                 }
-                if(animT<1){
-                    animT+=0.018;
+                if(animT < 1){
+                    animT += 0.018;
                     requestAnimationFrame(render);
                 } else {
-                    // 애니메이션 끝 → 오버레이/canvas 제거, 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "";
-                    _overlay.remove();
-                    backBtnAnim.style.opacity = "1";
-                    backBtnAnim.style.pointerEvents = "auto";
+                    backBtnEl.style.opacity = "1";
+                    backBtnEl.style.pointerEvents = "auto";
                 }
             }
             requestAnimationFrame(render);
-
-            // 기존 화살표 전부 제거
-            document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
-
-            const terminalContainer = document.getElementById("file-terminal-container");
-            const pages = getPages(fileData);
-            currentPageIndex = pageIdx ?? 0;
-            const content = pages[currentPageIndex];
-
-            // 파일 간 이동 화살표 — 제거됨
-
-            // 🔥 페이지 내부 화살표 (하단 모서리, 2페이지 이상일 때만)
-            if (pages.length > 1) {
-                if (currentPageIndex > 0) {
-                    const pl = document.createElement("div"); pl.className = "page-arrow page-arrow-left"; pl.innerHTML = "&lt;";
-                    pl.onclick = () => openFile(name, fileData, currentPageIndex - 1); terminalContainer.appendChild(pl);
-                }
-                if (currentPageIndex < pages.length - 1) {
-                    const pr = document.createElement("div"); pr.className = "page-arrow page-arrow-right"; pr.innerHTML = "&gt;";
-                    pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalContainer.appendChild(pr);
-                }
-                const pi = document.createElement("div"); pi.className = "page-indicator";
-                pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
-            }
-
-            setTimeout(() => {
-                // 캐릭터 카드 파싱 시도
-                const parsed = parseCharacterData(content);
-                if (parsed) {
-                    textTarget.appendChild(renderCharacterCard(parsed));
-                } else {
-                    const bodyMsg = document.createElement("div");
-                    bodyMsg.style.color = "#fff";
-                    bodyMsg.style.whiteSpace = "pre-wrap";
-                    bodyMsg.style.lineHeight = "1.6";
-                    bodyMsg.style.paddingBottom = "30px";
-                    bodyMsg.textContent = content;
-                    textTarget.appendChild(bodyMsg);
-                }
-
-                if (name.includes("Curo") && isGlitchUnlocked) {
-                    hZone.style.display = "block";
-                    window.onscroll = () => {
-                        const scrollY = window.scrollY;
-                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                        const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
-                        document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
-                        if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
-                        else hZone.style.opacity = "0";
-                    };
-                }
-            }, 420);
         }
-
         function navigateFile(direction) {
             currentFileIndex += direction;
             const newFileName = currentFileList[currentFileIndex];
@@ -2087,13 +2069,11 @@
             document.getElementById("database-view").classList.remove("hidden");
             currentOpenFile = null;
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
-            // canvas 오버레이 초기화
+            // canvas 초기화
             const cvs = document.getElementById("file-box-canvas");
             cvs.style.cssText = "";
             const ctx2 = cvs.getContext("2d");
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
-            document.getElementById("file-terminal-container").style.visibility = "";
-            document.getElementById("file-scroll-container").style.opacity = "";
         };
 
         function createAbyssFlash(color, duration) {

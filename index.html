@@ -1974,6 +1974,7 @@
 
             backBtnEl.style.opacity = "0";
             backBtnEl.style.pointerEvents = "none";
+            fsc.style.visibility = "hidden";
 
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
@@ -2050,8 +2051,8 @@
 
                     // container에 고정 canvas 새로 만들어 박스 유지
                     requestAnimationFrame(() => {
-                        const CW = tc.offsetWidth;
-                        const CH = tc.offsetHeight;
+                        const CW = terminalContainer.offsetWidth;
+                        const CH = terminalContainer.offsetHeight;
                         const boxCvs = document.createElement("canvas");
                         const bdpr = window.devicePixelRatio || 1;
                         boxCvs.width = Math.round(CW * bdpr);
@@ -2079,6 +2080,7 @@
                         boxCvs.classList.add("box-canvas-static");
                         tc.insertBefore(boxCvs, tc.firstChild);
 
+                        fsc.style.visibility = "";
                         backBtnEl.style.opacity = "1";
                         backBtnEl.style.pointerEvents = "auto";
                     });
@@ -2107,6 +2109,7 @@
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
             const staticBox = document.querySelector(".box-canvas-static");
             if(staticBox) staticBox.remove();
+            document.getElementById("file-scroll-container").style.visibility = "";
 
         };
 

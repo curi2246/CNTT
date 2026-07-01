@@ -148,11 +148,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             padding: 5vh 20px; z-index: 2; 
         }
-        #file-screen {
-            justify-content: center;
-            padding-top: 60px;
-            padding-bottom: 60px;
-        }
 
         #auth-screen { justify-content: center; }
         .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
@@ -172,25 +167,43 @@
             to   { clip-path: inset(0 0% 0 0%);   opacity: 1; }
         }
 
-        /* 텍스트 파일 박스 */
+        /* 텍스트 파일 박스 — SVG 오버레이 */
         #file-terminal-container {
-            background: rgba(135,206,250,0.06);
-            border: 1.5px solid #1e90ff;
+            background: transparent;
+            border: none;
+            overflow: visible;
             position: relative;
-            width: 95%;
-            max-width: 820px;
-            box-sizing: border-box;
+        }
+        .file-box-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .file-box-path {
+            fill: rgba(135, 206, 250, 0.10);
+            stroke: rgba(30, 144, 255, 0.85);
+            stroke-width: 1.5;
+            vector-effect: non-scaling-stroke;
         }
         #file-scroll-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            padding: 28px 56px;
-            max-height: 65vh;
-            overflow-y: auto;
-            box-sizing: border-box;
+            overflow: visible;
         }
-
+        /* 내부 텍스트 페이드인 */
+        #file-scroll-container.content-fade-in {
+            animation: fileTextFadeIn 0.8s ease forwards;
+        }
+        @keyframes fileTextFadeIn {
+            0%   { opacity: 0; }
+            50%  { opacity: 0; }
+            100% { opacity: 1; }
+        }
 
         /* 글리치 비번 입력창 */
         #glitch-input-overlay {
@@ -1020,11 +1033,11 @@
             </div>
         </div>
 
-        <div id="file-screen" class="hidden">
+        <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
-            <div id="file-terminal-container">
+            <div id="file-terminal-container" style="position:relative; width:95%; max-width:860px;">
                 <canvas id="file-box-canvas"></canvas>
-                <div id="file-scroll-container">
+                <div id="file-scroll-container" style="position:relative; z-index:1; padding: 28px 64px; max-height:62vh; overflow-y:auto;">
                     <div id="file-text"></div>
                     <div id="hidden-zone" style="display:none; padding:10px 0;">
                         <p id="ui-hidden-error" style="color:red; font-weight:bold; margin:0 0 10px;">CRITICAL ERROR: HIDDEN SECTOR FOUND</p>
@@ -1513,6 +1526,12 @@
             if (sfx) { sfx.currentTime = 0; sfx.play().catch(() => {}); }
         });
 
+        // 전역 클릭 효과음
+        document.addEventListener('click', () => {
+            const sfx = document.getElementById("sfx-click");
+            if (sfx) { sfx.currentTime = 0; sfx.play().catch(() => {}); }
+        });
+
         // 모바일 더블탭 → 입력창 열기
         let lastTap = 0;
         document.addEventListener('touchend', (e) => {
@@ -1904,94 +1923,58 @@
         }
 
         function openFile(name, fileData, pageIdx) {
-            if (fileData && fileData.type === "map") { launchMapViewer(); return; }
+            // 🗺️ 지도 파일 감지
+            if (fileData && fileData.type === "map") {
+                launchMapViewer();
+                return;
+            }
             window.scrollTo(0, 0);
             document.getElementById("database-view").classList.add("hidden");
             document.getElementById("file-screen").classList.remove("hidden");
             document.getElementById("file-title").textContent = "FILE: " + name;
-
             const textTarget = document.getElementById("file-text");
             const hZone = document.getElementById("hidden-zone");
-            const backBtnEl = document.getElementById("back-btn");
-            const terminalContainer = document.getElementById("file-terminal-container");
+            textTarget.innerHTML = ""; window.onscroll = null; hZone.style.display = "none";
+            const backBtnEl = document.getElementById("back-btn"); backBtnEl.style.opacity = "0"; backBtnEl.style.pointerEvents = "none";
+            // ── 별 → 박스 애니메이션: 화면 중앙 오버레이 위에서 실행 ──
+            const fs = document.getElementById("file-screen");
+            const tc = document.getElementById("file-terminal-container");
             const fsc = document.getElementById("file-scroll-container");
             const cvs = document.getElementById("file-box-canvas");
 
-            textTarget.innerHTML = "";
-            window.onscroll = null;
-            hZone.style.display = "none";
-            backBtnEl.style.opacity = "0";
-            backBtnEl.style.pointerEvents = "none";
-            document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
+            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
-            const pages = getPages(fileData);
-            currentPageIndex = pageIdx ?? 0;
-            const pageContent = pages[currentPageIndex];
-
-            // 페이지 화살표
-            if (pages.length > 1) {
-                if (currentPageIndex > 0) {
-                    const pl = document.createElement("div"); pl.className = "page-arrow page-arrow-left"; pl.innerHTML = "&lt;";
-                    pl.onclick = () => openFile(name, fileData, currentPageIndex - 1); terminalContainer.appendChild(pl);
-                }
-                if (currentPageIndex < pages.length - 1) {
-                    const pr = document.createElement("div"); pr.className = "page-arrow page-arrow-right"; pr.innerHTML = "&gt;";
-                    pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalContainer.appendChild(pr);
-                }
-                const pi = document.createElement("div"); pi.className = "page-indicator";
-                pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
-            }
-
-            // 텍스트 먼저 채우기
-            setTimeout(() => {
-                const parsed = parseCharacterData(pageContent);
-                if (parsed) {
-                    textTarget.appendChild(renderCharacterCard(parsed));
-                } else {
-                    const bodyMsg = document.createElement("div");
-                    bodyMsg.style.color = "#fff";
-                    bodyMsg.style.whiteSpace = "pre-wrap";
-                    bodyMsg.style.lineHeight = "1.6";
-                    bodyMsg.style.paddingBottom = "30px";
-                    bodyMsg.textContent = pageContent;
-                    textTarget.appendChild(bodyMsg);
-                }
-                if (name.includes("Curo") && isGlitchUnlocked) {
-                    hZone.style.display = "block";
-                    window.onscroll = () => {
-                        const scrollY = window.scrollY;
-                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                        const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
-                        document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
-                        if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
-                        else hZone.style.opacity = "0";
-                    };
-                }
-            }, 50);
-
-            // ── 별 → 박스 canvas 애니메이션 (fixed 오버레이) ──
-            const _tsfx = document.getElementById("sfx-text");
-            if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
-
-            backBtnEl.style.opacity = "0";
-            backBtnEl.style.pointerEvents = "none";
+            // 1) 오버레이 canvas를 viewport 전체에 고정
+            cvs.style.cssText = "";  // 이전 상태 완전 초기화
+            cvs.style.position = "fixed";
+            cvs.style.top = "0";
+            cvs.style.left = "0";
+            cvs.style.zIndex = "9000";
+            cvs.style.pointerEvents = "none";
+            cvs.style.display = "block";
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
             const VH = window.innerHeight;
-
-            cvs.style.cssText = "position:fixed;top:0;left:0;pointer-events:none;z-index:9000;";
             cvs.width = Math.round(VW * dpr);
             cvs.height = Math.round(VH * dpr);
             cvs.style.width = VW + "px";
             cvs.style.height = VH + "px";
-
             const ctx = cvs.getContext("2d");
             ctx.scale(dpr, dpr);
 
             const CX = VW / 2, CY = VH / 2;
             const STAR_RX = 16, STAR_RY = 80;
-            const BOX_W = Math.min(VW * 0.82, 800);
-            const BOX_H = Math.min(VH * 0.62, 460);
+            const BOX_W = Math.min(VW * 0.85, 820);
+            const BOX_H = Math.min(VH * 0.65, 480);
+
+            // canvas가 위에서 덮으므로 fsc만 숨김 (tc는 레이아웃 유지)
+            fsc.style.opacity = "0";
+            tc.style.opacity = "0";
+            fs.style.justifyContent = "center";
+            fs.style.minHeight = "100vh";
+            const backBtnAnim = document.getElementById("back-btn");
+            backBtnAnim.style.opacity = "0";
+            backBtnAnim.style.pointerEvents = "none";
 
             function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
             function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
@@ -2007,7 +1990,8 @@
             }
 
             function drawBox(cx,cy,w,h){
-                const x=cx-w/2, y=cy-h/2, tip=w*0.05, curve=0.18;
+                const x=cx-w/2, y=cy-h/2;
+                const tip=w*0.05, curve=0.18;
                 ctx.beginPath();
                 ctx.moveTo(x,y); ctx.lineTo(x+w,y);
                 ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
@@ -2021,38 +2005,96 @@
             let animT = 0;
             function render(){
                 ctx.clearRect(0,0,VW,VH);
-                if(animT <= 0.25){
-                    const p = easeOutBack(animT/0.25);
+                if(animT<=0.25){
+                    const p=easeOutBack(animT/0.25);
                     drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
-                    ctx.globalAlpha = Math.min(1,p);
-                    ctx.fillStyle = "rgba(135,206,250,0.18)"; ctx.fill();
-                    ctx.strokeStyle = "#1e90ff"; ctx.lineWidth = 2; ctx.stroke();
-                    ctx.globalAlpha = 1;
+                    ctx.globalAlpha=Math.min(1,p);
+                    ctx.fillStyle="rgba(135,206,250,0.18)"; ctx.fill();
+                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=2; ctx.stroke();
+                    ctx.globalAlpha=1;
                 } else {
-                    const p = easeInOutBack((animT-0.25)/0.75);
-                    const rx = STAR_RX + (BOX_W/2 - STAR_RX)*p;
-                    const ry = STAR_RY + (BOX_H/2 - STAR_RY)*p;
-                    if(p < 0.82){
+                    const p=easeInOutBack((animT-0.25)/0.75);
+                    const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
+                    const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
+                    if(p<0.82){
                         drawStar(CX,CY,rx,ry);
                     } else {
-                        drawBox(CX,CY,BOX_W*(0.65+0.35*((p-0.82)/0.18)),BOX_H);
+                        const bp=(p-0.82)/0.18;
+                        drawBox(CX,CY,BOX_W*(0.65+0.35*bp),BOX_H);
                     }
-                    ctx.fillStyle = "rgba(135,206,250,0.10)"; ctx.fill();
-                    ctx.strokeStyle = "#1e90ff"; ctx.lineWidth = 1.5; ctx.stroke();
+                    ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
+                    ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
                 }
-                if(animT < 1){
-                    animT += 0.018;
+                if(animT<1){
+                    animT+=0.018;
                     requestAnimationFrame(render);
                 } else {
-                    // 애니메이션 끝 → canvas 치우고 콘텐츠 표시
+                    // 애니메이션 끝 → canvas 숨기고 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
-                    cvs.style.cssText = "";
-                    backBtnEl.style.opacity = "1";
-                    backBtnEl.style.pointerEvents = "auto";
+                    cvs.style.cssText = "display:none;";
+                    tc.style.opacity = "1";
+                    fsc.style.opacity = "1";
+                    fs.style.justifyContent = "";
+                    fs.style.minHeight = "";
+                    backBtnAnim.style.opacity = "1";
+                    backBtnAnim.style.pointerEvents = "auto";
                 }
             }
             requestAnimationFrame(render);
+
+            // 기존 화살표 전부 제거
+            document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
+
+            const terminalContainer = document.getElementById("file-terminal-container");
+            const pages = getPages(fileData);
+            currentPageIndex = pageIdx ?? 0;
+            const content = pages[currentPageIndex];
+
+            // 파일 간 이동 화살표 — 제거됨
+
+            // 🔥 페이지 내부 화살표 (하단 모서리, 2페이지 이상일 때만)
+            if (pages.length > 1) {
+                if (currentPageIndex > 0) {
+                    const pl = document.createElement("div"); pl.className = "page-arrow page-arrow-left"; pl.innerHTML = "&lt;";
+                    pl.onclick = () => openFile(name, fileData, currentPageIndex - 1); terminalContainer.appendChild(pl);
+                }
+                if (currentPageIndex < pages.length - 1) {
+                    const pr = document.createElement("div"); pr.className = "page-arrow page-arrow-right"; pr.innerHTML = "&gt;";
+                    pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalContainer.appendChild(pr);
+                }
+                const pi = document.createElement("div"); pi.className = "page-indicator";
+                pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
+            }
+
+            setTimeout(() => {
+                // 캐릭터 카드 파싱 시도
+                const parsed = parseCharacterData(content);
+                if (parsed) {
+                    textTarget.appendChild(renderCharacterCard(parsed));
+                } else {
+                    const bodyMsg = document.createElement("div");
+                    bodyMsg.style.color = "#fff";
+                    bodyMsg.style.whiteSpace = "pre-wrap";
+                    bodyMsg.style.lineHeight = "1.6";
+                    bodyMsg.style.paddingBottom = "30px";
+                    bodyMsg.textContent = content;
+                    textTarget.appendChild(bodyMsg);
+                }
+
+                if (name.includes("Curo") && isGlitchUnlocked) {
+                    hZone.style.display = "block";
+                    window.onscroll = () => {
+                        const scrollY = window.scrollY;
+                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                        const ratio = Math.min(scrollY / (maxScroll * 0.85), 1);
+                        document.body.style.backgroundColor = `rgb(${Math.floor(2*(1-ratio))}, ${Math.floor(13*(1-ratio))}, ${Math.floor(13*(1-ratio))})`;
+                        if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScroll * 0.6) / (maxScroll * 0.4), 1);
+                        else hZone.style.opacity = "0";
+                    };
+                }
+            }, 420);
         }
+
         function navigateFile(direction) {
             currentFileIndex += direction;
             const newFileName = currentFileList[currentFileIndex];
@@ -2067,14 +2109,11 @@
             document.getElementById("database-view").classList.remove("hidden");
             currentOpenFile = null;
             document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
-            // canvas 초기화
+            // canvas 오버레이 초기화
             const cvs = document.getElementById("file-box-canvas");
             cvs.style.cssText = "";
             const ctx2 = cvs.getContext("2d");
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
-            const staticBox = document.querySelector(".box-canvas-static");
-            if(staticBox) staticBox.remove();
-
         };
 
         function createAbyssFlash(color, duration) {

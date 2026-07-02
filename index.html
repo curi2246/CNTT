@@ -1944,21 +1944,14 @@
 
             const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
-            // 1) 오버레이 canvas를 viewport 전체에 고정
-            cvs.style.cssText = "";  // 이전 상태 완전 초기화
-            cvs.style.position = "fixed";
-            cvs.style.top = "0";
-            cvs.style.left = "0";
-            cvs.style.zIndex = "9000";
-            cvs.style.pointerEvents = "none";
-            cvs.style.display = "block";
+            // 1) 오버레이 canvas: body에 직접 붙여서 tc opacity 영향 없게
             const dpr = window.devicePixelRatio || 1;
             const VW = window.innerWidth;
             const VH = window.innerHeight;
             cvs.width = Math.round(VW * dpr);
             cvs.height = Math.round(VH * dpr);
-            cvs.style.width = VW + "px";
-            cvs.style.height = VH + "px";
+            cvs.style.cssText = "position:fixed;top:0;left:0;width:"+VW+"px;height:"+VH+"px;z-index:9000;pointer-events:none;display:block;";
+            document.body.appendChild(cvs);
             const ctx = cvs.getContext("2d");
             ctx.scale(dpr, dpr);
 
@@ -1967,9 +1960,7 @@
             const BOX_W = Math.min(VW * 0.85, 820);
             const BOX_H = Math.min(VH * 0.65, 480);
 
-            // canvas가 위에서 덮으므로 fsc만 숨김 (tc는 레이아웃 유지)
             fsc.style.opacity = "0";
-            tc.style.opacity = "0";
             fs.style.justifyContent = "center";
             fs.style.minHeight = "100vh";
             const backBtnAnim = document.getElementById("back-btn");
@@ -2032,7 +2023,7 @@
                     // 애니메이션 끝 → canvas 숨기고 콘텐츠 표시
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "display:none;";
-                    tc.style.opacity = "1";
+                    tc.insertBefore(cvs, tc.firstChild);
                     fsc.style.opacity = "1";
                     fs.style.justifyContent = "";
                     fs.style.minHeight = "";

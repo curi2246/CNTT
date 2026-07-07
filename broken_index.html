@@ -70,6 +70,37 @@ padding: 5vh 20px; z-index: 2;
 #auth-screen { justify-content: center; }
 .terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
 #file-scroll-container { width: 100%; overflow: visible; }
+        #file-screen {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #file-terminal-container {
+            background: transparent;
+            border: none;
+            position: relative;
+            width: 88%;
+            max-width: 680px;
+            box-sizing: border-box;
+        }
+        #file-scroll-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding: 24px 32px;
+            max-height: 62vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        /* 낡은 느낌 - 스크롤바 스타일 */
+        #file-scroll-container::-webkit-scrollbar { width: 4px; }
+        #file-scroll-container::-webkit-scrollbar-track { background: rgba(30,144,255,0.05); }
+        #file-scroll-container::-webkit-scrollbar-thumb { background: rgba(30,144,255,0.3); }
 .hidden-trigger-zone { 
 margin-top: 50px; 
 padding-top: 100vh; 
@@ -725,6 +756,28 @@ animation: broken-new-type 0.05s infinite;
 body.broken-world .directory {
 animation: micro-shake 4s infinite;
 }
+
+        .char-card { display:flex; flex-direction:column; gap:16px; padding:4px 0 30px; color:#fff; font-size:13px; line-height:1.7; }
+        .char-card-top { display:flex; gap:20px; align-items:flex-start; }
+        .char-card-img { width:160px; min-width:160px; height:200px; border:1px solid var(--neon-pink); background:rgba(255,94,94,0.05); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:rgba(255,94,94,0.35); font-size:10px; letter-spacing:2px; text-align:center; flex-shrink:0; }
+        .char-card-img-icon { font-size:28px; opacity:0.3; }
+        .char-card-right { flex:1; min-width:0; }
+        .char-card-name { font-size:1.6rem; font-weight:900; color:var(--neon-pink); letter-spacing:3px; margin-bottom:6px; font-family:'Noto Sans KR','Courier New',monospace; }
+        .char-card-species { font-size:11px; color:var(--neon-pink); letter-spacing:2px; margin-bottom:14px; opacity:0.8; }
+        .char-stat-bars { display:flex; flex-direction:column; gap:7px; margin-bottom:4px; }
+        .char-stat-row { display:flex; align-items:center; gap:10px; }
+        .char-stat-label { font-size:9px; letter-spacing:2px; color:#aaa; width:100px; flex-shrink:0; }
+        .char-stat-track { flex:1; height:6px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,94,94,0.2); position:relative; overflow:hidden; }
+        .char-stat-fill { height:100%; background:linear-gradient(90deg,var(--neon-pink),#ff9090); box-shadow:0 0 6px var(--neon-pink); }
+        .char-card-divider { border:none; border-top:1px dashed rgba(255,94,94,0.2); margin:4px 0; }
+        .char-section-title { font-size:11px; letter-spacing:4px; color:var(--neon-pink); margin:14px 0 8px; }
+        .char-section-title::before { content:"[ "; }
+        .char-section-title::after  { content:" ]"; }
+        .char-profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; font-size:12px; color:#ccc; margin-bottom:8px; }
+        .char-profile-item span { color:#666; margin-right:4px; }
+        .char-section-body { font-size:12px; color:#ccc; line-height:1.75; border-left:2px solid rgba(255,94,94,0.3); padding-left:12px; margin-bottom:4px; }
+        .char-ability-item { background:rgba(255,94,94,0.04); border:1px solid rgba(255,94,94,0.15); padding:8px 12px; margin-bottom:6px; font-size:12px; color:#ccc; line-height:1.7; }
+        .char-illness-box { background:rgba(255,40,40,0.06); border:1px solid rgba(255,94,94,0.3); padding:8px 12px; font-size:12px; color:#ccc; line-height:1.7; }
 </style>
 </head>
 <body>
@@ -829,6 +882,8 @@ animation: micro-shake 4s infinite;
   <audio id="main-bgm" loop src="bgm.m4a.m4a"></audio>
   <audio id="glitch-bgm" loop src="error.mp3.mp3"></audio>
   <audio id="???-bgm" loop src="the hideen.mp3.mp3"></audio>
+  <audio id="sfx-click" src="sfx.mp3.wav"></audio>
+  <audio id="sfx-text" src="text.sfx.mp3"></audio>
 
   <div id="music-info-box">
     <span style="margin-right: 5px;">🎵</span>
@@ -867,9 +922,10 @@ animation: micro-shake 4s infinite;
       </div>
     </div>
 
-    <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div id="file-screen" class="hidden">
       <div class="header"><h1 id="file-title">FILE</h1></div>
       <div class="terminal" id="file-terminal-container">
+        <canvas id="file-box-canvas"></canvas>
         <div id="file-scroll-container">
           <div id="file-text"></div>
           <div id="hidden-zone" class="hidden-trigger-zone">
@@ -1292,6 +1348,99 @@ if (typeof fileData === "string") return [fileData];
 if (fileData && Array.isArray(fileData.pages)) return fileData.pages;
 return [String(fileData)];
 }
+
+function parseCharacterData(text) {
+    const isKo = text.includes("명칭:") && text.includes("[프로필");
+    const isEn = text.includes("Name:") && text.includes("[Profile]");
+    if (!isKo && !isEn) return null;
+    const get = (label) => {
+        const re = new RegExp("\\[" + label + "\\]\\s*([\\s\\S]*?)(?=\\n\\[|$)");
+        const m = text.match(re);
+        return m ? m[1].trim() : "";
+    };
+    let name = "";
+    if (isEn) { const m = text.match(/Name:\s*(.+)/); name = m ? m[1].trim() : ""; }
+    else { const m = text.match(/명칭:\s*(.+)/); name = m ? m[1].trim() : ""; }
+    const species    = get("Species")    || get("종족");
+    const gender     = get("Gender")     || get("성별");
+    const profile    = get("Profile")    || get("프로필");
+    const abilities  = get("Abilities")  || get("능력");
+    const companions = get("Companions") || get("일행");
+    const contacts   = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
+    const illness    = get("Current Illness") || get("현재 가지고 있는 병");
+    const profileLines = {};
+    profile.split("\n").forEach(l => { const m = l.match(/^(.+?):\s*(.+)/); if (m) profileLines[m[1].trim()] = m[2].trim(); });
+    const statsRaw = get("Stats") || get("스탯");
+    const stats = {};
+    statsRaw.split("\n").forEach(l => { const m = l.match(/^(.+?):\s*(\d+)/); if (m) stats[m[1].trim()] = parseInt(m[2]); });
+    return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness, stats };
+}
+
+function renderCharacterCard(d) {
+    const currentLang = document.getElementById("btn-en") && document.getElementById("btn-en").classList.contains("active") ? "en" : "ko";
+    const card = document.createElement("div"); card.className = "char-card";
+    const top = document.createElement("div"); top.className = "char-card-top";
+    const imgBox = document.createElement("div"); imgBox.className = "char-card-img";
+    imgBox.innerHTML = '<div class="char-card-img-icon">◈</div><div>IMAGE<br>PENDING</div>';
+    top.appendChild(imgBox);
+    const right = document.createElement("div"); right.className = "char-card-right";
+    const nameEl = document.createElement("div"); nameEl.className = "char-card-name"; nameEl.textContent = d.name;
+    right.appendChild(nameEl);
+    if (d.species) {
+        const sp = document.createElement("div"); sp.className = "char-card-species";
+        sp.textContent = (currentLang === "en" ? "CLASS: " : "분류: ") + d.species + (d.gender ? "  ·  " + d.gender : "");
+        right.appendChild(sp);
+    }
+    const statKeys = Object.keys(d.stats || {});
+    const statData = statKeys.length ? statKeys.map(k => ({ label: k, val: d.stats[k] })) : [
+        { label: currentLang === "en" ? "THREAT LEVEL" : "위협 수준", val: 100 },
+        { label: currentLang === "en" ? "COMBAT POWER" : "전투력",   val: 100 },
+        { label: currentLang === "en" ? "DANGER LEVEL" : "위험도",   val: 100 },
+    ];
+    const bars = document.createElement("div"); bars.className = "char-stat-bars";
+    statData.forEach(s => {
+        const row = document.createElement("div"); row.className = "char-stat-row";
+        const lbl = document.createElement("div"); lbl.className = "char-stat-label"; lbl.textContent = s.label;
+        const trk = document.createElement("div"); trk.className = "char-stat-track";
+        const fil = document.createElement("div"); fil.className = "char-stat-fill"; fil.style.width = "100%";
+        trk.appendChild(fil); row.appendChild(lbl); row.appendChild(trk);
+        bars.appendChild(row);
+    });
+    right.appendChild(bars); top.appendChild(right); card.appendChild(top);
+    const hr = document.createElement("hr"); hr.className = "char-card-divider"; card.appendChild(hr);
+    if (Object.keys(d.profile).length) {
+        const t = document.createElement("div"); t.className = "char-section-title";
+        t.textContent = currentLang === "en" ? "PERSONAL RECORD" : "프로필 정보"; card.appendChild(t);
+        const grid = document.createElement("div"); grid.className = "char-profile-grid";
+        Object.entries(d.profile).forEach(([k, v]) => {
+            const item = document.createElement("div"); item.className = "char-profile-item";
+            item.innerHTML = '<span>' + k + '</span>' + v; grid.appendChild(item);
+        });
+        card.appendChild(grid);
+    }
+    if (d.abilities) {
+        const t = document.createElement("div"); t.className = "char-section-title";
+        t.textContent = currentLang === "en" ? "ABILITIES & TRAITS" : "능력 및 특성"; card.appendChild(t);
+        const box = document.createElement("div"); box.className = "char-ability-item"; box.textContent = d.abilities; card.appendChild(box);
+    }
+    if (d.companions) {
+        const t = document.createElement("div"); t.className = "char-section-title";
+        t.textContent = currentLang === "en" ? "COMPANIONS" : "동행"; card.appendChild(t);
+        const box = document.createElement("div"); box.className = "char-section-body"; box.textContent = d.companions; card.appendChild(box);
+    }
+    if (d.contacts) {
+        const t = document.createElement("div"); t.className = "char-section-title";
+        t.textContent = currentLang === "en" ? "KNOWN CONTACTS" : "접점 인물"; card.appendChild(t);
+        const box = document.createElement("div"); box.className = "char-section-body"; box.textContent = d.contacts; card.appendChild(box);
+    }
+    if (d.illness) {
+        const t = document.createElement("div"); t.className = "char-section-title";
+        t.textContent = currentLang === "en" ? "CURRENT STATUS" : "현재 상태"; card.appendChild(t);
+        const box = document.createElement("div"); box.className = "char-illness-box"; box.textContent = d.illness; card.appendChild(box);
+    }
+    return card;
+}
+
 function openFile(name, fileData, pageIdx) {
 // 🔥 손상된 파일 감지 - 글리치 효과만 발생하고 안 열림
 const pages = getPages(fileData);
@@ -1310,6 +1459,222 @@ return;
 window.scrollTo(0, 0);
 document.getElementById("database-view").classList.add("hidden");
 document.getElementById("file-screen").classList.remove("hidden");
+
+// ── 별 → 박스 canvas 애니메이션 ──
+(function() {
+    const cvs = document.getElementById("file-box-canvas");
+    const tc = document.getElementById("file-terminal-container");
+    const fscEl = document.getElementById("file-scroll-container");
+    const backBtnEl = document.getElementById("back-btn");
+    const _tsfx = document.getElementById("sfx-text");
+    if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
+
+    backBtnEl.style.opacity = "0";
+    backBtnEl.style.pointerEvents = "none";
+
+    const dpr = window.devicePixelRatio || 1;
+    const VW = window.innerWidth;
+    const VH = window.innerHeight;
+    cvs.width = Math.round(VW * dpr);
+    cvs.height = Math.round(VH * dpr);
+    cvs.style.cssText = "position:fixed;top:0;left:0;width:"+VW+"px;height:"+VH+"px;z-index:9000;pointer-events:none;display:block;";
+    document.body.appendChild(cvs);
+    const ctx = cvs.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const CX = VW/2, CY = VH/2;
+    const STAR_RX = 16, STAR_RY = 80;
+    const BOX_W = Math.min(VW*0.75, 680);
+    const BOX_H = Math.min(VH*0.58, 420);
+
+    function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
+    function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
+
+    function drawStar(cx,cy,rx,ry){
+        ctx.beginPath();
+        ctx.moveTo(cx,cy-ry);
+        ctx.quadraticCurveTo(cx+rx*0.15,cy-ry*0.15,cx+rx,cy);
+        ctx.quadraticCurveTo(cx+rx*0.15,cy+ry*0.15,cx,cy+ry);
+        ctx.quadraticCurveTo(cx-rx*0.15,cy+ry*0.15,cx-rx,cy);
+        ctx.quadraticCurveTo(cx-rx*0.15,cy-ry*0.15,cx,cy-ry);
+        ctx.closePath();
+    }
+    function drawBox(cx,cy,w,h){
+        const x=cx-w/2,y=cy-h/2,tip=w*0.05,curve=0.18;
+        ctx.beginPath();
+        ctx.moveTo(x,y); ctx.lineTo(x+w,y);
+        ctx.quadraticCurveTo(x+w,y+h*curve,x+w+tip,cy);
+        ctx.quadraticCurveTo(x+w,y+h*(1-curve),x+w,y+h);
+        ctx.lineTo(x,y+h);
+        ctx.quadraticCurveTo(x,y+h*(1-curve),x-tip,cy);
+        ctx.quadraticCurveTo(x,y+h*curve,x,y);
+        ctx.closePath();
+    }
+
+    let animT = 0;
+    function render(){
+        ctx.clearRect(0,0,VW,VH);
+        if(animT<=0.25){
+            const p=easeOutBack(animT/0.25);
+            drawStar(CX,CY,STAR_RX*p,STAR_RY*p);
+            ctx.globalAlpha=Math.min(1,p);
+            ctx.fillStyle="rgba(135,206,250,0.18)"; ctx.fill();
+            ctx.strokeStyle="#1e90ff"; ctx.lineWidth=2; ctx.stroke();
+            ctx.globalAlpha=1;
+        } else {
+            const p=easeInOutBack((animT-0.25)/0.75);
+            const rx=STAR_RX+(BOX_W/2-STAR_RX)*p;
+            const ry=STAR_RY+(BOX_H/2-STAR_RY)*p;
+            if(p<0.82){ drawStar(CX,CY,rx,ry); }
+            else { drawBox(CX,CY,BOX_W*(0.65+0.35*((p-0.82)/0.18)),BOX_H); }
+            ctx.fillStyle="rgba(135,206,250,0.10)"; ctx.fill();
+            ctx.strokeStyle="#1e90ff"; ctx.lineWidth=1.5; ctx.stroke();
+        }
+        if(animT<1){
+            animT+=0.018; requestAnimationFrame(render);
+        } else {
+            ctx.clearRect(0,0,VW,VH);
+            cvs.style.cssText="display:none;";
+            tc.insertBefore(cvs, tc.firstChild);
+            // 고정 박스 canvas
+            requestAnimationFrame(()=>{
+                const CW=tc.offsetWidth, CH=tc.offsetHeight;
+                if(!CW||!CH) { backBtnEl.style.opacity="1"; backBtnEl.style.pointerEvents="auto"; return; }
+                const bdpr=window.devicePixelRatio||1;
+                const tip=Math.round(CW*0.05), curve=0.18;
+                let boxCvs=tc.querySelector(".static-box-cvs");
+                if(!boxCvs){ boxCvs=document.createElement("canvas"); boxCvs.className="static-box-cvs"; boxCvs.style.cssText="position:absolute;top:0;pointer-events:none;z-index:0;"; tc.insertBefore(boxCvs,tc.firstChild); }
+                boxCvs.width=Math.round((CW+tip*2)*bdpr);
+                boxCvs.height=Math.round(CH*bdpr);
+                boxCvs.style.width=(CW+tip*2)+"px";
+                boxCvs.style.height=CH+"px";
+                boxCvs.style.left=-tip+"px";
+                const bctx=boxCvs.getContext("2d");
+                bctx.scale(bdpr,bdpr);
+                const bx=tip,by=0,bw=CW,bh=CH;
+                bctx.clearRect(0,0,CW+tip*2,CH);
+                bctx.beginPath();
+                bctx.moveTo(bx,by); bctx.lineTo(bx+bw,by);
+                bctx.quadraticCurveTo(bx+bw,by+bh*curve,bx+bw+tip,by+bh/2);
+                bctx.quadraticCurveTo(bx+bw,by+bh*(1-curve),bx+bw,by+bh);
+                bctx.lineTo(bx,by+bh);
+                bctx.quadraticCurveTo(bx,by+bh*(1-curve),bx-tip,by+bh/2);
+                bctx.quadraticCurveTo(bx,by+bh*curve,bx,by);
+                bctx.closePath();
+                // 배경만 채우고 테두리 없음
+                bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
+                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
+
+                // 글리치 효과 — 박스 가장자리에 크로마틱 어버레이션
+                bctx.save();
+                bctx.clip();
+
+                // 레드 채널 오프셋
+                bctx.globalAlpha=0.07;
+                bctx.strokeStyle="#ff3333"; bctx.lineWidth=1.5;
+                bctx.beginPath();
+                bctx.moveTo(bx-2,by); bctx.lineTo(bx+bw+2,by);
+                bctx.quadraticCurveTo(bx+bw+tip+2,by+bh*0.18,bx+bw+tip+2,by+bh/2);
+                bctx.quadraticCurveTo(bx+bw+tip+2,by+bh*0.82,bx+bw+2,by+bh);
+                bctx.lineTo(bx-2,by+bh);
+                bctx.quadraticCurveTo(bx-tip-2,by+bh*0.82,bx-tip-2,by+bh/2);
+                bctx.quadraticCurveTo(bx-tip-2,by+bh*0.18,bx-2,by);
+                bctx.closePath(); bctx.stroke();
+
+                // 블루 채널 오프셋
+                bctx.strokeStyle="#33ffff"; bctx.lineWidth=1.5;
+                bctx.beginPath();
+                bctx.moveTo(bx+2,by); bctx.lineTo(bx+bw-2,by);
+                bctx.quadraticCurveTo(bx+bw+tip-2,by+bh*0.18,bx+bw+tip-2,by+bh/2);
+                bctx.quadraticCurveTo(bx+bw+tip-2,by+bh*0.82,bx+bw-2,by+bh);
+                bctx.lineTo(bx+2,by+bh);
+                bctx.quadraticCurveTo(bx-tip+2,by+bh*0.82,bx-tip+2,by+bh/2);
+                bctx.quadraticCurveTo(bx-tip+2,by+bh*0.18,bx+2,by);
+                bctx.closePath(); bctx.stroke();
+
+                // 수평 글리치 스캔라인
+                bctx.globalAlpha=0.04;
+                for(let i=0;i<5;i++){
+                    const gy=by+Math.random()*bh;
+                    const gw=Math.random()*bw*0.4+bw*0.3;
+                    const gx=bx+Math.random()*bw*0.3;
+                    bctx.fillStyle=Math.random()>0.5?"#ff3333":"#33ffff";
+                    bctx.fillRect(gx, gy, gw, Math.random()*2+0.5);
+                }
+
+                // 낡은 흠집
+                bctx.globalAlpha=0.05;
+                for(let i=0;i<4;i++){
+                    const sx=bx+Math.random()*bw, sy=by+Math.random()*bh;
+                    bctx.strokeStyle="#aaddff"; bctx.lineWidth=0.5;
+                    bctx.beginPath();
+                    bctx.moveTo(sx, sy);
+                    bctx.lineTo(sx+Math.random()*30-15, sy+Math.random()*15-7);
+                    bctx.stroke();
+                }
+
+                bctx.restore();
+                backBtnEl.style.opacity="1";
+                backBtnEl.style.pointerEvents="auto";
+
+                // 글리치 깜빡임 — 랜덤 간격으로 반복
+                function glitchFlicker(){
+                    const delay = 2000 + Math.random()*4000;
+                    setTimeout(()=>{
+                        if(!document.querySelector(".static-box-cvs")) return;
+                        bctx.save();
+                        bctx.clearRect(0,0,CW+tip*2,CH);
+                        // 박스 다시 그리기
+                        bctx.beginPath();
+                        bctx.moveTo(bx,by); bctx.lineTo(bx+bw,by);
+                        bctx.quadraticCurveTo(bx+bw,by+bh*0.18,bx+bw+tip,by+bh/2);
+                        bctx.quadraticCurveTo(bx+bw,by+bh*0.82,bx+bw,by+bh);
+                        bctx.lineTo(bx,by+bh);
+                        bctx.quadraticCurveTo(bx-tip,by+bh*0.82,bx-tip,by+bh/2);
+                        bctx.quadraticCurveTo(bx-tip,by+bh*0.18,bx,by);
+                        bctx.closePath();
+                        bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
+                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
+                        // 글리치 순간 — 짧게 수평 밀림
+                        const shiftY = Math.floor(Math.random()*bh*0.6+by);
+                        const shiftH = Math.floor(Math.random()*20+5);
+                        const shiftX = Math.floor(Math.random()*12-6);
+                        const imgData = bctx.getImageData(bx, shiftY, bw+tip, shiftH);
+                        bctx.putImageData(imgData, bx+shiftX, shiftY);
+                        // 레드/블루 채널
+                        bctx.globalAlpha=0.12;
+                        bctx.strokeStyle="#ff3333"; bctx.lineWidth=1.2;
+                        bctx.beginPath();
+                        bctx.moveTo(bx-2,shiftY); bctx.lineTo(bx+bw+2,shiftY);
+                        bctx.stroke();
+                        bctx.strokeStyle="#33ffff";
+                        bctx.beginPath();
+                        bctx.moveTo(bx+2,shiftY+shiftH); bctx.lineTo(bx+bw-2,shiftY+shiftH);
+                        bctx.stroke();
+                        bctx.restore();
+                        setTimeout(()=>{
+                            if(!document.querySelector(".static-box-cvs")) return;
+                            bctx.clearRect(0,0,CW+tip*2,CH);
+                            bctx.beginPath();
+                            bctx.moveTo(bx,by); bctx.lineTo(bx+bw,by);
+                            bctx.quadraticCurveTo(bx+bw,by+bh*0.18,bx+bw+tip,by+bh/2);
+                            bctx.quadraticCurveTo(bx+bw,by+bh*0.82,bx+bw,by+bh);
+                            bctx.lineTo(bx,by+bh);
+                            bctx.quadraticCurveTo(bx-tip,by+bh*0.82,bx-tip,by+bh/2);
+                            bctx.quadraticCurveTo(bx-tip,by+bh*0.18,bx,by);
+                            bctx.closePath();
+                            bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
+                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
+                            glitchFlicker();
+                        }, 80);
+                    }, delay);
+                }
+                glitchFlicker();
+            });
+        }
+    }
+    requestAnimationFrame(render);
+})();
 // 🔥 Kisune_Full_Archive.txt는 "Kisune Corden"으로 표시
 const displayName = name === "Kisune_Full_Archive.txt" ? "Kisune Corden" : name;
 document.getElementById("file-title").textContent = "FILE: " + displayName;
@@ -1336,22 +1701,21 @@ pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalConta
 const pi = document.createElement("div"); pi.className = "page-indicator";
 pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
 }
-const sysMsg = document.createElement("p");
-sysMsg.style.color = "var(--neon-mint)"; sysMsg.className = "typing-cursor";
-sysMsg.textContent = uiText[currentLang].fileReading;
-textTarget.appendChild(sysMsg);
 setTimeout(() => {
-sysMsg.classList.remove("typing-cursor");
-const bodyMsg = document.createElement("div");
-bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
-bodyMsg.style.paddingBottom = "30px";
-textTarget.appendChild(bodyMsg);
-let charIdx = 0;
-function typeBody() {
-if(charIdx < content.length) {
-bodyMsg.textContent += content[charIdx]; charIdx++;
-setTimeout(typeBody, 1);
+const parsed = parseCharacterData(content);
+if (parsed) {
+    textTarget.appendChild(renderCharacterCard(parsed));
 } else {
+    const bodyMsg = document.createElement("div");
+    bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap"; bodyMsg.style.lineHeight = "1.6";
+    bodyMsg.style.paddingBottom = "30px";
+    bodyMsg.textContent = content;
+    textTarget.appendChild(bodyMsg);
+}
+// 페이드인
+textTarget.style.opacity = "0";
+textTarget.style.transition = "opacity 0.5s ease";
+requestAnimationFrame(() => { textTarget.style.opacity = "1"; });
 if (name.includes("Curo") && isGlitchUnlocked) {
 hZone.style.display = "block";
 window.onscroll = () => {
@@ -1363,10 +1727,7 @@ if (scrollY > maxScroll * 0.6) hZone.style.opacity = Math.min((scrollY - maxScro
 else hZone.style.opacity = "0";
 };
 }
-}
-}
-typeBody();
-}, 800);
+}, 50);
 }
 function navigateFile(direction) {
 currentFileIndex += direction;
@@ -1375,12 +1736,23 @@ currentOpenFile = { folder: currentFolder, name: newFileName };
 currentPageIndex = 0;
 openFile(newFileName, fileSystem[currentLang][currentFolder][newFileName], 0);
 }
+// 전역 클릭 효과음
+document.addEventListener('click', () => {
+    const sfx = document.getElementById("sfx-click");
+    if (sfx) { sfx.currentTime = 0; sfx.play().catch(() => {}); }
+});
+
 document.getElementById("back-btn").onclick = () => {
 window.onscroll = null; document.body.style.backgroundColor = "var(--bg-black)";
 document.getElementById("file-screen").classList.add("hidden");
 document.getElementById("database-view").classList.remove("hidden");
 currentOpenFile = null;
 document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
+// canvas 초기화
+const cvsBk = document.getElementById("file-box-canvas");
+if (cvsBk) { cvsBk.style.cssText = ""; const c2 = cvsBk.getContext("2d"); c2.clearRect(0,0,cvsBk.width,cvsBk.height); }
+const oldBox = document.querySelector(".static-box-cvs");
+if (oldBox) oldBox.remove();
 };
 function createAbyssFlash(color, duration) {
 const flash = document.createElement("div");

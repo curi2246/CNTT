@@ -169,8 +169,8 @@
 
         /* 텍스트 파일 박스 */
         #file-terminal-container {
-            background: rgba(135, 206, 250, 0.06);
-            border: 1.5px solid #1e90ff;
+            background: transparent;
+            border: none;
             position: relative;
         }
         #file-scroll-container {
@@ -2003,7 +2003,7 @@
                     animT+=0.018;
                     requestAnimationFrame(render);
                 } else {
-                    // 애니메이션 끝 → canvas 숨기고 콘텐츠 표시
+                    // 애니메이션 끝 → canvas를 tc에 붙여 박스 유지 그리기
                     ctx.clearRect(0,0,VW,VH);
                     cvs.style.cssText = "display:none;";
                     tc.insertBefore(cvs, tc.firstChild);
@@ -2012,6 +2012,44 @@
                     fs.style.minHeight = "";
                     backBtnAnim.style.opacity = "1";
                     backBtnAnim.style.pointerEvents = "auto";
+
+                    // 고정 박스 canvas 생성
+                    requestAnimationFrame(() => {
+                        const CW = tc.offsetWidth;
+                        const CH = tc.offsetHeight;
+                        if (!CW || !CH) return;
+                        const bdpr = window.devicePixelRatio || 1;
+                        let boxCvs = tc.querySelector(".static-box-cvs");
+                        if (!boxCvs) {
+                            boxCvs = document.createElement("canvas");
+                            boxCvs.className = "static-box-cvs";
+                            boxCvs.style.cssText = "position:absolute;top:0;left:0;pointer-events:none;z-index:0;";
+                            tc.insertBefore(boxCvs, tc.firstChild);
+                        }
+                        boxCvs.width = Math.round(CW * bdpr);
+                        boxCvs.height = Math.round(CH * bdpr);
+                        boxCvs.style.width = CW + "px";
+                        boxCvs.style.height = CH + "px";
+                        const bctx = boxCvs.getContext("2d");
+                        bctx.scale(bdpr, bdpr);
+                        const bx = 0, by = 0, bw = CW, bh = CH;
+                        const tip = bw * 0.04, curve = 0.18;
+                        bctx.clearRect(0,0,CW,CH);
+                        bctx.beginPath();
+                        bctx.moveTo(bx, by);
+                        bctx.lineTo(bx+bw, by);
+                        bctx.quadraticCurveTo(bx+bw, by+bh*curve, bx+bw+tip, by+bh/2);
+                        bctx.quadraticCurveTo(bx+bw, by+bh*(1-curve), bx+bw, by+bh);
+                        bctx.lineTo(bx, by+bh);
+                        bctx.quadraticCurveTo(bx, by+bh*(1-curve), bx-tip, by+bh/2);
+                        bctx.quadraticCurveTo(bx, by+bh*curve, bx, by);
+                        bctx.closePath();
+                        bctx.fillStyle = "rgba(135,206,250,0.07)";
+                        bctx.fill();
+                        bctx.strokeStyle = "#1e90ff";
+                        bctx.lineWidth = 1.5;
+                        bctx.stroke();
+                    });
                 }
             }
             requestAnimationFrame(render);
@@ -2088,6 +2126,8 @@
             cvs.style.cssText = "";
             const ctx2 = cvs.getContext("2d");
             ctx2.clearRect(0, 0, cvs.width, cvs.height);
+            const oldBox = document.querySelector(".static-box-cvs");
+            if (oldBox) oldBox.remove();
         };
 
         function createAbyssFlash(color, duration) {

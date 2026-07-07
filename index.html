@@ -2026,15 +2026,20 @@
                             boxCvs.style.cssText = "position:absolute;top:0;left:0;pointer-events:none;z-index:0;";
                             tc.insertBefore(boxCvs, tc.firstChild);
                         }
-                        boxCvs.width = Math.round(CW * bdpr);
+                        // tip만큼 좌우 여유 줘서 뾰족부분 안 잘리게
+                        const tip = Math.round(CW * 0.05);
+                        const curve = 0.18;
+                        boxCvs.width = Math.round((CW + tip*2) * bdpr);
                         boxCvs.height = Math.round(CH * bdpr);
-                        boxCvs.style.width = CW + "px";
+                        boxCvs.style.width = (CW + tip*2) + "px";
                         boxCvs.style.height = CH + "px";
+                        boxCvs.style.left = -tip + "px";
                         const bctx = boxCvs.getContext("2d");
                         bctx.scale(bdpr, bdpr);
-                        const bx = 0, by = 0, bw = CW, bh = CH;
-                        const tip = bw * 0.04, curve = 0.18;
-                        bctx.clearRect(0,0,CW,CH);
+                        const bw = CW, bh = CH;
+                        // 그리기 좌표는 tip만큼 오른쪽으로 이동
+                        const bx = tip, by = 0;
+                        bctx.clearRect(0, 0, CW+tip*2, CH);
                         bctx.beginPath();
                         bctx.moveTo(bx, by);
                         bctx.lineTo(bx+bw, by);

@@ -1469,6 +1469,9 @@ document.getElementById("file-screen").classList.remove("hidden");
     const _tsfx = document.getElementById("sfx-text");
     if (_tsfx) { _tsfx.currentTime = 0; _tsfx.play().catch(() => {}); }
 
+    // 이전 static box 강제 제거 (모바일 재진입 버그 방지)
+    document.querySelectorAll(".static-box-cvs").forEach(el => el.remove());
+
     backBtnEl.style.opacity = "0";
     backBtnEl.style.pointerEvents = "none";
 
@@ -1536,6 +1539,9 @@ document.getElementById("file-screen").classList.remove("hidden");
             ctx.clearRect(0,0,VW,VH);
             cvs.style.cssText="display:none;";
             tc.insertBefore(cvs, tc.firstChild);
+            // 텍스트 페이드인
+            const txtEl = document.getElementById("file-text");
+            if(txtEl){ txtEl.style.transition="opacity 0.5s ease"; txtEl.style.opacity="1"; }
             // 고정 박스 canvas
             requestAnimationFrame(()=>{
                 const CW=tc.offsetWidth, CH=tc.offsetHeight;
@@ -1563,7 +1569,6 @@ document.getElementById("file-screen").classList.remove("hidden");
                 bctx.closePath();
                 // 배경만 채우고 테두리 없음
                 bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
-                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
 
                 // 글리치 효과 — 박스 가장자리에 크로마틱 어버레이션
                 bctx.save();
@@ -1634,7 +1639,6 @@ document.getElementById("file-screen").classList.remove("hidden");
                         bctx.quadraticCurveTo(bx-tip,by+bh*0.18,bx,by);
                         bctx.closePath();
                         bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
-                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
                         // 글리치 순간 — 짧게 수평 밀림
                         const shiftY = Math.floor(Math.random()*bh*0.6+by);
                         const shiftH = Math.floor(Math.random()*20+5);
@@ -1664,7 +1668,6 @@ document.getElementById("file-screen").classList.remove("hidden");
                             bctx.quadraticCurveTo(bx-tip,by+bh*0.18,bx,by);
                             bctx.closePath();
                             bctx.fillStyle="rgba(135,206,250,0.05)"; bctx.fill();
-                bctx.strokeStyle="rgba(30,144,255,0.6)"; bctx.lineWidth=1.5; bctx.stroke();
                             glitchFlicker();
                         }, 80);
                     }, delay);
@@ -1701,6 +1704,8 @@ pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalConta
 const pi = document.createElement("div"); pi.className = "page-indicator";
 pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
 }
+// 텍스트는 숨긴 채로 렌더
+textTarget.style.opacity = "0";
 setTimeout(() => {
 const parsed = parseCharacterData(content);
 if (parsed) {
@@ -1712,10 +1717,6 @@ if (parsed) {
     bodyMsg.textContent = content;
     textTarget.appendChild(bodyMsg);
 }
-// 페이드인
-textTarget.style.opacity = "0";
-textTarget.style.transition = "opacity 0.5s ease";
-requestAnimationFrame(() => { textTarget.style.opacity = "1"; });
 if (name.includes("Curo") && isGlitchUnlocked) {
 hZone.style.display = "block";
 window.onscroll = () => {

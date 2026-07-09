@@ -68,7 +68,8 @@ display: flex; flex-direction: column; align-items: center; justify-content: fle
 padding: 5vh 20px; z-index: 2; 
 }
 #auth-screen { justify-content: center; }
-.terminal { width: 100%; max-width: 600px; border: 1px solid var(--neon-pink); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
+.terminal { width: 100%; max-width: 600px; border: none; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); padding: 20px; margin-bottom: 15px; position: relative; }
+        #file-terminal-container { border: none !important; background: transparent !important; backdrop-filter: none !important; box-shadow: none !important; }
 #file-scroll-container { width: 100%; overflow: visible; }
         #file-screen {
             width: 100%;
@@ -81,8 +82,10 @@ padding: 5vh 20px; z-index: 2;
             box-sizing: border-box;
         }
         #file-terminal-container {
-            background: transparent;
-            border: none;
+            background: transparent !important;
+            border: none !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
             position: relative;
             width: 88%;
             max-width: 680px;
@@ -97,10 +100,9 @@ padding: 5vh 20px; z-index: 2;
             overflow-y: auto;
             box-sizing: border-box;
         }
-        /* 낡은 느낌 - 스크롤바 스타일 */
-        #file-scroll-container::-webkit-scrollbar { width: 4px; }
-        #file-scroll-container::-webkit-scrollbar-track { background: rgba(30,144,255,0.05); }
-        #file-scroll-container::-webkit-scrollbar-thumb { background: rgba(30,144,255,0.3); }
+        /* 스크롤바 숨김 */
+        #file-scroll-container::-webkit-scrollbar { display: none; }
+        #file-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
 .hidden-trigger-zone { 
 margin-top: 50px; 
 padding-top: 100vh; 
@@ -759,7 +761,7 @@ animation: micro-shake 4s infinite;
 
         .char-card { display:flex; flex-direction:column; gap:16px; padding:4px 0 30px; color:#fff; font-size:13px; line-height:1.7; }
         .char-card-top { display:flex; gap:20px; align-items:flex-start; }
-        .char-card-img { width:160px; min-width:160px; height:200px; border:1px solid var(--neon-pink); background:rgba(255,94,94,0.05); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:rgba(255,94,94,0.35); font-size:10px; letter-spacing:2px; text-align:center; flex-shrink:0; }
+        .char-card-img { width:160px; min-width:160px; height:200px; border:none; background:rgba(255,94,94,0.03); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:rgba(255,94,94,0.35); font-size:10px; letter-spacing:2px; text-align:center; flex-shrink:0; }
         .char-card-img-icon { font-size:28px; opacity:0.3; }
         .char-card-right { flex:1; min-width:0; }
         .char-card-name { font-size:1.6rem; font-weight:900; color:var(--neon-pink); letter-spacing:3px; margin-bottom:6px; font-family:'Noto Sans KR','Courier New',monospace; }
@@ -1574,29 +1576,6 @@ document.getElementById("file-screen").classList.remove("hidden");
                 bctx.save();
                 bctx.clip();
 
-                // 레드 채널 오프셋
-                bctx.globalAlpha=0.07;
-                bctx.strokeStyle="#ff3333"; bctx.lineWidth=1.5;
-                bctx.beginPath();
-                bctx.moveTo(bx-2,by); bctx.lineTo(bx+bw+2,by);
-                bctx.quadraticCurveTo(bx+bw+tip+2,by+bh*0.18,bx+bw+tip+2,by+bh/2);
-                bctx.quadraticCurveTo(bx+bw+tip+2,by+bh*0.82,bx+bw+2,by+bh);
-                bctx.lineTo(bx-2,by+bh);
-                bctx.quadraticCurveTo(bx-tip-2,by+bh*0.82,bx-tip-2,by+bh/2);
-                bctx.quadraticCurveTo(bx-tip-2,by+bh*0.18,bx-2,by);
-                bctx.closePath(); bctx.stroke();
-
-                // 블루 채널 오프셋
-                bctx.strokeStyle="#33ffff"; bctx.lineWidth=1.5;
-                bctx.beginPath();
-                bctx.moveTo(bx+2,by); bctx.lineTo(bx+bw-2,by);
-                bctx.quadraticCurveTo(bx+bw+tip-2,by+bh*0.18,bx+bw+tip-2,by+bh/2);
-                bctx.quadraticCurveTo(bx+bw+tip-2,by+bh*0.82,bx+bw-2,by+bh);
-                bctx.lineTo(bx+2,by+bh);
-                bctx.quadraticCurveTo(bx-tip+2,by+bh*0.82,bx-tip+2,by+bh/2);
-                bctx.quadraticCurveTo(bx-tip+2,by+bh*0.18,bx+2,by);
-                bctx.closePath(); bctx.stroke();
-
                 // 수평 글리치 스캔라인
                 bctx.globalAlpha=0.04;
                 for(let i=0;i<5;i++){
@@ -1646,16 +1625,9 @@ document.getElementById("file-screen").classList.remove("hidden");
                         const imgData = bctx.getImageData(bx, shiftY, bw+tip, shiftH);
                         bctx.putImageData(imgData, bx+shiftX, shiftY);
                         // 레드/블루 채널
-                        bctx.globalAlpha=0.12;
-                        bctx.strokeStyle="#ff3333"; bctx.lineWidth=1.2;
-                        bctx.beginPath();
-                        bctx.moveTo(bx-2,shiftY); bctx.lineTo(bx+bw+2,shiftY);
-                        bctx.stroke();
-                        bctx.strokeStyle="#33ffff";
-                        bctx.beginPath();
-                        bctx.moveTo(bx+2,shiftY+shiftH); bctx.lineTo(bx+bw-2,shiftY+shiftH);
-                        bctx.stroke();
+
                         bctx.restore();
+                        bctx.scale(bdpr, bdpr);
                         setTimeout(()=>{
                             if(!document.querySelector(".static-box-cvs")) return;
                             bctx.clearRect(0,0,CW+tip*2,CH);

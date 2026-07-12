@@ -824,6 +824,7 @@
             letter-spacing: 3px;
             margin-bottom: 6px;
             font-family: 'Courier New', monospace;
+            word-break: keep-all;
         }
         .char-card-species {
             font-size: 11px;
@@ -1590,25 +1591,24 @@
 
         // ── 캐릭터 텍스트 파싱 ──
         function parseCharacterData(text) {
-            // 영문(Name:+[Profile]) 또는 한글(명칭:+[프로필) 둘 다 인식
-            const isKo = text.includes("명칭:") && text.includes("[프로필");
+            const isKo = text.includes("명칭:");
             const isEn = text.includes("Name:") && text.includes("[Profile]");
-            if (!isKo && !isEn) return null;
+            const isWorld = !isKo && !isEn && text.includes("[스탯]");
+            if (!isKo && !isEn && !isWorld) return null;
 
             const get = (label) => {
-                const re = new RegExp("\\[" + label + "\\]\\s*([\\s\\S]*?)(?=\\n\\[|$)");
+                const re = new RegExp("\\[" + label + "\\]?\\s*([\\s\\S]*?)(?=\\n\\[|$)");
                 const m = text.match(re);
                 return m ? m[1].trim() : "";
             };
 
             let name = "";
-            if (isEn) {
-                const m = text.match(/Name:\s*(.+)/);
-                name = m ? m[1].trim() : "";
-            } else {
-                const m = text.match(/명칭:\s*(.+)/);
-                // "명칭: 큐로(Curo)" → "큐로(Curo)"
-                name = m ? m[1].trim() : "";
+            if (isEn) { const m = text.match(/Name:\s*(.+)/); name = m ? m[1].trim() : ""; }
+            else if (isKo) { const m = text.match(/명칭:\s*(.+)/); name = m ? m[1].trim() : ""; }
+            else {
+                // 월드 파일: 첫 줄이 이름
+                const firstLine = text.split("\n")[0].trim();
+                name = firstLine;
             }
 
             const species    = get("Species")    || get("종족");
@@ -1618,26 +1618,23 @@
             const companions = get("Companions") || get("일행");
             const contacts   = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
             const illness    = get("Current Illness") || get("현재 가지고 있는 병");
+            const statsRaw   = get("Stats")      || get("스탯");
 
-            // Profile 파싱 (키: 값)
             const profileLines = {};
             profile.split("\n").forEach(l => {
-                const m = l.match(/^(.+?):\s*(.+)/);
+                const m = l.match(/^(.+?)[:：]\s*(.+)/);
                 if (m) profileLines[m[1].trim()] = m[2].trim();
             });
 
-            // Stats 파싱
-            const statsRaw = get("Stats") || get("스탯");
             const stats = {};
             statsRaw.split("\n").forEach(l => {
-                const m = l.match(/^(.+?):\s*(\d+)/);
+                const m = l.match(/^(.+?)[:：]\s*(\d+)/);
                 if (m) stats[m[1].trim()] = parseInt(m[2]);
             });
 
             return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness, stats };
         }
 
-        // ── 캐릭터 카드 렌더 ──
         function renderCharacterCard(d) {
             const card = document.createElement("div");
             card.className = "char-card";

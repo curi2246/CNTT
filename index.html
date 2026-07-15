@@ -823,8 +823,7 @@
             color: var(--neon-pink);
             letter-spacing: 3px;
             margin-bottom: 6px;
-            font-family: 'Courier New', monospace;
-            word-break: keep-all;
+            font-family: 'Noto Sans KR', 'Courier New', monospace;
         }
         .char-card-species {
             font-size: 11px;
@@ -871,11 +870,10 @@
         .char-profile-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px 12px;
+            gap: 4px 16px;
             font-size: 12px;
             color: #ccc;
             margin-bottom: 8px;
-            word-break: keep-all;
         }
         .char-profile-item span { color: #666; margin-right: 4px; }
         .char-section-body {
@@ -1591,11 +1589,19 @@
 
         // ── 캐릭터 텍스트 파싱 ──
         function parseCharacterData(text) {
-            const isKo = text.includes("명칭:");
-            const isEn = text.includes("Name:") && text.includes("[Profile]");
-            const isWorld = !isKo && !isEn && text.includes("[스탯]");
-            if (!isKo && !isEn && !isWorld) return null;
+            const hasKoName  = text.includes("명칭:");
+            const hasEnName  = text.includes("Name:");
+            const hasKoStat  = text.includes("[스탯]");
+            const hasEnStat  = text.includes("[Stats]");
+            const hasEnProf  = text.includes("[Profile]");
+            const hasKoProf  = text.includes("[프로필");
 
+            // 인식 조건: 이름태그 OR (스탯 있는 월드파일)
+            const isKo = hasKoName || hasKoStat;
+            const isEn = hasEnName || hasEnStat;
+            if (!isKo && !isEn) return null;
+
+            // 섹션 추출 — 닫힘 괄호 없어도 매칭
             const get = (label) => {
                 const re = new RegExp("\\[" + label + "\\]?\\s*([\\s\\S]*?)(?=\\n\\[|$)");
                 const m = text.match(re);
@@ -1603,12 +1609,15 @@
             };
 
             let name = "";
-            if (isEn) { const m = text.match(/Name:\s*(.+)/); name = m ? m[1].trim() : ""; }
-            else if (isKo) { const m = text.match(/명칭:\s*(.+)/); name = m ? m[1].trim() : ""; }
-            else {
-                // 월드 파일: 첫 줄이 이름
-                const firstLine = text.split("\n")[0].trim();
-                name = firstLine;
+            if (hasEnName) {
+                const m = text.match(/Name:\s*(.+)/);
+                name = m ? m[1].trim() : "";
+            } else if (hasKoName) {
+                const m = text.match(/명칭:\s*(.+)/);
+                name = m ? m[1].trim() : "";
+            } else {
+                // 월드파일: 첫 줄이 이름
+                name = text.split("\n")[0].trim();
             }
 
             const species    = get("Species")    || get("종족");
@@ -1618,7 +1627,6 @@
             const companions = get("Companions") || get("일행");
             const contacts   = get("Known Contacts") || get("만난 적 있음, 혹은 접점이 있던 존재들");
             const illness    = get("Current Illness") || get("현재 가지고 있는 병");
-            const statsRaw   = get("Stats")      || get("스탯");
 
             const profileLines = {};
             profile.split("\n").forEach(l => {
@@ -1626,6 +1634,7 @@
                 if (m) profileLines[m[1].trim()] = m[2].trim();
             });
 
+            const statsRaw = get("Stats") || get("스탯");
             const stats = {};
             statsRaw.split("\n").forEach(l => {
                 const m = l.match(/^(.+?)[:：]\s*(\d+)/);
@@ -1635,6 +1644,7 @@
             return { name, species, gender, profile: profileLines, abilities, companions, contacts, illness, stats };
         }
 
+        // ── 캐릭터 카드 렌더 ──
         function renderCharacterCard(d) {
             const card = document.createElement("div");
             card.className = "char-card";

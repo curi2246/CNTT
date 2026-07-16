@@ -1593,10 +1593,8 @@
             const hasEnName  = text.includes("Name:");
             const hasKoStat  = text.includes("[스탯]");
             const hasEnStat  = text.includes("[Stats]");
-            const hasEnProf  = text.includes("[Profile]");
-            const hasKoProf  = text.includes("[프로필");
 
-            // 인식 조건: 이름태그 OR (스탯 있는 월드파일)
+            // 인식 조건: 이름태그 OR 스탯 있는 월드파일
             const isKo = hasKoName || hasKoStat;
             const isEn = hasEnName || hasEnStat;
             if (!isKo && !isEn) return null;
@@ -1654,10 +1652,14 @@
             top.className = "char-card-top";
 
             // 이미지 플레이스홀더
-            const imgBox = document.createElement("div");
-            imgBox.className = "char-card-img";
-            imgBox.innerHTML = `<div class="char-card-img-icon">◈</div><div>IMAGE<br>PENDING</div>`;
-            top.appendChild(imgBox);
+            // 프로필/종족 없으면 월드파일 → 이미지 박스 숨김
+            const isWorldCard = !d.species && Object.keys(d.profile).length === 0;
+            if (!isWorldCard) {
+                const imgBox = document.createElement("div");
+                imgBox.className = "char-card-img";
+                imgBox.innerHTML = `<div class="char-card-img-icon">◈</div><div>IMAGE<br>PENDING</div>`;
+                top.appendChild(imgBox);
+            }
 
             // 우측 정보
             const right = document.createElement("div");

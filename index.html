@@ -1016,7 +1016,7 @@
             </div>
         </div>
 
-        <div id="file-screen" class="hidden" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div id="file-screen" class="hidden" style="width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <div class="header"><h1 id="file-title">FILE</h1></div>
             <div id="file-terminal-container" style="position:relative; width:95%; max-width:860px;">
                 <canvas id="file-box-canvas"></canvas>
@@ -2038,8 +2038,6 @@
                     cvs.style.cssText = "display:none;";
                     tc.insertBefore(cvs, tc.firstChild);
                     fsc.style.opacity = "1";
-                    fs.style.justifyContent = "";
-                    fs.style.minHeight = "";
                     backBtnAnim.style.opacity = "1";
                     backBtnAnim.style.pointerEvents = "auto";
 

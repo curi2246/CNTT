@@ -1437,12 +1437,12 @@
                         scrollEl.style.transition = "opacity 0.18s ease";
                         scrollEl.style.opacity = "0";
                         setTimeout(() => {
-                            openFile(currentOpenFile.name, fd, currentPageIndex);
+                            openFile(currentOpenFile.name, fd, currentPageIndex, true);
                             scrollEl.style.transition = "opacity 0.25s ease";
                             scrollEl.style.opacity = "1";
                         }, 180);
                     } else {
-                        openFile(currentOpenFile.name, fd, currentPageIndex);
+                        openFile(currentOpenFile.name, fd, currentPageIndex, true);
                     }
                 }
             }
@@ -1928,7 +1928,7 @@
             }
         }
 
-        function openFile(name, fileData, pageIdx) {
+        function openFile(name, fileData, pageIdx, skipAnim) {
             // 🗺️ 지도 파일 감지
             if (fileData && fileData.type === "map") {
                 launchMapViewer();
@@ -1948,7 +1948,7 @@
             const fsc = document.getElementById("file-scroll-container");
             const cvs = document.getElementById("file-box-canvas");
 
-            const _tsfx = document.getElementById("sfx-text"); if(_tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
+            const _tsfx = document.getElementById("sfx-text"); if(!skipAnim && _tsfx){ _tsfx.currentTime=0; _tsfx.play().catch(()=>{}); }
 
             // 1) 오버레이 canvas: body에 직접 붙여서 tc opacity 영향 없게
             const dpr = window.devicePixelRatio || 1;
@@ -1972,6 +1972,13 @@
             const backBtnAnim = document.getElementById("back-btn");
             backBtnAnim.style.opacity = "0";
             backBtnAnim.style.pointerEvents = "none";
+
+            // 언어 전환 시 애니메이션 스킵 — 텍스트만 바로 렌더
+            if (skipAnim) {
+                cvs.style.cssText = "display:none;";
+                _renderFileContent(name, fileData, pageIdx, textTarget, hZone, fsc, backBtnAnim);
+                return;
+            }
 
             function easeOutBack(t){const c1=1.5,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
             function easeInOutBack(t){const c1=1.3,c2=c1*1.525;return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(2*t-2)+c2)+2)/2;}
@@ -2133,6 +2140,42 @@
                     };
                 }
             }, 420);
+        }
+
+        // 언어 전환 시 텍스트만 바로 렌더 (애니메이션 없이)
+        function _renderFileContent(name, fileData, pageIdx, textTarget, hZone, fsc, backBtnEl) {
+            document.querySelectorAll(".nav-arrow, .page-arrow, .page-indicator").forEach(a => a.remove());
+            const terminalContainer = document.getElementById("file-terminal-container");
+            const pages = getPages(fileData);
+            currentPageIndex = pageIdx ?? 0;
+            const content = pages[currentPageIndex];
+            if (pages.length > 1) {
+                if (currentPageIndex > 0) {
+                    const pl = document.createElement("div"); pl.className = "page-arrow page-arrow-left"; pl.innerHTML = "&lt;";
+                    pl.onclick = () => openFile(name, fileData, currentPageIndex - 1); terminalContainer.appendChild(pl);
+                }
+                if (currentPageIndex < pages.length - 1) {
+                    const pr = document.createElement("div"); pr.className = "page-arrow page-arrow-right"; pr.innerHTML = "&gt;";
+                    pr.onclick = () => openFile(name, fileData, currentPageIndex + 1); terminalContainer.appendChild(pr);
+                }
+                const pi = document.createElement("div"); pi.className = "page-indicator";
+                pi.textContent = (currentPageIndex + 1) + " / " + pages.length; terminalContainer.appendChild(pi);
+            }
+            const parsed = parseCharacterData(content);
+            if (parsed) {
+                textTarget.appendChild(renderCharacterCard(parsed));
+            } else {
+                const bodyMsg = document.createElement("div");
+                bodyMsg.style.color = "#fff"; bodyMsg.style.whiteSpace = "pre-wrap";
+                bodyMsg.style.lineHeight = "1.6"; bodyMsg.style.paddingBottom = "30px";
+                bodyMsg.textContent = content;
+                textTarget.appendChild(bodyMsg);
+            }
+            fsc.style.opacity = "1";
+            if (backBtnEl) { backBtnEl.style.opacity = "1"; backBtnEl.style.pointerEvents = "auto"; }
+            if (name.includes("Curo") && isGlitchUnlocked) {
+                hZone.style.display = "block";
+            }
         }
 
         function navigateFile(direction) {

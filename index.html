@@ -1430,8 +1430,21 @@
             if (!mainScreen.classList.contains("hidden")) buildDirectory();
             if (currentOpenFile) {
                 const fd = getFileSystem(currentLang)[currentOpenFile.folder]?.[currentOpenFile.name];
-                // 🔥 지도 타입이면 언어 변경 시 재열기 안 함
-                if (fd && !(fd.type === "map")) openFile(currentOpenFile.name, fd, currentPageIndex);
+                if (fd && !(fd.type === "map")) {
+                    // 텍스트 영역만 페이드 아웃 후 새 언어로 페이드 인
+                    const scrollEl = document.getElementById("file-scroll-container");
+                    if (scrollEl) {
+                        scrollEl.style.transition = "opacity 0.18s ease";
+                        scrollEl.style.opacity = "0";
+                        setTimeout(() => {
+                            openFile(currentOpenFile.name, fd, currentPageIndex);
+                            scrollEl.style.transition = "opacity 0.25s ease";
+                            scrollEl.style.opacity = "1";
+                        }, 180);
+                    } else {
+                        openFile(currentOpenFile.name, fd, currentPageIndex);
+                    }
+                }
             }
         }
 

@@ -1,910 +1,169 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WORLD MAP</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WORLD MAP · PREVIEW</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Serif+KR:wght@400;700&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  :root{
-    --pink:#ff5e5e;
-    --mint:#5effeb;
-    --bg:#020d0d;
-    --gold:#c9a84c;
-  }
-  html,body{
-    width:100%;height:100%;
-    background:#000;
-    color:#fff;
-    font-family:'Share Tech Mono',monospace;
-    overflow:hidden;
-  }
+:root{--mint:#5effeb;--pink:#ff5e5e;--blue:#1e90ff;--bg:#020d0d;--mono:'Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg)}
+body{color:var(--mint);font-family:var(--mono);overflow:hidden;background:radial-gradient(ellipse 70% 50% at 50% -10%,rgba(30,144,255,.13),transparent 70%),var(--bg)}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:89;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6))}
 
-  /* ══════════════════════════════
-     부팅 오버레이
-  ══════════════════════════════ */
-  #boot-overlay{
-    position:fixed;inset:0;
-    background:#000;
-    z-index:9999;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    gap:0;
-  }
-  /* 옛날 TV 켜지는 효과 - 세로로 얇아지다가 수평선만 남고 사라짐 */
-  #boot-overlay.tv-off{
-    animation: tv-turn-on-reverse 0.6s cubic-bezier(0.23,1,0.32,1) forwards;
-  }
-  @keyframes tv-turn-on-reverse {
-    0%   { clip-path: inset(0 0 0 0);         opacity:1; }
-    40%  { clip-path: inset(49% 0 49% 0);     opacity:1; }
-    70%  { clip-path: inset(49.8% 0 49.8% 0); opacity:1; filter:brightness(3); }
-    100% { clip-path: inset(50% 0 50% 0);     opacity:0; filter:brightness(0); }
-  }
+/* 부팅 */
+#boot{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;padding:0 max(20px,calc(50% - 280px));background:var(--bg);transition:opacity .6s}
+#boot.off{opacity:0;pointer-events:none}
+#log{font:12px/1.75 var(--mono);color:#bfe;white-space:pre-wrap;max-width:100%}
+#log .w{color:var(--pink)}#log .o{color:var(--mint)}
+#bbar{width:min(560px,100%);height:2px;background:rgba(94,255,235,.14)}
+#bbar b{display:block;height:100%;width:0;background:var(--mint);box-shadow:0 0 10px var(--mint);transition:width .15s linear}
 
-  #boot-lines{
-    width:min(600px,85vw);
-    max-height:55vh;
-    overflow:hidden;
-    display:flex;flex-direction:column;
-    gap:6px;
-    font-size:clamp(11px,1.5vw,14px);
-    letter-spacing:1px;
-  }
-  .boot-line{
-    color:var(--mint);
-    opacity:0;
-    animation:bfade 0.03s forwards;
-    white-space:nowrap;
-  }
-  .boot-line-sub{
-    color:var(--mint);
-    opacity:0;
-    animation:bfade 0.03s forwards;
-    white-space:nowrap;
-    padding-left:20px;
-    font-size:0.9em;
-  }
-  @keyframes bfade{to{opacity:1;}}
-  .boot-warn{color:#ff5e5e !important;}
-  .boot-ok{color:#5eff8a !important;}
+/* 앱 */
+#app{position:fixed;inset:0;display:grid;grid-template-rows:56px 1fr 54px;padding:0 14px 0;gap:10px;clip-path:inset(50% 0 50% 0);opacity:0}
+#app.on{clip-path:inset(0);opacity:1;transition:clip-path .9s cubic-bezier(.2,.8,.2,1),opacity .9s}
+#app.out{opacity:0;transition:opacity .4s}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(94,255,235,.3);background:linear-gradient(90deg,rgba(94,255,235,.06),transparent)}
+h2{font-size:clamp(.72rem,3vw,1rem);letter-spacing:.22em;color:var(--mint);text-shadow:0 0 14px rgba(94,255,235,.4);transition:opacity .18s}
+#close{font:700 10px var(--mono);letter-spacing:.2em;padding:8px 12px;color:var(--pink);background:none;border:1px solid rgba(255,94,94,.5);cursor:pointer;transition:.25s}
+#close:hover{background:rgba(255,94,94,.12);box-shadow:0 0 12px rgba(255,94,94,.3)}
+#stage{position:relative;overflow:hidden;border:1px solid rgba(94,255,235,.3);background:#010809;cursor:crosshair}
+#stage::before,#stage::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--mint);z-index:6;pointer-events:none}
+#stage::before{top:-1px;left:-1px;border-right:0;border-bottom:0}#stage::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+#ter{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity 1.2s .3s}
+#app.on #ter{opacity:1}
+.gridl{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(94,255,235,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(94,255,235,.07) 1px,transparent 1px);background-size:10% 12.5%}
+.sweep{position:absolute;top:0;bottom:0;width:90px;left:-90px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(94,255,235,.13));border-right:1px solid rgba(94,255,235,.55);animation:sw 7s linear infinite}
+@keyframes sw{to{left:100%}}
+#xh i{position:absolute;pointer-events:none;background:rgba(94,255,235,.35);opacity:0;transition:opacity .2s}
+#xh .h{left:0;right:0;height:1px}#xh .v{top:0;bottom:0;width:1px}
+#stage:hover #xh i{opacity:1}
+#coord{position:absolute;left:12px;bottom:10px;font-size:9px;letter-spacing:.25em;color:rgba(94,255,235,.6);pointer-events:none}
 
-  .boot-bar-wrap{
-    width:min(600px,85vw);
-    margin-top:20px;
-  }
-  .boot-bar-label{
-    font-size:11px;color:#2a2a2a;
-    margin-bottom:5px;letter-spacing:3px;
-  }
-  .boot-bar{height:2px;background:#0a0a0a;overflow:hidden;}
-  .boot-bar-fill{
-    height:100%;background:var(--mint);width:0%;
-    transition:width 0.1s linear;
-    box-shadow:0 0 8px var(--mint);
-  }
+/* 핀 */
+.pin{--c:#5effeb;position:absolute;transform:translate(-50%,-100%);background:none;border:0;cursor:pointer;color:var(--c);font:700 9px var(--mono);letter-spacing:.18em;display:flex;flex-direction:column;align-items:center;z-index:4;opacity:0;animation:pop .5s cubic-bezier(.2,1.4,.4,1) forwards;animation-delay:calc(1s + var(--i)*.12s)}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-100%) scale(.2)}to{opacity:1;transform:translate(-50%,-100%)}}
+.pin.white{--c:#fff}.pin.gold{--c:#ffd24d}.pin.pink{--c:#ff5e5e}
+.pl{padding:3px 6px;border:1px solid var(--c);background:rgba(1,8,9,.8);white-space:nowrap;transition:.25s}
+.pn{width:1px;height:22px;background:var(--c);opacity:.7}
+.pd{position:relative;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 12px var(--c)}
+.pd::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid var(--c);animation:ring 2.4s ease-out infinite}
+@keyframes ring{from{transform:scale(.5);opacity:.9}to{transform:scale(2.6);opacity:0}}
+.pin:hover .pl,.pin.sel .pl{background:var(--c);color:#010809;box-shadow:0 0 16px var(--c)}
+.pin.sel .pd{transform:scale(1.5)}
+.pin.warn .pl{animation:flk 2.6s steps(1) infinite}
+@keyframes flk{0%,90%,100%{opacity:1}92%{opacity:.2;transform:translateX(-3px)}95%{opacity:.8;transform:translateX(3px)}}
 
-  /* ══════════════════════════════
-     TV 켜지는 인트로 — 지도 등장
-  ══════════════════════════════ */
-  #map-wrapper{
-    position:fixed;inset:0;
-    display:flex;flex-direction:column;
-    background:#000;
-    /* 처음엔 가로로 완전히 찌그러진 상태 */
-    clip-path: inset(50% 0 50% 0);
-    opacity:0;
-  }
-  #map-wrapper.tv-on{
-    animation: tv-expand 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
-  }
-  @keyframes tv-expand {
-    0%   { clip-path: inset(50% 0 50% 0);  opacity:1; filter:brightness(3) saturate(0); }
-    20%  { clip-path: inset(49% 0 49% 0);  opacity:1; filter:brightness(2) saturate(0); }
-    50%  { clip-path: inset(20% 0 20% 0);  opacity:1; filter:brightness(1.3) saturate(0.5); }
-    80%  { clip-path: inset(2% 0 2% 0);    opacity:1; filter:brightness(1.1) saturate(0.9); }
-    100% { clip-path: inset(0% 0 0% 0);    opacity:1; filter:brightness(1) saturate(1); }
-  }
+/* 정보 패널 */
+#panel{position:absolute;top:0;right:0;bottom:0;width:min(340px,92%);z-index:7;background:rgba(2,13,13,.9);backdrop-filter:blur(6px);border-left:1px solid rgba(94,255,235,.4);transform:translateX(102%);transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .18s;overflow-y:auto;cursor:default}
+#panel.open{transform:none}
+.px{position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;background:rgba(0,0,0,.5);border:1px solid rgba(94,255,235,.4);color:var(--mint);cursor:pointer;font:12px var(--mono)}
+.ph{height:110px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:radial-gradient(circle at 50% 60%,color-mix(in srgb,var(--c) 28%,transparent),transparent 70%),repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 2px,transparent 2px 5px);border-bottom:1px solid rgba(94,255,235,.25)}
+.pb{padding:16px 18px 24px;display:flex;flex-direction:column;gap:10px}
+.pc{font-size:9px;letter-spacing:.4em;color:var(--pink)}
+.pb h3{font-size:1rem;line-height:1.4;letter-spacing:.06em;color:#fff}
+.ps{font-size:11px;color:var(--mint);opacity:.75}
+.pb p{font-size:12px;line-height:1.8;color:#cde;border-left:2px solid rgba(255,94,94,.5);padding-left:12px}
+.tg{display:flex;justify-content:space-between;gap:10px;font-size:10px;padding:7px 10px;border:1px solid rgba(94,255,235,.2);background:rgba(94,255,235,.03)}
+.tg span{color:rgba(94,255,235,.6);letter-spacing:.15em}.tg b{color:#fff;text-align:right;font-weight:400}
+.tg.dg{border-color:rgba(255,94,94,.45);background:rgba(255,94,94,.06)}.tg.dg b{color:var(--pink)}
 
-  /* ══════════════════════════════
-     헤더
-  ══════════════════════════════ */
-  #map-header{
-    padding:10px 20px;
-    border-bottom:1px solid rgba(94,255,235,0.2);
-    display:flex;align-items:center;justify-content:space-between;
-    background:rgba(0,0,0,0.8);
-    backdrop-filter:blur(4px);
-    flex-shrink:0;
-    letter-spacing:3px;
-  }
-  .hdr-left{
-    display:flex;align-items:center;gap:12px;
-    font-size:clamp(11px,1.4vw,13px);
-    color:var(--mint);
-  }
-  .hdr-left span{color:#333;}
-  #map-header .close-btn{
-    font-size:11px;color:#333;
-    letter-spacing:2px;
-    border:1px solid #222;
-    padding:4px 10px;
-    cursor:default;
-  }
-
-  /* ══════════════════════════════
-     지도 영역 — 화면 꽉
-  ══════════════════════════════ */
-  #map-area{
-    flex:1;
-    position:relative;
-    overflow:hidden;
-    background:
-      radial-gradient(ellipse 70% 60% at 60% 45%, #0a1520 0%, #000 70%);
-  }
-
-  /* 지형 — 화면 꽉 채우되 비율 유지 */
-  #terrain{
-    position:absolute;
-    /* 가운데 정렬, 최대한 크게 */
-    top:50%; left:50%;
-    transform:translate(-50%, -50%);
-    width: min(90vw, calc(90vh * 1.15));
-    height: min(90vh, calc(90vw / 1.15));
-    aspect-ratio: 1.15 / 1;
-  }
-
-  /* ── 메인 대륙 ── */
-  #land-main{
-    position:absolute;
-    left:28%; top:5%;
-    width:68%; height:82%;
-    clip-path:polygon(
-      18% 0%, 40% 1%, 58% 0%, 74% 4%, 90% 8%,
-      99% 20%, 100% 38%, 96% 55%, 87% 68%,
-      75% 79%, 60% 86%, 44% 88%, 30% 83%,
-      18% 72%, 8% 55%, 2% 38%, 4% 20%, 10% 8%
-    );
-    background:linear-gradient(145deg, #3a2e14 0%, #2a2010 40%, #332818 100%);
-    box-shadow:
-      0 0 60px rgba(0,0,0,0.95),
-      0 0 120px rgba(0,0,0,0.7),
-      inset 0 0 30px rgba(0,0,0,0.3);
-  }
-  /* 대륙 가장자리 질감 */
-  #land-main::after{
-    content:'';
-    position:absolute;inset:0;
-    background:
-      radial-gradient(ellipse 40% 30% at 70% 30%, rgba(255,230,140,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 40% 60%, rgba(0,0,0,0.15) 0%, transparent 70%);
-  }
-
-  /* ── 지형 요소들 ── */
-  /* 요괴의 숲 */
-  #zone-forest{
-    position:absolute;
-    left:44%; top:12%;
-    width:24%; height:32%;
-    border-radius:45% 55% 50% 50% / 55% 45% 55% 45%;
-    background:radial-gradient(ellipse at 50% 40%,
-      rgba(25,75,18,0.9) 0%,
-      rgba(18,58,12,0.75) 50%,
-      rgba(10,35,8,0.4) 100%
-    );
-    box-shadow:inset 0 0 20px rgba(0,50,0,0.4), 0 0 15px rgba(20,80,10,0.15);
-  }
-  #zone-forest::before{
-    content:'';position:absolute;inset:5%;
-    border-radius:inherit;
-    background:radial-gradient(ellipse at 40% 35%, rgba(40,110,25,0.4) 0%, transparent 60%);
-  }
-
-  /* 친사의 땅 — 우상단 산 */
-  #zone-mountain{
-    position:absolute;
-    right:2%; top:2%;
-    width:24%; height:30%;
-  }
-  /* 산봉우리 1 */
-  #zone-mountain::before{
-    content:'';position:absolute;
-    left:20%; top:0%;
-    width:60%; height:100%;
-    clip-path:polygon(50% 0%, 95% 100%, 5% 100%);
-    background:linear-gradient(180deg, #888 0%, #666 40%, #444 100%);
-    box-shadow:0 0 20px rgba(0,0,0,0.5);
-  }
-  /* 눈 */
-  #zone-mountain::after{
-    content:'';position:absolute;
-    left:32%; top:0%;
-    width:36%; height:35%;
-    clip-path:polygon(50% 0%, 85% 100%, 15% 100%);
-    background:rgba(220,230,255,0.85);
-  }
-  /* 호수 */
-  #zone-lake{
-    position:absolute;
-    right:8%; top:28%;
-    width:14%; height:9%;
-    border-radius:50%;
-    background:radial-gradient(ellipse, rgba(60,120,180,0.7) 0%, rgba(30,70,120,0.5) 100%);
-    box-shadow:0 0 10px rgba(60,120,200,0.2);
-  }
-
-  /* 악마의 영역 — 우측 화산 */
-  #zone-volcano{
-    position:absolute;
-    right:3%; top:30%;
-    width:22%; height:30%;
-  }
-  #zone-volcano::before{
-    content:'';position:absolute;inset:0;
-    clip-path:polygon(50% 0%, 100% 100%, 0% 100%);
-    background:linear-gradient(180deg, #5a2010 0%, #3a1508 40%, #2a1005 100%);
-  }
-  #zone-volcano::after{
-    content:'';position:absolute;
-    left:35%; top:0%;
-    width:30%; height:40%;
-    clip-path:polygon(50% 0%, 85% 100%, 15% 100%);
-    background:radial-gradient(ellipse at 50% 30%, rgba(255,80,0,0.7) 0%, rgba(200,40,0,0.4) 60%, transparent 100%);
-    animation:volcano-glow 2s ease-in-out infinite;
-  }
-  @keyframes volcano-glow{
-    0%,100%{opacity:0.7; filter:brightness(1);}
-    50%{opacity:1; filter:brightness(1.4);}
-  }
-
-  /* 변칙 구역 — 좌측 균열 */
-  #zone-anomaly{
-    position:absolute;
-    left:2%; top:30%;
-    width:22%; height:30%;
-    clip-path:polygon(8% 0%,92% 3%,100% 45%,88% 97%,12% 100%,0% 55%,3% 18%);
-    background:linear-gradient(135deg, #1a0820 0%, #100515 100%);
-    box-shadow:inset 0 0 20px rgba(100,0,150,0.3);
-    animation:anomaly-flicker 4s ease-in-out infinite;
-  }
-  @keyframes anomaly-flicker{
-    0%,100%{filter:none;}
-    94%{filter:none;}
-    95%{filter:hue-rotate(90deg) brightness(1.8) saturate(2);}
-    96%{filter:none;}
-    98%{filter:hue-rotate(180deg) brightness(0.6);}
-    99%{filter:none;}
-  }
-  /* 균열 라인들 */
-  #zone-anomaly::before{
-    content:'';position:absolute;inset:0;
-    background:
-      linear-gradient(125deg, transparent 45%, rgba(100,150,255,0.2) 46%, transparent 47%),
-      linear-gradient(145deg, transparent 30%, rgba(100,150,255,0.15) 31%, transparent 32%),
-      linear-gradient(100deg, transparent 55%, rgba(150,100,255,0.1) 56%, transparent 57%);
-  }
-
-  /* 게약의 도시 — 중앙 */
-  #zone-city{
-    position:absolute;
-    left:44%; top:45%;
-    width:18%; height:22%;
-    border-radius:40%;
-    background:radial-gradient(ellipse, rgba(40,70,100,0.5) 0%, rgba(20,40,70,0.3) 70%, transparent 100%);
-  }
-
-  /* ── 작은 섬들 ── */
-  #island-small{
-    position:absolute;
-    left:20%; top:72%;
-    width:8%; height:12%;
-    clip-path:polygon(20% 0%,80% 5%,100% 55%,65% 100%,10% 95%,0% 45%);
-    background:linear-gradient(145deg, #2a2010, #1a1208);
-    box-shadow:0 0 15px rgba(0,0,0,0.8);
-  }
-  #island-bottom{
-    position:absolute;
-    left:52%; top:88%;
-    width:16%; height:14%;
-    clip-path:polygon(20% 0%,80% 0%,100% 50%,80% 100%,20% 100%,0% 50%);
-    background:linear-gradient(145deg, #1e2a14, #141e0a);
-    box-shadow:0 0 15px rgba(0,0,0,0.8);
-  }
-
-  /* 지형 텍스처 오버레이 */
-  #terrain-texture{
-    position:absolute;inset:0;
-    pointer-events:none;z-index:1;
-    background:
-      repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 60px,
-        rgba(0,0,0,0.015) 60px,
-        rgba(0,0,0,0.015) 61px
-      );
-  }
-
-  /* ══════════════════════════════
-     핀
-  ══════════════════════════════ */
-  .map-pin{
-    position:absolute;
-    transform:translate(-50%,-50%);
-    cursor:pointer;
-    z-index:30;
-  }
-  .pin-wrap{
-    display:flex;flex-direction:column;align-items:center;
-    gap:3px;
-  }
-  .pin-dot-wrap{
-    position:relative;
-    width:16px;height:16px;
-  }
-  .pin-outer{
-    position:absolute;inset:0;
-    border-radius:50%;
-    border:1.5px solid var(--gold);
-    background:rgba(5,5,10,0.85);
-    animation:pring 2.5s ease-in-out infinite;
-    transition:transform 0.2s, background 0.2s;
-  }
-  .pin-inner{
-    position:absolute;
-    top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    width:6px;height:6px;
-    border-radius:50%;
-    background:var(--gold);
-    box-shadow:0 0 5px var(--gold);
-  }
-  @keyframes pring{
-    0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.5);}
-    50%{box-shadow:0 0 0 6px rgba(201,168,76,0);}
-  }
-  .pin-code{
-    font-size:9px;color:#444;letter-spacing:1px;
-    white-space:nowrap;
-    transition:color 0.2s;
-  }
-  .map-pin:hover .pin-outer{transform:scale(1.5);background:rgba(201,168,76,0.25);}
-  .map-pin:hover .pin-inner{box-shadow:0 0 10px var(--gold);}
-  .map-pin:hover .pin-code{color:var(--gold);}
-
-  /* 글리치 핀 */
-  .pin-glitch .pin-outer{
-    border-color:var(--pink);
-    animation:pring-r 1.5s ease-in-out infinite;
-  }
-  .pin-glitch .pin-inner{
-    background:var(--pink);
-    box-shadow:0 0 5px var(--pink);
-    animation:gdot 0.2s infinite;
-  }
-  .pin-glitch .pin-code{color:#441010;}
-  @keyframes pring-r{
-    0%,100%{box-shadow:0 0 0 0 rgba(255,94,94,0.5);}
-    50%{box-shadow:0 0 0 6px rgba(255,94,94,0);}
-  }
-  @keyframes gdot{
-    0%{transform:translate(-50%,-50%);}
-    33%{transform:translate(-50%,-50%) translate(1.5px,-1px);}
-    66%{transform:translate(-50%,-50%) translate(-1px,1.5px);}
-  }
-
-  /* 민트 핀 (특수) */
-  .pin-mint .pin-outer{border-color:var(--mint);animation:pring-m 2s infinite;}
-  .pin-mint .pin-inner{background:var(--mint);box-shadow:0 0 5px var(--mint);}
-  .pin-mint .pin-code{color:#0a2a2a;}
-  @keyframes pring-m{
-    0%,100%{box-shadow:0 0 0 0 rgba(94,255,235,0.4);}
-    50%{box-shadow:0 0 0 6px rgba(94,255,235,0);}
-  }
-
-  /* ══════════════════════════════
-     팝업
-  ══════════════════════════════ */
-  #popup{
-    position:absolute;inset:0;z-index:100;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.7);
-    opacity:0;pointer-events:none;
-    transition:opacity 0.3s;
-    backdrop-filter:blur(4px);
-  }
-  #popup.open{opacity:1;pointer-events:all;}
-  #popup-card{
-    background:#050f0f;
-    border:1px solid rgba(94,255,235,0.2);
-    width:min(500px,88vw);
-    max-height:80vh;
-    overflow-y:auto;
-    position:relative;
-    transform:translateY(16px) scale(0.97);
-    transition:transform 0.35s cubic-bezier(0.34,1.5,0.64,1);
-    box-shadow:0 0 60px rgba(94,255,235,0.07), 0 24px 70px rgba(0,0,0,0.7);
-  }
-  #popup.open #popup-card{transform:translateY(0) scale(1);}
-
-  #popup-banner{
-    width:100%;height:130px;
-    position:relative;overflow:hidden;display:flex;align-items:flex-end;
-  }
-  #popup-banner-bg{position:absolute;inset:0;}
-  #popup-banner-grad{
-    position:absolute;inset:0;
-    background:linear-gradient(to top,#050f0f 0%,transparent 60%);
-  }
-  .banner-code{
-    position:relative;z-index:1;padding:0 18px 8px;
-    font-size:9px;color:var(--mint);letter-spacing:3px;
-    text-shadow:0 0 8px var(--mint);
-  }
-  #popup-body{padding:14px 18px 20px;}
-  #popup-name{
-    font-family:'Noto Serif KR',serif;
-    font-size:clamp(16px,2.3vw,22px);
-    color:#fff;margin-bottom:3px;
-  }
-  #popup-sub{font-size:10px;color:#444;letter-spacing:2px;margin-bottom:14px;font-style:italic;}
-  #popup-desc{
-    font-size:clamp(11px,1.4vw,13px);color:#999;line-height:1.9;
-    border-left:2px solid rgba(94,255,235,0.2);
-    padding-left:12px;margin-bottom:14px;
-    font-family:'Noto Serif KR',serif;
-  }
-  .pstat{
-    display:flex;align-items:center;gap:10px;
-    background:rgba(94,255,235,0.03);
-    border:1px solid rgba(94,255,235,0.08);
-    padding:9px 13px;margin-bottom:7px;
-  }
-  .pstat-ico{font-size:15px;flex-shrink:0;}
-  .pstat-lbl{font-size:9px;color:var(--mint);letter-spacing:2px;margin-bottom:2px;}
-  .pstat-val{font-size:13px;color:#bbb;font-family:'Noto Serif KR',serif;}
-  .d-low{color:#5eff8a;}.d-mid{color:#ffd75e;}.d-high{color:#ff5e5e;}.d-ex{color:#ff44ff;}.d-unk{color:#666;}
-  #popup-close{
-    position:absolute;top:8px;right:8px;
-    width:28px;height:28px;
-    background:rgba(0,0,0,0.8);
-    border:1px solid rgba(255,255,255,0.1);
-    color:#555;font-size:13px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    z-index:200;transition:all 0.2s;
-  }
-  #popup-close:hover{background:rgba(255,94,94,0.2);color:#fff;}
-
-  /* 하단 정보 */
-  #info-bar{
-    position:absolute;bottom:8px;left:0;right:0;
-    display:flex;justify-content:space-between;
-    padding:0 16px;pointer-events:none;z-index:5;
-  }
-  .info-txt{font-size:9px;color:#1a1a1a;letter-spacing:1px;}
-
-  /* 스캔라인 */
-  #scanline{
-    position:fixed;inset:0;
-    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
-    z-index:8000;pointer-events:none;
-  }
-  ::-webkit-scrollbar{width:3px;}
-  ::-webkit-scrollbar-thumb{background:#1a1a1a;}
-
-  /* 다음 맵으로 가는 화살표 버튼 */
-  #next-map-arrow{
-    position:absolute;
-    right:20px;
-    top:50%;
-    transform:translateY(-50%);
-    width:70px;
-    height:70px;
-    background:rgba(94,255,235,0.15);
-    border:3px solid var(--mint);
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    transition:all 0.3s;
-    z-index:200;
-  }
-  #next-map-arrow:hover{
-    background:rgba(94,255,235,0.3);
-    box-shadow:0 0 20px rgba(94,255,235,0.6);
-    transform:translateY(-50%) scale(1.1);
-  }
-  #next-map-arrow::before{
-    content:'▶';
-    font-size:24px;
-    color:var(--mint);
-  }
-
-  /* 유리 깨짐 오버레이 */
-  #glass-shatter-overlay{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:9998;
-    display:none;
-  }
-  #glass-shatter-overlay.active{
-    display:block;
-  }
-  #glass-canvas{
-    width:100%;
-    height:100%;
-  }
-
-  @keyframes crack-spread{
-    0%{opacity:0;}
-    10%{opacity:1;}
-    100%{opacity:1;}
-  }
+/* 하단 칩 */
+#chips{display:flex;gap:8px;align-items:center;overflow-x:auto;scrollbar-width:none;transition:opacity .18s}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font:700 10px var(--mono);letter-spacing:.14em;padding:9px 12px;color:rgba(94,255,235,.75);background:rgba(2,13,13,.7);border:1px solid rgba(94,255,235,.3);cursor:pointer;transition:.25s;white-space:nowrap}
+.chip:hover,.chip.sel{color:#010809;background:var(--mint);box-shadow:0 0 14px rgba(94,255,235,.4)}
+.lang{position:fixed;right:18px;top:11px;z-index:95;display:none}
+@media(max-width:700px){#panel{top:auto;width:100%;height:56%;border-left:0;border-top:1px solid rgba(94,255,235,.4);transform:translateY(102%)}.pl{font-size:8px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
 <body>
-<div id="scanline"></div>
-
-<!-- 부팅 -->
-<div id="boot-overlay">
-  <div id="boot-lines"></div>
-  <div class="boot-bar-wrap">
-    <div class="boot-bar-label">LOADING</div>
-    <div class="boot-bar"><div class="boot-bar-fill" id="bfill"></div></div>
+<div class="vig"></div><div class="scan"></div>
+<div id="boot"><pre id="log"></pre><div id="bbar"><b></b></div></div>
+<div id="app">
+  <header><h2 id="ttl"></h2><div style="display:flex;gap:8px"><button id="close"></button><button id="lg" class="chip">EN</button></div></header>
+  <div id="stage">
+    <canvas id="ter" width="400" height="225"></canvas><div class="gridl"></div><div class="sweep"></div>
+    <div id="xh"><i class="h"></i><i class="v"></i></div><div id="coord"></div>
+    <div id="pins"></div><aside id="panel"></aside>
   </div>
+  <nav id="chips"></nav>
 </div>
-
-<!-- 메인 -->
-<div id="map-wrapper">
-  <div id="map-header">
-    <div class="hdr-left">
-      ◆ WORLD MAP <span>—</span> CONTINENTAL SECTOR
-    </div>
-    <div class="close-btn" onclick="if(window.parent&&window.parent.document.getElementById('map-fullscreen-overlay'))window.parent.document.getElementById('map-fullscreen-overlay').remove();" style="cursor:pointer;">✕ CLOSE</div>
-  </div>
-
-  <div id="map-area">
-    <div id="terrain">
-      <!-- 지형 레이어 -->
-      <div id="land-main"></div>
-      <div id="zone-forest"></div>
-      <div id="zone-mountain"></div>
-      <div id="zone-lake"></div>
-      <div id="zone-volcano"></div>
-      <div id="zone-anomaly"></div>
-      <div id="zone-city"></div>
-      <div id="island-small"></div>
-      <div id="island-bottom"></div>
-      <div id="terrain-texture"></div>
-      <!-- 핀은 JS -->
-    </div>
-    <div id="next-map-arrow"></div>
-
-    <div id="info-bar">
-      <span class="info-txt" id="coord-txt">LAT: —  LON: —</span>
-      <span class="info-txt">WORLD_MAP.exe  v1.0</span>
-    </div>
-
-    <!-- 팝업 -->
-    <div id="popup">
-      <div id="popup-card">
-        <button id="popup-close" onclick="closePopup()">✕</button>
-        <div id="popup-banner">
-          <div id="popup-banner-bg"></div>
-          <div id="popup-banner-grad"></div>
-          <div class="banner-code">● <span id="p-code">—</span></div>
-        </div>
-        <div id="popup-body">
-          <div id="popup-name">—</div>
-          <div id="popup-sub">—</div>
-          <div id="popup-desc">—</div>
-          <div id="popup-stats"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-var LOCS = [
-  {
-    code:"SECTOR-01", name:"Fox's Haunt / Kitsune Forest",
-    sub:"Fox's Haunt · Glitch-infested Forest",
-    desc:"A deep forest inhabited by foxes and yokai. Glitch flows between the trees, warping space itself — even compasses cannot be trusted here. Believed to be near Curo's original territory.",
-    guardian:"Kitsune Pack (multiple unidentified entities)", danger:"High", dc:"d-high",
-    px:56, py:26, pinClass:"", bg:"linear-gradient(135deg,#0d1a0d,#1a1200)"
-  },
-  {
-    code:"SECTOR-02", name:"친사의 땅 / 빛의 성역",
-    sub:"Angel's Domain · Sanctuary of Light",
-    desc:"A high-altitude sanctuary inhabited by angels. Access is strictly restricted. Shiro has been intermittently sighted in this region. Anomalies related to glitch-covered halos have been reported.",
-    guardian:"Shiro — intermittently observed", danger:"Unknown", dc:"d-unk",
-    px:86, py:14, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080814,#0a0d20)"
-  },
-  {
-    code:"SECTOR-03", name:"Demon's Realm / Altar of the Abyss",
-    sub:"Demon's Realm · Altar of the Abyss",
-    desc:"Home territory of pure demon entities. Rumored to contain an altar where pure demons like Kisune forge contracts. Deep within, traces of pacts with nameless beings are carved into the walls.",
-    guardian:"Principle of Contract (phenomenon entity)", danger:"Very High", dc:"d-high",
-    px:88, py:43, pinClass:"", bg:"linear-gradient(135deg,#1a0505,#0d0005)"
-  },
-  {
-    code:"SECTOR-04", name:"Anomaly Zone / Glitch District",
-    sub:"Glitch Zone · Anomaly District",
-    desc:"The region with the most extreme glitch manifestations. Space itself is unstable and standard physical laws do not apply. The only zone where a Curo?(GLITCH_DATA) apparition has been observed. Severe cognitive distortion reported upon entry.",
-    guardian:"Unidentified glitch entity", danger:"Extreme", dc:"d-ex",
-    px:13, py:45, pinClass:"pin-glitch", bg:"linear-gradient(135deg,#0d000d,#050005)"
-  },
-  {
-    code:"SECTOR-05", name:"City of Contracts",
-    sub:"City of Contracts · Central Nexus",
-    desc:"A contract hub city located at the center of the continent. A neutral zone where beings of all races gather to forge contracts. The only place where demons, angels, humans, and yokai can all officially enter.",
-    guardian:"Guild Alliance (multiple factions)", danger:"Moderate", dc:"d-mid",
-    px:55, py:56, pinClass:"", bg:"linear-gradient(135deg,#080f14,#0a0f18)"
-  },
-  {
-    code:"SECTOR-EX", name:"Isle of Frozen Time / Eternal Salvation",
-    sub:"Isle of Frozen Time · Salvation of Eternity",
-    desc:"An isolated island believed to be unaffected by the Reset phenomenon. Partial records related to the Noein remain. Leay's visit to this location has been documented, though the details have been redacted.",
-    guardian:"Tory — unconfirmed", danger:"Unclassified", dc:"d-unk",
-    px:60, py:92, pinClass:"pin-mint", bg:"linear-gradient(135deg,#080f08,#050a05)"
+const D={"ko":{"title":"◈ 세계 지도 — 대륙 구역","locations":[{"id":"yokai_forest","name":"요괴의 땅 — 구미의 숲","sub":"고대 여우 요괴들의 영역","code":"구역-01","color":"mint","x":43,"y":32,"emoji":"🌲","desc":"기록된 역사 이전부터 요괴들이 살아온 울창한 고대의 숲. 구미호가 이 곳의 지배권을 쥐고 있다. 공간 왜곡과 환영이 빈번하게 발생하며 — 외부인이 돌아온 사례는 드물다.","tags":[{"label":"진영","value":"중립 / 요괴"},{"label":"위험 등급","value":"극도로 위험","danger":true},{"label":"관련 인물","value":"큐로 (출신지)"}]},{"id":"angel_land","name":"천사의 땅 — 빛의 성역","sub":"천상의 질서를 수호하는 성지","code":"구역-02","color":"white","x":72,"y":20,"emoji":"✨","desc":"영원한 빛으로 뒤덮인 고지대 영역. 천사들은 이곳에서 세계의 시스템을 유지한다. 무단 접근은 금지되어 있으며 — 위반자는 기록에서 말소된다.","tags":[{"label":"진영","value":"천상 / 질서"},{"label":"위험 등급","value":"접근 제한","danger":true},{"label":"관련 인물","value":"시로 (불규칙 존재)"}]},{"id":"contract_city","name":"계약의 도시","sub":"모든 종족이 공존하는 중립 지대","code":"구역-03","color":"gold","x":50,"y":55,"emoji":"🏙️","desc":"문명의 중심 거점. 원래 중립지대로 창설되었으나 현재는 가장 큰 정착지로 성장했다. 악마, 천사, 요괴, 인간 사이의 모든 계약이 보이지 않는 권력에 의해 이곳에서 집행된다.","tags":[{"label":"진영","value":"중립 / 전 종족"},{"label":"위험 등급","value":"보통"},{"label":"인구","value":"약 13억 (인간 밀집)"}]},{"id":"demon_abyss","name":"악마의 영역 — 심연의 제단","sub":"순수 악마들의 심층 영역","code":"구역-04","color":"pink","x":78,"y":52,"emoji":"🌋","desc":"순수 악마가 절대적 권위를 지닌 화산 황무지. 최고 등급의 계약 의식이 이 제단에서 거행된다. 키스네가 이 지역 출신이지만 — 그녀는 거의 인정하지 않는다.","tags":[{"label":"진영","value":"악마 / 심연"},{"label":"위험 등급","value":"치명적","danger":true},{"label":"관련 인물","value":"키스네 (전 거주자)"}]},{"id":"glitch_zone","name":"변칙과 왜곡의 규역 — 릴지 구역","sub":"현실이 영구적으로 붕괴된 곳","code":"구역-??","color":"pink","x":20,"y":58,"emoji":"⚡","desc":"누적된 글리치 현상이 물리 법칙을 영구적으로 왜곡시킨 지역. 시간, 공간, 정체성이 이곳에서 붕괴된다. 지도 자체도 이 구역을 올바르게 렌더링하기를 거부한다. 접근 금지.","tags":[{"label":"진영","value":"오류 / 미정의"},{"label":"위험 등급","value":"분류 불가","danger":true},{"label":"상태","value":"데이터 손상"}]},{"id":"isolated_isle","name":"고립된 시간의 섬 — 영원의 구원","sub":"동결된 시간의 파편","code":"구역-EX","color":"mint","x":55,"y":85,"emoji":"🏝️","desc":"대륙 본토와 시간의 흐름으로부터 분리된 작은 섬. 이곳에는 리셋이 적용되지 않는다. 그 존재는 '세이브 포인트'로 이론화되고 있지만 — 누가, 무슨 목적으로 만들었는지는 미지수다.","tags":[{"label":"진영","value":"불명 / 변칙"},{"label":"위험 등급","value":"낮음"},{"label":"특수","value":"리셋 면역 구역"}]}]},"en":{"title":"◈ WORLD MAP — CONTINENTAL SECTOR","locations":[{"id":"yokai_forest","name":"Land of Yokai — Spider's Forest","sub":"Domain of ancient fox spirits","code":"SECTOR-01","color":"mint","x":43,"y":32,"emoji":"🌲","desc":"A dense, ancient forest where yokai have lived since before recorded history. The Nine-Tail foxes hold dominion here. Spatial distortions and illusions are common — outsiders rarely return.","tags":[{"label":"ALIGNMENT","value":"Neutral / Yokai"},{"label":"DANGER LEVEL","value":"EXTREME","danger":true},{"label":"KNOWN ENTITY","value":"Curo (Origin Point)"}]},{"id":"angel_land","name":"Land of Angels — Sanctuary of Light","sub":"Sacred ground of the celestial order","code":"SECTOR-02","color":"white","x":72,"y":20,"emoji":"✨","desc":"A highland domain shrouded in perpetual radiance. Angels maintain the fabric of the world's system from here. Unauthorized access is forbidden — violators are erased from record.","tags":[{"label":"ALIGNMENT","value":"Celestial / Order"},{"label":"DANGER LEVEL","value":"RESTRICTED","danger":true},{"label":"KNOWN ENTITY","value":"Shiro (Irregular)"}]},{"id":"contract_city","name":"City of Contracts","sub":"Neutral ground — all races coexist","code":"SECTOR-03","color":"gold","x":50,"y":55,"emoji":"🏙️","desc":"The central hub of civilization. Originally founded as a neutral zone, it has evolved into the largest known settlement. Contracts between all species — demons, angels, yokai, and humans — are enforced here by an invisible authority.","tags":[{"label":"ALIGNMENT","value":"Neutral / All Races"},{"label":"DANGER LEVEL","value":"MODERATE"},{"label":"POPULATION","value":"~1.3 Billion (Human Concentration)"}]},{"id":"demon_abyss","name":"Demon Territory — Altar of the Abyss","sub":"The deep domain of pure demons","code":"SECTOR-04","color":"pink","x":78,"y":52,"emoji":"🌋","desc":"A volcanic wasteland where pure demons hold absolute authority. Contract ceremonies of the highest order are conducted at the Altar. Kisune originated from this region — though she rarely acknowledges it.","tags":[{"label":"ALIGNMENT","value":"Demon / Infernal"},{"label":"DANGER LEVEL","value":"LETHAL","danger":true},{"label":"KNOWN ENTITY","value":"Kisune (Former Resident)"}]},{"id":"glitch_zone","name":"Glitch Zone — Distortion Relict","sub":"Where reality fractures permanently","code":"SECTOR-??","color":"pink","x":20,"y":58,"emoji":"⚡","desc":"A region where accumulated glitch phenomena have permanently warped the laws of physics. Time, space, and identity collapse here. Even the map itself refuses to render this area correctly. Do not approach.","tags":[{"label":"ALIGNMENT","value":"ERROR / UNDEFINED"},{"label":"DANGER LEVEL","value":"UNCLASSIFIABLE","danger":true},{"label":"STATUS","value":"DATA CORRUPTED"}]},{"id":"isolated_isle","name":"Isle of Isolated Time — Eternal Salvation","sub":"A fragment of frozen time","code":"SECTOR-EX","color":"mint","x":55,"y":85,"emoji":"🏝️","desc":"A small island detached from the main continent and from the flow of time itself. Resets do not affect this location. Its existence is theorized to be a 'save point' — but by whom, and for what purpose, remains unknown.","tags":[{"label":"ALIGNMENT","value":"Unknown / Anomaly"},{"label":"DANGER LEVEL","value":"LOW"},{"label":"SPECIAL","value":"Reset-Immune Zone"}]}]}};
+const TT={
+ ko:{l:["> WORLD_MAP.exe 실행 중...","> 위성 연결 초기화...","> 대륙 지형 데이터 로드 중...","> 구역 데이터베이스 검색 중..."],f:["> 지도 렌더러 활성화...","> LAUNCH"],x:"✕ 닫기"},
+ en:{l:["> Executing WORLD_MAP.exe...","> Initializing satellite link...","> Loading continental terrain data...","> Scanning sector database..."],f:["> Activating map renderer...","> LAUNCH"],x:"✕ CLOSE"}
+};
+let lang="ko",cur=-1;
+const $=id=>document.getElementById(id),L=()=>D[lang].locations,sh=n=>n.split(" — ")[0];
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* 지형 생성 — 구역 위치를 중심으로 대륙이 솟도록 */
+function terrain(){
+  const c=$("ter"),x=c.getContext("2d"),W=c.width,H=c.height,im=x.createImageData(W,H),P=D.en.locations;
+  const h=(a,b)=>{const n=Math.sin(a*127.1+b*311.7+7.3)*43758.5453;return n-Math.floor(n)};
+  const vn=(a,b)=>{const i=Math.floor(a),j=Math.floor(b),f=a-i,g=b-j,u=f*f*(3-2*f),v=g*g*(3-2*g),m=(p,q,t)=>p+(q-p)*t;return m(m(h(i,j),h(i+1,j),u),m(h(i,j+1),h(i+1,j+1),u),v)};
+  const fbm=(a,b)=>{let s=0,A=.5;for(let o=0;o<4;o++){s+=A*vn(a,b);a*=2.1;b*=2.1;A/=2}return s};
+  for(let py=0;py<H;py++)for(let px=0;px<W;px++){
+    const u=px/W,v=py/H;let e=fbm(u*5,v*3)*.8;
+    P.forEach(p=>{const dx=(u-p.x/100)*1.7,dy=v-p.y/100,w=p.id==="isolated_isle"?.012:.045;e+=.55*Math.exp(-(dx*dx+dy*dy)/w)});
+    e*=1-Math.pow(Math.abs(u*2-1),4)*.5-Math.pow(Math.abs(v*2-1),4)*.5;
+    const k=(py*W+px)*4,d=im.data;
+    if(e<.5){d[k]=94;d[k+1]=255;d[k+2]=235;d[k+3]=e>.47?34:(py%6===0?5:0)}
+    else{const b=Math.min(4,Math.floor((e-.5)/.09)),r=(e-.5)%.09;
+      if(e<.512){d[k]=94;d[k+1]=255;d[k+2]=235;d[k+3]=230}
+      else if(r<.007){d[k]=94;d[k+1]=255;d[k+2]=235;d[k+3]=80}
+      else{d[k]=20;d[k+1]=110+b*12;d[k+2]=130+b*10;d[k+3]=46+b*24}}
   }
-];
+  x.putImageData(im,0,0);
+}
 
-var BOOT = [
-  {t:"> Initializing WORLD_MAP.exe...", w:false},
-  {t:"> Establishing satellite connection...", w:false},
-  {t:"> Loading continental terrain data...", w:false},
-  {t:"> Scanning sector database...", w:false},
-  {t:"  [SECTOR-01] Fox's Haunt..........OK", w:false, sub:true},
-  {t:"  [SECTOR-02] Angel's Domain......OK", w:false, sub:true},
-  {t:"  [SECTOR-03] Demon's Realm.......OK", w:false, sub:true},
-  {t:"  [SECTOR-04] Anomaly Zone... WARNING", w:true,  sub:true},
-  {t:"  [SECTOR-05] City of Contracts...OK", w:false, sub:true},
-  {t:"  [SECTOR-EX] Isle of Time........OK", w:false, sub:true},
-  {t:"> WARNING: SECTOR-04 data corruption detected", w:true},
-  {t:"> Bypassing corruption filter.......OK", w:false},
-  {t:"> Rendering pin overlay.............OK", w:false},
-  {t:"> System ready.", w:false},
-];
+/* 부팅 */
+async function boot(){
+  const t=TT[lang],log=$("log"),bar=$("bbar").firstElementChild;log.innerHTML="";bar.style.width="0";
+  const rows=[...t.l.map(s=>[s]),...L().map(o=>{const w=o.code.includes("?"),n="  ["+o.code+"] "+sh(o.name);return[n+" "+".".repeat(Math.max(3,40-n.length)),w?'<span class="w">WARNING</span>':'<span class="o">OK</span>']}),...t.f.map(s=>[s])];
+  for(let i=0;i<rows.length;i++){log.innerHTML+=rows[i].join("")+"\n";bar.style.width=((i+1)/rows.length*100)+"%";await wait(i<4?170:110)}
+  await wait(450);$("boot").classList.add("off");$("app").classList.remove("out");$("app").classList.add("on");
+}
 
-function runBoot(){
-  var lines = document.getElementById("boot-lines");
-  var fill  = document.getElementById("bfill");
-  var currentIndex = 0;
-  
-  function addLine() {
-    if(currentIndex < BOOT.length) {
-      var el = document.createElement("div");
-      el.className = (BOOT[currentIndex].sub ? "boot-line-sub" : "boot-line") + (BOOT[currentIndex].w ? " boot-warn" : "");
-      el.style.animationDelay = "0s";
-      el.textContent = BOOT[currentIndex].t;
-      lines.appendChild(el);
-      fill.style.width = ((currentIndex+1)/BOOT.length*100)+"%";
-      currentIndex++;
-      
-      setTimeout(addLine, 70 + Math.random()*80);
-    } else {
-      setTimeout(function() {
-        // TV 꺼지는 효과로 부팅 화면 사라짐
-        document.getElementById("boot-overlay").classList.add("tv-off");
-        
-        setTimeout(function() {
-          // TV 켜지는 효과로 지도 등장
-          var mw = document.getElementById("map-wrapper");
-          mw.style.opacity = "1";
-          mw.classList.add("tv-on");
-          
-          setTimeout(function() {
-            document.getElementById("boot-overlay").style.display = "none";
-          }, 700);
-        }, 300);
-      }, 400);
-      
-      initMap();
-    }
-  }
-  
-  addLine();
+/* 렌더 */
+function render(){
+  const t=TT[lang];$("ttl").textContent=D[lang].title;$("close").textContent=t.x;$("lg").textContent=lang==="ko"?"EN":"KO";
+  $("chips").innerHTML=L().map((o,i)=>`<button class="chip${i===cur?" sel":""}" data-i="${i}">${o.code} · ${sh(o.name)}</button>`).join("");
+  $("chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>sel(+b.dataset.i));
+  panel();
 }
-var sleep = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
-
-function initMap(){
-  var terrain = document.getElementById("terrain");
-  for(var i = 0; i < LOCS.length; i++) {
-    var loc = LOCS[i];
-    var pin = document.createElement("div");
-    pin.className = "map-pin";
-    pin.style.left = loc.px + "%";
-    pin.style.top  = loc.py + "%";
-    pin.innerHTML = 
-      "<div class='pin-wrap'>" +
-        "<div class='pin-dot-wrap " + loc.pinClass + "'>" +
-          "<div class='pin-outer'></div>" +
-          "<div class='pin-inner'></div>" +
-        "</div>" +
-        "<div class='pin-code'>" + loc.code + "</div>" +
-      "</div>";
-    pin.querySelector(".pin-dot-wrap").className = "pin-dot-wrap";
-    if(loc.pinClass) pin.classList.add(loc.pinClass);
-    pin.addEventListener("click", function() { openPopup(loc); });
-    terrain.appendChild(pin);
-  }
-
-  terrain.addEventListener("mousemove", function(e) {
-    var r = terrain.getBoundingClientRect();
-    var rx = ((e.clientX-r.left)/r.width*100).toFixed(1);
-    var ry = ((e.clientY-r.top)/r.height*100).toFixed(1);
-    document.getElementById("coord-txt").textContent = "LAT: "+ry+"  LON: "+rx;
-  });
+function pins(){
+  $("pins").innerHTML=L().map((o,i)=>`<button class="pin ${o.color}${o.code.includes("?")?" warn":""}" style="left:${o.x}%;top:${o.y}%;--i:${i}" data-i="${i}"><span class="pl">${o.code}</span><span class="pn"></span><span class="pd"></span></button>`).join("");
+  $("pins").querySelectorAll(".pin").forEach(b=>b.onclick=e=>{e.stopPropagation();sel(+b.dataset.i)});
 }
-function openPopup(loc){
-  document.getElementById("p-code").textContent = loc.code;
-  document.getElementById("popup-name").textContent = loc.name;
-  document.getElementById("popup-sub").textContent = loc.sub;
-  document.getElementById("popup-desc").textContent = loc.desc;
-  document.getElementById("popup-banner-bg").style.background = loc.bg;
-  document.getElementById("popup-stats").innerHTML = 
-    "<div class='pstat'>" +
-      "<div class='pstat-ico'>👁</div>" +
-      "<div>" +
-        "<div class='pstat-lbl'>GUARDIAN / OBSERVED ENTITY</div>" +
-        "<div class='pstat-val'>" + loc.guardian + "</div>" +
-      "</div>" +
-    "</div>" +
-    "<div class='pstat'>" +
-      "<div class='pstat-ico'>⚠</div>" +
-      "<div>" +
-        "<div class='pstat-lbl'>DANGER LEVEL</div>" +
-        "<div class='pstat-val " + loc.dc + "'>" + loc.danger + "</div>" +
-      "</div>" +
-    "</div>";
-  document.getElementById("popup").classList.add("open");
+function panel(){
+  const p=$("panel");if(cur<0){p.classList.remove("open");return}
+  const o=L()[cur],c={mint:"#5effeb",white:"#fff",gold:"#ffd24d",pink:"#ff5e5e"}[o.color];
+  p.innerHTML=`<button class="px" id="px">✕</button><div class="ph" style="--c:${c}">${o.emoji||"🌍"}</div><div class="pb"><div class="pc">CODE: ${o.code}</div><h3>${o.name}</h3><div class="ps">${o.sub||""}</div><p>${o.desc}</p>${(o.tags||[]).map(g=>`<div class="tg${g.danger?" dg":""}"><span>${g.label}</span><b>${g.value}</b></div>`).join("")}</div>`;
+  $("px").onclick=()=>sel(-1);p.scrollTop=0;p.classList.add("open");
 }
-function openPopup(loc){
-  document.getElementById("p-code").textContent = loc.code;
-  document.getElementById("popup-name").textContent = loc.name;
-  document.getElementById("popup-sub").textContent = loc.sub;
-  document.getElementById("popup-desc").textContent = loc.desc;
-  document.getElementById("popup-banner-bg").style.background = loc.bg;
-  document.getElementById("popup-stats").innerHTML = 
-    "<div class='pstat'>" +
-      "<div class='pstat-ico'>👁</div>" +
-      "<div>" +
-        "<div class='pstat-lbl'>GUARDIAN / OBSERVED ENTITY</div>" +
-        "<div class='pstat-val'>" + loc.guardian + "</div>" +
-      "</div>" +
-    "</div>" +
-    "<div class='pstat'>" +
-      "<div class='pstat-ico'>⚠</div>" +
-      "<div>" +
-        "<div class='pstat-lbl'>DANGER LEVEL</div>" +
-        "<div class='pstat-val " + loc.dc + "'>" + loc.danger + "</div>" +
-      "</div>" +
-    "</div>";
-  document.getElementById("popup").classList.add("open");
+function sel(i){
+  cur=i===cur?-1:i;
+  document.querySelectorAll(".pin,.chip").forEach(e=>e.classList.toggle("sel",+e.dataset.i===cur));
+  panel();
 }
-function closePopup(){
-  document.getElementById("popup").classList.remove("open");
+function setLang(){
+  lang=lang==="ko"?"en":"ko";const els=[$("ttl"),$("chips"),$("panel")];
+  els.forEach(e=>e.style.opacity=0);
+  setTimeout(()=>{render();els.forEach(e=>e.style.opacity=1)},190);
 }
-document.getElementById("popup").addEventListener("click", function(e) {
-  if(e.target===document.getElementById("popup")) closePopup();
+$("lg").onclick=setLang;
+$("close").onclick=()=>{cur=-1;$("panel").classList.remove("open");$("app").classList.add("out");setTimeout(()=>{$("app").classList.remove("on");$("boot").classList.remove("off");boot()},450)};
+$("stage").addEventListener("pointermove",e=>{
+  const r=$("stage").getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  $("xh").children[0].style.top=y+"px";$("xh").children[1].style.left=x+"px";
+  $("coord").textContent=`X ${(x/r.width*100).toFixed(1)} · Y ${(y/r.height*100).toFixed(1)}`;
 });
-
-runBoot();
+terrain();render();pins();boot();
 </script>
-
-  <!-- 유리 깨짐 효과 -->
-  <div id="glass-shatter-overlay">
-    <canvas id="glass-canvas"></canvas>
-  </div>
-
-<script>
-  // 화살표 버튼 클릭 이벤트
-  var nextArrow = document.getElementById('next-map-arrow');
-  if(nextArrow) {
-    nextArrow.onclick = function() {
-      shatterAndTransition();
-    };
-  }
-
-  function shatterAndTransition() {
-    var overlay = document.getElementById('glass-shatter-overlay');
-    var canvas = document.getElementById('glass-canvas');
-    var ctx = canvas.getContext('2d');
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    overlay.classList.add('active');
-    
-    var startTime = Date.now();
-    var increaseDuration = 1500;
-    
-    function animateNoise() {
-      var elapsed = Date.now() - startTime;
-      var progress = Math.min(elapsed / increaseDuration, 1);
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      var noiseIntensity = progress;
-      
-      // 노이즈 그리기
-      var imageData = ctx.createImageData(canvas.width, canvas.height);
-      var data = imageData.data;
-      
-      for(var i = 0; i < data.length; i += 4) {
-        var noise = Math.random() * 255 * noiseIntensity;
-        data[i] = noise;
-        data[i + 1] = noise;
-        data[i + 2] = noise;
-        data[i + 3] = 255 * noiseIntensity;
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-      
-      if(progress < 1) {
-        requestAnimationFrame(animateNoise);
-      } else {
-        // 노이즈 100%에서 페이지 전환
-        window.location.href = 'worldmap_midpoint.html';
-      }
-    }
-    
-    animateNoise();
-  }
-
-// 페이지 로드 시 자동으로 노이즈 감소
-window.addEventListener('load', function() {
-  var overlay = document.getElementById('glass-shatter-overlay');
-  var canvas = document.getElementById('glass-canvas');
-  
-  if(!overlay || !canvas) return;
-  
-  var ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  overlay.classList.add('active');
-  
-  var startTime = Date.now();
-  var decreaseDuration = 1500;
-  
-  function fadeInNoise() {
-    var elapsed = Date.now() - startTime;
-    var progress = Math.min(elapsed / decreaseDuration, 1);
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 1 → 0 (노이즈 감소)
-    var noiseIntensity = 1 - progress;
-    
-    var imageData = ctx.createImageData(canvas.width, canvas.height);
-    var data = imageData.data;
-    
-    for(var i = 0; i < data.length; i += 4) {
-      var noise = Math.random() * 255 * noiseIntensity;
-      data[i] = noise;
-      data[i + 1] = noise;
-      data[i + 2] = noise;
-      data[i + 3] = 255 * noiseIntensity;
-    }
-    
-    ctx.putImageData(imageData, 0, 0);
-    
-    if(progress < 1) {
-      requestAnimationFrame(fadeInNoise);
-    } else {
-      // 완료되면 오버레이 제거
-      overlay.classList.remove('active');
-    }
-  }
-  
-  fadeInNoise();
-});
-
-</script>
-
 </body>
 </html>

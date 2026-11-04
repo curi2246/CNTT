@@ -185,8 +185,8 @@
         .folder.open .f-chev{transform:rotate(45deg)}
         .file{cursor:pointer;padding:10px 12px;color:#fff;border-left:1px dashed #444;margin-left:15px;transition:color .15s,text-shadow .15s,background .2s,border-color .2s}
         .file:hover{color:var(--neon-mint);text-shadow:0 0 6px var(--neon-mint);background:rgba(94,255,235,.05);border-left-color:var(--neon-mint)}
-        #directory > div:not(.folder):not(.hidden){animation:dbListIn .4s ease both;margin-bottom:10px}
-        #directory > div:not(.folder):not(.hidden) .file{opacity:0;animation:dbFileIn .4s ease forwards}
+        #directory > .legacy-list{animation:dbListIn .4s ease both;margin-bottom:10px}
+        #directory > .legacy-list .file{opacity:0;animation:dbFileIn .4s ease forwards}
         #directory .file:nth-child(1){animation-delay:.05s}#directory .file:nth-child(2){animation-delay:.11s}#directory .file:nth-child(3){animation-delay:.17s}#directory .file:nth-child(4){animation-delay:.23s}#directory .file:nth-child(5){animation-delay:.29s}#directory .file:nth-child(6){animation-delay:.35s}
         @keyframes dbListIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
         @keyframes dbFileIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
@@ -1041,6 +1041,36 @@
         #timeline-boxes { max-width: 700px; }
         #box-future { border: 1px dashed rgba(255,94,94,.4) !important; color: var(--neon-pink); }
         #box-future:hover { background: rgba(255,94,94,.07); box-shadow: 0 0 18px rgba(255,94,94,.2); letter-spacing: 3px; }
+
+        /* ===== MAIN RENEWAL 3 (샘플과 동일하게) ===== */
+        #main-screen .glitch-canvas-wrap { display: none !important; }
+        #ui-title-db.db-title-glitch { display: inline-block !important; position: relative; margin: 0; font-size: clamp(1.7rem, 6.2vw, 2.8rem); font-weight: 900; letter-spacing: .14em; color: var(--neon-pink); text-shadow: 0 0 22px rgba(255,94,94,.35); }
+        #ui-title-db::before, #ui-title-db::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; }
+        #ui-title-db::before { color: var(--neon-mint); animation: dbGl1 5s infinite steps(1); }
+        #ui-title-db::after { color: #1e90ff; animation: dbGl2 5s infinite steps(1); }
+        @keyframes dbGl1 { 0%,91%,100% { clip-path: inset(0 0 100% 0); transform: none; } 92% { clip-path: inset(18% 0 52% 0); transform: translate(-5px,0); } 94% { clip-path: inset(62% 0 8% 0); transform: translate(4px,0); } 96% { clip-path: inset(34% 0 40% 0); transform: translate(-3px,0); } }
+        @keyframes dbGl2 { 0%,91%,100% { clip-path: inset(0 0 100% 0); transform: none; } 93% { clip-path: inset(44% 0 30% 0); transform: translate(5px,0); } 95% { clip-path: inset(10% 0 70% 0); transform: translate(-4px,0); } 97% { clip-path: inset(70% 0 4% 0); transform: translate(3px,0); } }
+        .db-eyebrow { margin-bottom: 14px; }
+        .db-rule { margin: 20px auto 14px; }
+        #main-screen .terminal b { color: var(--neon-pink); font-weight: 400; }
+        #main-screen .terminal i { color: var(--neon-mint); font-style: normal; }
+        .sbtn.lock { opacity: 1; }
+        .sbtn.lock h3::after { content: " ▮ LOCKED"; font-size: 8px; letter-spacing: .2em; opacity: .7; }
+        .fcard { position: relative; margin-bottom: 10px; border: 1px solid rgba(94,255,235,.28); background: rgba(2,13,13,.55); backdrop-filter: blur(3px); transition: border-color .3s, box-shadow .3s, background .3s; }
+        .fcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; z-index: 2; background: var(--neon-mint); box-shadow: 0 0 10px var(--neon-mint); transform: scaleY(0); transform-origin: top; transition: transform .35s; }
+        .fcard:hover, .fcard.open { border-color: rgba(94,255,235,.7); background: rgba(94,255,235,.045); box-shadow: 0 0 20px rgba(94,255,235,.12); }
+        .fcard:hover::before, .fcard.open::before { transform: scaleY(1); }
+        .fcard > .folder { border: 0; background: none; backdrop-filter: none; box-shadow: none !important; margin-bottom: 0; animation: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+        .fcard > .folder::after { display: none; }
+        .fcard:hover .folder::before, .fcard.open .folder::before { color: var(--neon-pink); }
+        .folder .f-name { font-size: .98rem; letter-spacing: .12em; }
+        .fcard .f-list.open { padding-bottom: 6px; }
+        #timeline-boxes { width: 100%; max-width: 700px; }
+        #box-future { border: 1px dashed rgba(255,94,94,.4) !important; background: transparent; color: var(--neon-pink); }
+        #box-future:hover { background: rgba(255,94,94,.07); box-shadow: 0 0 18px rgba(255,94,94,.2); letter-spacing: .5em; }
+        #box-future .timeline-box-label { font-size: 11px; letter-spacing: .4em; margin: 0; }
+        #box-future .timeline-box-label::before { content: "⏳ "; }
+        #box-future .timeline-box-sub { display: none; }
     </style>
 </head>
 <body>
@@ -1748,12 +1778,17 @@
             } else {
                 document.body.classList.add("auth-error-flash");
                 msg.textContent = t.accessDenied; msg.style.color = "var(--neon-pink)";
-                const _ap = document.getElementById("auth-panel"); _ap.classList.remove("shake"); void _ap.offsetWidth; _ap.classList.add("shake", "bad");
+                const _ap = document.getElementById("auth-panel"); _ap.style.opacity = "1"; _ap.style.filter = "none"; _ap.style.transform = "none"; _ap.classList.remove("shake"); void _ap.offsetWidth; _ap.classList.add("shake", "bad");
                 setTimeout(() => { document.body.classList.remove("auth-error-flash"); document.getElementById("password-input").value = ""; }, 500);
                 setTimeout(() => { _ap.classList.remove("bad"); msg.textContent = t.enterKey; msg.style.color = ""; }, 900);
             }
         };
 
+        (function syncDbTitle() {
+            const h = document.getElementById("ui-title-db"); if (!h) return;
+            const sync = () => h.setAttribute("data-text", h.textContent);
+            sync(); new MutationObserver(sync).observe(h, { childList: true, characterData: true, subtree: true });
+        })();
         // ===== MAIN RENEWAL 2: 라벨 + 파티클 =====
         function paintMainLabels() {
             const e = document.getElementById("ui-dir-label");
@@ -1776,29 +1811,26 @@
             })(0);
         })();
 
+        let mainBootTok = 0;
         function startMainTyping() {
             paintMainLabels();
             const term = document.getElementById("terminal-text");
             term.innerHTML = "";
-            const t = uiText[currentLang];
-            const lines = [t.typingLine1, t.typingLine2];
-            let lIdx = 0, cIdx = 0;
-            function type() {
-                if(lIdx >= lines.length) {
-                    // 타이핑 완료 후 timeline-boxes 표시
-                    const boxes = document.getElementById("timeline-boxes");
-                    boxes.style.display = "flex";
-                    boxes.style.opacity = "0";
-                    boxes.style.transition = "opacity 0.8s";
-                    setTimeout(() => { boxes.style.opacity = "1"; }, 100);
-                    return;
+            const tok = ++mainBootTok;
+            const T = { ko: { b: ["시스템 초기화", "보안 계층 검증", "아카이브 연결"], ok: "완료" }, en: { b: ["Initializing system", "Verifying security layers", "Linking archive"], ok: "OK" } }[currentLang] || { b: ["Initializing system", "Verifying security layers", "Linking archive"], ok: "OK" };
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+            (async () => {
+                for (const line of T.b) {
+                    const row = document.createElement("div"); term.appendChild(row);
+                    for (let i = 0; i <= line.length; i++) { if (tok !== mainBootTok) return; row.innerHTML = "<b>&gt;</b> " + line.slice(0, i) + '<span class="auth-cur"></span>'; await sleep(16); }
+                    await sleep(220); if (tok !== mainBootTok) return;
+                    row.innerHTML = "<b>&gt;</b> " + line + " ... <i>[" + T.ok + "]</i>";
                 }
-                let p = term.querySelectorAll("p")[lIdx];
-                if(!p) { p = document.createElement("p"); term.appendChild(p); }
-                p.textContent = lines[lIdx].slice(0, cIdx + 1); cIdx++;
-                if(cIdx === lines[lIdx].length) { cIdx = 0; lIdx++; setTimeout(type, 600); } else { setTimeout(type, 40); }
-            }
-            type();
+                const end = document.createElement("div"); end.innerHTML = '<b>&gt;</b> <span class="auth-cur"></span>'; term.appendChild(end);
+                const boxes = document.getElementById("timeline-boxes");
+                boxes.style.display = "flex"; boxes.style.opacity = "0"; boxes.style.transition = "opacity 0.8s";
+                setTimeout(() => { boxes.style.opacity = "1"; }, 100);
+            })();
         }
 
 
@@ -2064,8 +2096,13 @@
                 }
 
                 renderPage();
-                dir.appendChild(fDiv);
-                dir.appendChild(list);
+                const card = document.createElement("div");
+                card.className = "fcard db-rise";
+                card.style.setProperty("--d", (0.5 + fIdx * 0.07) + "s");
+                card.appendChild(fDiv); card.appendChild(list);
+                const _tg = fDiv.onclick;
+                fDiv.onclick = () => { _tg(); card.classList.toggle("open", list.classList.contains("open")); };
+                dir.appendChild(card);
             });
         }
 
@@ -2090,6 +2127,16 @@
         }
 
         // 🔥 지도 파일 열기 — 전체화면 오버레이
+        function closeWorldMapOverlay() {
+            const o = document.getElementById("map-fullscreen-overlay"); if (o) o.remove();
+            currentOpenFile = null;
+            const fsEl = document.getElementById("file-screen"); if (fsEl) fsEl.classList.add("hidden");
+            const dbEl = document.getElementById("database-view"); if (dbEl) dbEl.classList.remove("hidden");
+        }
+        window.addEventListener("message", (e) => {
+            const d = e.data, k = typeof d === "string" ? d : (d && (d.type || d.action || d.cmd));
+            if (typeof k === "string" && /close|exit|back|quit/i.test(k)) closeWorldMapOverlay();
+        });
         function openMapFile(name) {
             const old = document.getElementById("map-fullscreen-overlay");
             if (old) old.remove();
@@ -2102,6 +2149,11 @@
             iframe.src = currentLang === "ko" ? "worldmap_ko.html" : "worldmap.html";
             iframe.style.cssText = "width:100%;height:100%;border:none;display:block;";
             overlay.appendChild(iframe);
+            const xBtn = document.createElement("button");
+            xBtn.textContent = currentLang === "ko" ? "✕ 닫기" : "✕ CLOSE";
+            xBtn.style.cssText = "position:absolute;right:14px;bottom:14px;z-index:2;font:700 10px 'Courier New',monospace;letter-spacing:.2em;padding:8px 12px;color:#ff5e5e;background:rgba(0,0,0,.7);border:1px solid rgba(255,94,94,.5);cursor:pointer;";
+            xBtn.onclick = closeWorldMapOverlay;
+            overlay.appendChild(xBtn);
             document.body.appendChild(overlay);
         }
 
@@ -2869,6 +2921,7 @@
             const mapWrap = document.getElementById("map-viewer-wrap");
             mapWrap.classList.remove("open");
             setTimeout(() => { mapWrap.style.display = "none"; }, 700);
+            closeWorldMapOverlay();
         }
 
         // ============================================================

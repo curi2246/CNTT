@@ -2149,11 +2149,6 @@
             iframe.src = currentLang === "ko" ? "worldmap_ko.html" : "worldmap.html";
             iframe.style.cssText = "width:100%;height:100%;border:none;display:block;";
             overlay.appendChild(iframe);
-            const xBtn = document.createElement("button");
-            xBtn.textContent = currentLang === "ko" ? "✕ 닫기" : "✕ CLOSE";
-            xBtn.style.cssText = "position:absolute;right:14px;bottom:14px;z-index:2;font:700 10px 'Courier New',monospace;letter-spacing:.2em;padding:8px 12px;color:#ff5e5e;background:rgba(0,0,0,.7);border:1px solid rgba(255,94,94,.5);cursor:pointer;";
-            xBtn.onclick = closeWorldMapOverlay;
-            overlay.appendChild(xBtn);
             document.body.appendChild(overlay);
         }
 

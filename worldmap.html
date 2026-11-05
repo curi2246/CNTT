@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WORLD MAP · PREVIEW</title>
+<title>WORLD MAP</title>
 <style>
 :root{--mint:#5effeb;--pink:#ff5e5e;--blue:#1e90ff;--bg:#020d0d;--mono:'Courier New',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -97,7 +97,7 @@ const TT={
  ko:{l:["> WORLD_MAP.exe 실행 중...","> 위성 연결 초기화...","> 대륙 지형 데이터 로드 중...","> 구역 데이터베이스 검색 중..."],f:["> 지도 렌더러 활성화...","> LAUNCH"],x:"✕ 닫기"},
  en:{l:["> Executing WORLD_MAP.exe...","> Initializing satellite link...","> Loading continental terrain data...","> Scanning sector database..."],f:["> Activating map renderer...","> LAUNCH"],x:"✕ CLOSE"}
 };
-let lang="ko",cur=-1;
+let lang="en",cur=-1;
 const $=id=>document.getElementById(id),L=()=>D[lang].locations,sh=n=>n.split(" — ")[0];
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -157,7 +157,18 @@ function setLang(){
   setTimeout(()=>{render();els.forEach(e=>e.style.opacity=1)},190);
 }
 $("lg").onclick=setLang;
-$("close").onclick=()=>{cur=-1;$("panel").classList.remove("open");$("app").classList.add("out");setTimeout(()=>{$("app").classList.remove("on");$("boot").classList.remove("off");boot()},450)};
+$("close").onclick=()=>{
+  cur=-1;$("panel").classList.remove("open");$("app").classList.add("out");
+  setTimeout(()=>{
+    if(window.parent&&window.parent!==window){
+      /* 메인 사이트(iframe) 안에서 열린 경우: 지도를 닫고 메인 화면으로 */
+      try{if(typeof window.parent.closeWorldMapOverlay==="function"){window.parent.closeWorldMapOverlay();return}}catch(e){}
+      window.parent.postMessage("closeMap","*");
+    }else{
+      $("app").classList.remove("on");$("boot").classList.remove("off");boot();
+    }
+  },450);
+};
 $("stage").addEventListener("pointermove",e=>{
   const r=$("stage").getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
   $("xh").children[0].style.top=y+"px";$("xh").children[1].style.left=x+"px";

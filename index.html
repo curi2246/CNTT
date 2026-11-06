@@ -455,12 +455,16 @@
         }
         #clock-crack-layer.visible { opacity: 1; }
 
+        #clock-fx-cv { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; display: none; }
+        #clock-overlay.fx #clock-fx-cv { display: block; }
+        #clock-overlay.fx #clock-svg-wrap { visibility: hidden; }
         /* 시계 아래 텍스트 */
         #clock-status-text {
             margin-top: 28px;
             font-size: 11px;
             letter-spacing: 3px;
             color: #444;
+            position: relative; z-index: 2;
         }
 
         /* 깨짐 파편 */
@@ -1277,6 +1281,25 @@
         <nav id="map-chips"></nav>
     </div>
 
+    <script>
+    /* 저장소 접근이 막힌 환경(앱 내 미리보기, 일부 사생활 보호 모드)에서도 멈추지 않도록 메모리 저장소로 대체 */
+    (function () {
+        ["sessionStorage", "localStorage"].forEach(function (n) {
+            try { window[n].getItem("__t"); } catch (e) {
+                var m = {};
+                var shim = {
+                    getItem: function (k) { return Object.prototype.hasOwnProperty.call(m, k) ? m[k] : null; },
+                    setItem: function (k, v) { m[k] = String(v); },
+                    removeItem: function (k) { delete m[k]; },
+                    clear: function () { m = {}; },
+                    key: function (i) { return Object.keys(m)[i] || null; },
+                    get length() { return Object.keys(m).length; }
+                };
+                try { Object.defineProperty(window, n, { value: shim, configurable: true }); } catch (e2) {}
+            }
+        });
+    })();
+    </script>
     <script src="filedata_en.js"></script>
     <script src="filedata_ko.js"></script>
     <script>
@@ -2923,6 +2946,166 @@
         // ⏳ FUTURE / PAST 시계 시스템
         // ============================================================
 
+        // ============================================================
+        // ClockFX: 유리 깨짐 × 글리치 (타이밍은 아래 기존 시계 시스템의 값을 그대로 사용)
+        // ============================================================
+        window.ClockFX = (function () {
+            const cv = document.createElement("canvas"); cv.id = "clock-fx-cv";
+            const x = cv.getContext("2d");
+            let W, H, R, CX, CY, D, S = null, raf = 0, IMP = [.4, .38];
+            const rnd = (a, b) => a + Math.random() * (b - a), cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), eo = t => 1 - Math.pow(1 - t, 2.2);
+            const elastic = t => { if (t <= 0) return 0; if (t >= 1) return 1; const c = 2 * Math.PI / 4.5; return t < .5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c)) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c)) / 2 + 1; };
+            const parts = [...Array(70)].map(() => ({ a: rnd(0, 6.283), r: rnd(.2, 1), s: rnd(.6, 2), v: rnd(.3, 1) }));
+
+            function size() {
+                D = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+                cv.width = W * D; cv.height = H * D; x.setTransform(D, 0, 0, D, 0, 0);
+                const r = document.getElementById("clock-svg-wrap").getBoundingClientRect();
+                CX = r.left + r.width / 2; CY = r.top + r.height / 2; R = Math.min(135, Math.min(W, H) * .3);
+            }
+            function hand(c, deg, len, tail, w, col, al) { c.save(); c.rotate(deg * Math.PI / 180); c.globalAlpha = al; c.strokeStyle = col; c.lineCap = "round"; c.lineWidth = w; c.shadowColor = col; c.shadowBlur = w * 2; c.beginPath(); c.moveTo(0, tail); c.lineTo(0, -len); c.stroke(); c.restore(); }
+            function clock(c, cx, cy, r, o) {
+                c.save(); c.translate(cx, cy);
+                let g = c.createRadialGradient(0, 0, r * .9, 0, 0, r * 1.8); g.addColorStop(0, `rgba(${o.a},${.38 * o.g})`); g.addColorStop(1, `rgba(${o.a},0)`);
+                c.fillStyle = g; c.beginPath(); c.arc(0, 0, r * 1.8, 0, 6.283); c.fill();
+                if (!o.fo) {
+                    g = c.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, "#0f1717"); g.addColorStop(1, "#000");
+                    c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.fill();
+                    g = c.createLinearGradient(-r, -r, r, r); g.addColorStop(0, "#fff"); g.addColorStop(.5, "#707070"); g.addColorStop(1, "#eee");
+                    c.strokeStyle = g; c.lineWidth = r * .035; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.stroke();
+                    c.strokeStyle = `rgba(${o.a},.35)`; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, r * .9, 0, 6.283); c.stroke();
+                }
+                for (let i = 0; i < 60; i++) {
+                    const m = i % 5 === 0, an = i * Math.PI / 30, r1 = r * (m ? .78 : .85), r2 = r * .89, lit = o.lit >= 0 && i / 60 <= o.lit;
+                    if (o.fo && !lit) continue;
+                    c.strokeStyle = lit ? `rgb(${o.a})` : (m ? "#999" : "#555"); c.lineWidth = m ? r * .025 : r * .012;
+                    c.beginPath(); c.moveTo(Math.sin(an) * r1, -Math.cos(an) * r1); c.lineTo(Math.sin(an) * r2, -Math.cos(an) * r2); c.stroke();
+                }
+                if (!o.fo) { c.fillStyle = "#9aa"; c.font = `${r * .15}px 'Courier New'`; c.textAlign = "center"; c.textBaseline = "middle"; [["12", 0, -1], ["3", 1, 0], ["6", 0, 1], ["9", -1, 0]].forEach(([t, dx, dy]) => c.fillText(t, dx * r * .64, dy * r * .64)); }
+                if (!o.nh) {
+                    if (o.w > 150) for (let k = 12; k >= 1; k--) hand(c, o.sec - k * o.w * .0045, r * .8, r * .18, r * .012, "#ff4444", .2 * (1 - k / 13));
+                    hand(c, o.hr, r * .52, 0, r * .045, "#fff", 1); hand(c, o.min, r * .72, 0, r * .028, "#ccc", 1); hand(c, o.sec, r * .8, r * .18, r * .014, "#ff4444", 1);
+                    c.fillStyle = "#fff"; c.shadowColor = "#fff"; c.shadowBlur = 10; c.beginPath(); c.arc(0, 0, r * .05, 0, 6.283); c.fill(); c.shadowBlur = 0;
+                }
+                if (!o.fo) {
+                    c.strokeStyle = "rgba(255,255,255,.13)"; c.lineWidth = r * .02; c.beginPath(); c.arc(0, 0, r * .93, 3.5, 4.4); c.stroke();
+                    if (o.wh > 0) { c.fillStyle = `rgba(255,255,255,${o.wh * .55})`; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.fill(); }
+                }
+                c.restore();
+            }
+            function snap(o) { const sn = document.createElement("canvas"); sn.width = sn.height = Math.ceil(R * 2 * D); const c = sn.getContext("2d"); c.scale(D, D); clock(c, R, R, R, o); return sn; }
+            function tint(sn, col) { const t = document.createElement("canvas"); t.width = sn.width; t.height = sn.height; const c = t.getContext("2d"); c.drawImage(sn, 0, 0); c.globalCompositeOperation = "multiply"; c.fillStyle = col; c.fillRect(0, 0, t.width, t.height); c.globalCompositeOperation = "destination-in"; c.drawImage(sn, 0, 0); return t; }
+            function prepSnap(o) { S.snap = snap(o); S.snR = tint(S.snap, "#ff3030"); S.snC = tint(S.snap, "#30ffff"); }
+
+            /* 유리 파편: 충격점에서 거미줄처럼 갈라지는 불규칙 조각 */
+            function pieces() {
+                const P = [], ix = rnd(.32, .45), iy = rnd(.3, .45), RS = [0, .06, .13, .22, .34, .5, .72, 1.0, 1.45], K = RS.length - 1, n = 14; IMP = [ix, iy];
+                const V = RS.map((r, k) => [...Array(n)].map((_, j) => { const a = (j + rnd(-.22, .22)) / n * 6.283 + k * .04, rr = r * (1 + rnd(-.1, .1)); return k ? [ix + Math.cos(a) * rr, iy + Math.sin(a) * rr] : [ix, iy]; }));
+                for (let k = 0; k < K; k++) for (let j = 0; j < n; j++) {
+                    const q = [V[k][j], V[k][(j + 1) % n], V[k + 1][(j + 1) % n], V[k + 1][j]], cx = q.reduce((t, v) => t + v[0], 0) / 4, cy = q.reduce((t, v) => t + v[1], 0) / 4;
+                    if (Math.hypot(cx - .5, cy - .5) > .62) continue;
+                    const sd = Math.floor(rnd(0, 9)), lag = rnd(0, 1.2), fall = rnd(150, 340) * (.7 + k * .1), tilt = rnd(-28, 28), dr = rnd(-35, 35), tum = Math.random() < .45, spin = rnd(2, 5) * (Math.random() < .5 ? -1 : 1);
+                    P.push({ p: q, pv: [cx, cy], sh: rnd(0, 6.28), f: p => {
+                        const ea = cl(p / .3 * (K + 1) - k - lag), gl = p < .34 && (Math.floor(p * 40) + sd) % 6 === 0;
+                        if (p < .3) return { a: 1, ea, gl, dx: gl ? rnd(-9, 9) : 0, bk: 0 };
+                        const bk = cl((p - .3 - k * .03 - lag * .01) / .7);
+                        return { a: Math.max(0, 1 - Math.pow(bk, 1.5)) * (Math.random() < .1 ? .45 : 1), ea: 1, gl: Math.random() < .07, dx: dr * bk, dy: fall * bk * bk, r: tilt * bk, sx: (tum ? Math.cos(bk * spin) : 1) * (1 - .05 * bk), sy: 1 - .05 * bk, bk };
+                    } });
+                }
+                S.chips = [...Array(70)].map(() => ({ a: rnd(0, 6.283), sp: rnd(.4, 1.5), sz: rnd(.02, .06), rot: rnd(-6, 6), c: Math.random() < .25 ? "#5effeb" : "#fff" }));
+                return P;
+            }
+            function dp(s, p, al, wh) {
+                const k = R / 120, pv = s.pv, o = s.f(p), a = o.a == null ? al : o.a, sx = o.sx == null ? 1 : o.sx, sy = o.sy == null ? 1 : o.sy, ea = o.ea == null ? 1 : o.ea;
+                if (a <= 0 || Math.abs(sx) < .03) return;
+                x.save(); x.globalAlpha = a; x.translate(CX + (pv[0] - .5) * 2 * R + (o.dx || 0) * k, CY + (pv[1] - .5) * 2 * R + (o.dy || 0) * k); x.rotate((o.r || 0) * Math.PI / 180); x.scale(sx, sy); x.translate(-pv[0] * 2 * R, -pv[1] * 2 * R);
+                x.beginPath(); s.p.forEach(([u, v], j) => j ? x.lineTo(u * 2 * R, v * 2 * R) : x.moveTo(u * 2 * R, v * 2 * R)); x.closePath();
+                x.save(); x.clip(); x.drawImage(S.snap, 0, 0, 2 * R, 2 * R);
+                x.fillStyle = `rgba(170,235,255,${(.05 + .14 * Math.abs(Math.sin(s.sh + (o.bk || 0) * 6))) * ea})`; x.fill();
+                if (wh > 0) { x.fillStyle = `rgba(255,255,255,${wh})`; x.fill(); }
+                x.restore();
+                x.globalAlpha = a * ea;
+                if (o.gl) { x.lineWidth = 1.5; x.save(); x.translate(-4, 0); x.strokeStyle = "rgba(255,40,40,.75)"; x.stroke(); x.restore(); x.save(); x.translate(4, 0); x.strokeStyle = "rgba(40,255,255,.75)"; x.stroke(); x.restore(); }
+                else { x.strokeStyle = "rgba(94,255,235,.35)"; x.lineWidth = 3; x.stroke(); x.strokeStyle = "#fff"; x.lineWidth = 1.2; x.shadowColor = "#fff"; x.shadowBlur = 7; x.stroke(); }
+                x.restore();
+            }
+            /* 글리치 오버레이 + 충격 섬광 + 유리 조각(칩) + 메모리 주소 */
+            function fx(g) {
+                const px = CX + (IMP[0] - .5) * 2 * R, py = CY + (IMP[1] - .5) * 2 * R, k = R / 120;
+                if (g < .22) { const gr = x.createRadialGradient(px, py, 0, px, py, R * .7); gr.addColorStop(0, `rgba(255,255,255,${.95 * (1 - g / .22)})`); gr.addColorStop(1, "rgba(94,255,235,0)"); x.save(); x.globalCompositeOperation = "lighter"; x.fillStyle = gr; x.fillRect(px - R, py - R, 2 * R, 2 * R); x.restore(); }
+                if (g < .4 && S.snap) {
+                    x.save(); x.globalCompositeOperation = "lighter";
+                    if (Math.random() < .6) { x.globalAlpha = .5; x.drawImage(S.snR, CX - R - 5, CY - R, 2 * R, 2 * R); x.drawImage(S.snC, CX - R + 5, CY - R, 2 * R, 2 * R); }
+                    for (let i = 0; i < 3; i++) if (Math.random() < .6) { const sy = rnd(0, 1.8) * R, sh = rnd(.04, .12) * R, src = Math.random() < .5 ? S.snR : S.snC; x.globalAlpha = .8; x.drawImage(src, 0, sy * D, 2 * R * D, sh * D, CX - R + rnd(-24, 24), CY - R + sy, 2 * R, sh); }
+                    for (let i = 0; i < 5; i++) if (Math.random() < .5) { const w = rnd(.08, .2) * R, h = rnd(.04, .1) * R, u = rnd(0, 1.6) * R, v = rnd(0, 1.6) * R; x.globalAlpha = .7; x.drawImage(S.snap, u * D, v * D, w * D, h * D, px - R * .5 + rnd(-.8, .8) * R + u * .1, py - R * .5 + rnd(-.8, .8) * R + v * .1, w, h); }
+                    x.restore();
+                }
+                S.chips.forEach(c => { const d = eo(g) * c.sp * R * 1.9, al = 1 - Math.pow(g, 1.4); if (al <= 0) return; x.save(); x.globalAlpha = al; x.translate(px + Math.cos(c.a) * d, py + Math.sin(c.a) * d + g * g * R * .9); x.rotate(c.rot * g); const z = c.sz * R * 2; x.fillStyle = c.c; x.shadowColor = c.c; x.shadowBlur = 6; x.beginPath(); x.moveTo(0, -z); x.lineTo(z * .7, z * .6); x.lineTo(-z * .7, z * .6); x.closePath(); x.fill(); x.restore(); });
+                if (g < .5) {
+                    S.tg = S.tg || [...Array(10)].map(() => ({ a: rnd(0, 6.283), r: rnd(.1, .95) }));
+                    x.save(); x.font = `${R * .1}px 'Courier New'`; x.textAlign = "left";
+                    S.tg.forEach((t, i) => { if (Math.random() < .3) return; x.fillStyle = i % 4 ? "#5effeb" : "#ff5e5e"; x.globalAlpha = Math.min(1, (.5 - g) * 4); x.fillText("0x" + Math.floor(rnd(4096, 65535)).toString(16).toUpperCase(), CX + Math.cos(t.a) * t.r * R, CY + Math.sin(t.a) * t.r * R); });
+                    x.restore();
+                }
+            }
+            function drawBrk(ts) {
+                const bt = (ts - S.b0) / 1000;
+                x.save(); if (bt < .35) { const s = (1 - bt / .35) * 10; x.translate(rnd(-s, s), rnd(-s, s)); }
+                S.pcs.forEach(s => { const lt = cl(bt / .8); if (lt >= 1) return; dp(s, lt, 1 - lt, bt < .25 ? .85 * (1 - bt / .25) : 0); });
+                fx(cl(bt / .8));
+                if (bt < .6) { x.strokeStyle = `rgba(255,255,255,${1 - bt / .6})`; x.lineWidth = 3 * (1 - bt / .6) + 1; x.beginPath(); x.arc(CX + (IMP[0] - .5) * 2 * R, CY + (IMP[1] - .5) * 2 * R, R * (.2 + bt * 3.4), 0, 6.283); x.stroke(); }
+                x.restore();
+            }
+            function drawRe(e) {
+                const wh = Math.max(0, 1 - Math.min(e / 1.5, 1)) * .55, p = 1 - cl(e / .8);
+                S.pcs.forEach(s => dp(s, p, 1 - p, wh));
+                fx(1 - Math.min(1, e / .85));
+            }
+            function drawRip(ts) {
+                const now = performance.now(), A = "94,255,235";
+                if (S.p0 && now - S.p0 < 500) { const l = (now - S.p0) / 500, g = x.createRadialGradient(CX, CY, 0, CX, CY, R * 2.2); g.addColorStop(0, `rgba(${A},${.45 * (1 - l)})`); g.addColorStop(1, `rgba(${A},0)`); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+                S.rip = S.rip.filter(t => now - t < 1200);
+                S.rip.forEach(t => { const l = (now - t) / 1200, p = eo(l); x.save(); x.strokeStyle = `rgba(${A},${.85 * (1 - l)})`; x.lineWidth = 3 - 2 * l; x.shadowColor = "#5effeb"; x.shadowBlur = 14; x.beginPath(); x.arc(CX, CY, R * (1 + 1.6 * p), 0, 6.283); x.stroke(); x.restore(); });
+            }
+            function bg(e, A, ts) {
+                const dt = S.pt ? Math.min((ts - S.pt) / 1000, .05) : .016; S.pt = ts; const f = S.m === "future";
+                const g = x.createRadialGradient(CX, CY, R * .5, CX, CY, Math.max(W, H) * .75);
+                g.addColorStop(0, `rgba(${A},${f ? Math.min(e / 1.7, 1) * .12 : .06})`); g.addColorStop(1, "rgba(0,0,0,.85)"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+                if (f && S.ph === "run") { const n = Math.floor(e * e * 24); for (let i = 0; i < n; i++) { const an = i * 2.399, r0 = R * (1.35 + (i % 5) * .12), l = R * (.3 + e * .8); x.strokeStyle = `rgba(${A},${.08 + e * .18})`; x.lineWidth = 1; x.beginPath(); x.moveTo(CX + Math.cos(an) * r0, CY + Math.sin(an) * r0); x.lineTo(CX + Math.cos(an) * (r0 + l), CY + Math.sin(an) * (r0 + l)); x.stroke(); } }
+                const mx = Math.max(W, H) * .6;
+                parts.forEach(p => { p.r += (f ? -1 : .15) * p.v * dt * (f ? .15 + e * e * .5 : .1); if (p.r < .12) p.r = 1; if (p.r > 1) p.r = .2; x.fillStyle = `rgba(${A},${.15 + .4 * p.v})`; x.fillRect(CX + Math.cos(p.a) * p.r * mx, CY + Math.sin(p.a) * p.r * mx, p.s, p.s); });
+            }
+            function frame(ts) {
+                if (!S) return; if (!S.t0) S.t0 = ts;
+                const e = (ts - S.t0) / 1000, f = S.m === "future", A = f ? "255,94,94" : "94,255,235";
+                x.clearRect(0, 0, W, H); bg(e, A, ts);
+                if (S.ph === "run" || S.ph === "hold") {
+                    let sec, w = 0, wh = 0, lit = -1, gl = .4, sx = 0, sy = 0;
+                    if (f) { sec = (e * e * 40 + e * 2) * 6; w = (e * 80 + 2) * 6; gl = .4 + Math.min(e / 1.7, 1) * 1.3; const s = e * e * 2.2; sx = rnd(-s, s); sy = rnd(-s, s); }
+                    else { const t = Math.min(e / 1.9, 1); sec = elastic(t) * 1080; lit = t; wh = 1 - Math.min(e / 1.5, 1); gl = .3 + wh * .7; }
+                    const min = sec / 60, hr = min / 12, re = !f && S.ph === "run" && e < 1.2; S.last = { sec, min, hr, a: A, g: gl, wh, lit, w, fo: re };
+                    if (re) drawRe(e);
+                    if (f && e > 1) { x.globalAlpha = .35; x.strokeStyle = "#ff2222"; x.lineWidth = 2; x.beginPath(); x.arc(CX + sx - (e - 1) * 4, CY + sy, R, 0, 6.283); x.stroke(); x.strokeStyle = "#22ffff"; x.beginPath(); x.arc(CX + sx + (e - 1) * 4, CY + sy, R, 0, 6.283); x.stroke(); x.globalAlpha = 1; }
+                    clock(x, CX + sx, CY + sy, R, S.last);
+                }
+                if (S.ph === "brk") drawBrk(ts);
+                if (!f) drawRip(ts);
+                raf = requestAnimationFrame(frame);
+            }
+            return {
+                start(mode) {
+                    const ov = document.getElementById("clock-overlay"); if (!cv.parentNode) ov.appendChild(cv);
+                    ov.classList.add("fx"); size();
+                    S = { m: mode, t0: 0, ph: "run", rip: [], pt: 0 };
+                    if (mode === "past") { S.pcs = pieces(); prepSnap({ a: "94,255,235", g: 0, wh: 0, lit: -1, w: 0, nh: true, sec: 0, min: 0, hr: 0 }); }
+                    cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
+                },
+                breakNow() { if (!S || !S.last) return; S.ph = "brk"; S.b0 = performance.now(); S.pcs = pieces(); prepSnap(S.last); },
+                stopPast() { if (!S) return; S.ph = "hold"; S.p0 = performance.now(); [0, 1, 2].forEach(i => setTimeout(() => S && S.rip.push(performance.now()), i * 100)); },
+                end() { cancelAnimationFrame(raf); raf = 0; S = null; const ov = document.getElementById("clock-overlay"); if (ov) ov.classList.remove("fx"); }
+            };
+        })();
+
         // 시계 눈금 생성
         function buildClockTicks() {
             const face = document.getElementById("clock-face");
@@ -2969,6 +3152,7 @@
             clockStartTime = null;
             const overlay = document.getElementById("clock-overlay");
             overlay.classList.add("active");
+            if (window.ClockFX) ClockFX.start(mode);
 
             const statusText = document.getElementById("clock-status-text");
             statusText.textContent = mode === "future" ? "TIMELINE ACCELERATING..." : "RESTORING ARCHIVE...";
@@ -3042,10 +3226,11 @@
                     clockRAF = requestAnimationFrame(animateClock);
                 } else {
                     // 🌊 정지 완료 - 물결 파동 생성
+                    if (window.ClockFX) ClockFX.stopPast();
                     const overlay = document.getElementById("clock-overlay");
                     
                     // 3개의 파동을 0.1초 간격으로
-                    for (let i = 0; i < 3; i++) {
+                    if (!window.ClockFX) for (let i = 0; i < 3; i++) {
                         setTimeout(() => {
                             const ripple = document.createElement("div");
                             ripple.className = "clock-ripple";
@@ -3067,6 +3252,7 @@
                     // 3초 후 시계 닫기
                     setTimeout(() => {
                         document.getElementById("clock-overlay").classList.remove("active");
+                        if (window.ClockFX) ClockFX.end();
                     }, 2000);
                 }
             }
@@ -3074,7 +3260,7 @@
 
         function triggerClockBreak() {
             // 균열 표시
-            document.getElementById("clock-crack-layer").classList.add("visible");
+            if (window.ClockFX) ClockFX.breakNow(); else document.getElementById("clock-crack-layer").classList.add("visible");
             
             const face = document.getElementById("clock-face");
             const overlay = document.getElementById("clock-overlay");
@@ -3089,7 +3275,7 @@
                 { clip: "polygon(50% 50%, 50% 0%, 60% 30%, 50% 60%, 40% 30%)", anim: "shard-fly-6" }
             ];
             
-            shardShapes.forEach((shard, i) => {
+            if (!window.ClockFX) shardShapes.forEach((shard, i) => {
                 const piece = document.createElement("div");
                 piece.className = "clock-shard";
                 piece.style.cssText = `

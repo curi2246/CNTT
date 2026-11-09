@@ -780,6 +780,93 @@ animation: micro-shake 4s infinite;
         .char-section-body { font-size:12px; color:#ccc; line-height:1.75; border-left:2px solid rgba(255,94,94,0.3); padding-left:12px; margin-bottom:4px; }
         .char-ability-item { background:rgba(255,94,94,0.04); border:1px solid rgba(255,94,94,0.15); padding:8px 12px; margin-bottom:6px; font-size:12px; color:#ccc; line-height:1.7; }
         .char-illness-box { background:rgba(255,40,40,0.06); border:1px solid rgba(255,94,94,0.3); padding:8px 12px; font-size:12px; color:#ccc; line-height:1.7; }
+        /* ===== CLOCK FX ===== */
+        #clock-fx-cv { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; display: none; }
+        #clock-overlay.fx #clock-fx-cv { display: block; }
+        #clock-overlay.fx #clock-svg-wrap { visibility: hidden; }
+        #clock-status-text { position: relative; z-index: 2; }
+        /* ===== MAP RENEWAL ===== */
+        #map-boot-overlay { align-items: flex-start; padding: 0 max(20px, calc(50% - 280px)); background: #020d0d; }
+        #map-boot-log { font-size: 12px; line-height: 1.75; color: #bfe; white-space: pre-wrap; }
+        #map-boot-bar-wrap { height: 2px; border: 0; background: rgba(94,255,235,.14); }
+        #map-boot-bar { box-shadow: 0 0 10px var(--neon-mint); }
+        #map-viewer-wrap { background: #020d0d; clip-path: inset(50% 0 50% 0); transition: clip-path .9s cubic-bezier(.2,.8,.2,1); }
+        #map-viewer-wrap.open { clip-path: inset(0); }
+        #map-header { background: linear-gradient(90deg, rgba(94,255,235,.07), rgba(0,0,0,.9)); border-bottom: 1px solid rgba(94,255,235,.3); }
+        #map-header h2 { font-size: clamp(.72rem, 3vw, 1rem); letter-spacing: .22em; text-shadow: 0 0 14px rgba(94,255,235,.4); }
+        #map-close-btn { font-size: 10px; letter-spacing: .2em; border-color: rgba(255,94,94,.5); transition: .25s; }
+        #map-close-btn:hover { background: rgba(255,94,94,.12); box-shadow: 0 0 12px rgba(255,94,94,.3); }
+        #map-canvas-area { margin: 10px 14px 0; border: 1px solid rgba(94,255,235,.3); background: #010809; cursor: crosshair; }
+        #map-canvas-area::before, #map-canvas-area::after { content: ""; position: absolute; width: 16px; height: 16px; border: 2px solid var(--neon-mint); z-index: 6; pointer-events: none; }
+        #map-canvas-area::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+        #map-canvas-area::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+        .map-gridl { position: absolute; inset: 0; pointer-events: none; z-index: 2; background-image: linear-gradient(rgba(94,255,235,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(94,255,235,.07) 1px, transparent 1px); background-size: 10% 12.5%; }
+        .map-sweep { position: absolute; top: 0; bottom: 0; width: 90px; left: -90px; pointer-events: none; z-index: 3; background: linear-gradient(90deg, transparent, rgba(94,255,235,.13)); border-right: 1px solid rgba(94,255,235,.55); animation: mapSweep 7s linear infinite; }
+        @keyframes mapSweep { to { left: 100%; } }
+        #map-xh i { position: absolute; pointer-events: none; z-index: 4; background: rgba(94,255,235,.35); opacity: 0; transition: opacity .2s; }
+        #map-xh .h { left: 0; right: 0; height: 1px; } #map-xh .v { top: 0; bottom: 0; width: 1px; }
+        #map-canvas-area:hover #map-xh i { opacity: 1; }
+        #map-coord { position: absolute; left: 12px; bottom: 10px; z-index: 4; font-size: 9px; letter-spacing: .25em; color: rgba(94,255,235,.6); pointer-events: none; }
+        .map-pin { --c: var(--neon-pink); opacity: 0; animation: mapPop .5s cubic-bezier(.2,1.4,.4,1) forwards; animation-delay: calc(.5s + var(--i, 0) * .12s); color: var(--c); }
+        .map-pin.mint { --c: var(--neon-mint); } .map-pin.gold { --c: #ffd24d; } .map-pin.white { --c: #fff; }
+        @keyframes mapPop { from { opacity: 0; scale: .2; } to { opacity: 1; scale: 1; } }
+        .map-pin .map-pin-dot { position: relative; width: 9px; height: 9px; border: 0; background: var(--c); box-shadow: 0 0 12px var(--c); animation: none; }
+        .map-pin .map-pin-dot::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--c); animation: mapRing 2.4s ease-out infinite; }
+        @keyframes mapRing { from { transform: scale(.5); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
+        .map-pin .map-pin-line { width: 1px; height: 22px; background: var(--c); opacity: .7; }
+        .map-pin .map-pin-label { order: -1; margin: 0 0 0; padding: 3px 6px; font-weight: 700; font-size: 9px; letter-spacing: .18em; color: var(--c); border: 1px solid var(--c); background: rgba(1,8,9,.8); transition: .25s; }
+        .map-pin:hover .map-pin-label, .map-pin.sel .map-pin-label { background: var(--c); color: #010809; box-shadow: 0 0 16px var(--c); }
+        .map-pin.sel .map-pin-dot { transform: scale(1.5); }
+        .map-pin.warn .map-pin-label { animation: mapFlk 2.6s steps(1) infinite; }
+        @keyframes mapFlk { 0%, 90%, 100% { opacity: 1; } 92% { opacity: .2; transform: translateX(-3px); } 95% { opacity: .8; transform: translateX(3px); } }
+        #map-info-panel { width: min(340px, 92%); max-width: none; background: rgba(2,13,13,.9); backdrop-filter: blur(6px); border-left: 1px solid rgba(94,255,235,.4); cursor: default; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+        #map-info-header-img.no-img { height: 110px; border-bottom: 1px solid rgba(94,255,235,.25); }
+        #map-info-close { top: 8px; right: 8px; width: 28px; height: 28px; font-size: 12px; background: rgba(0,0,0,.5); border: 1px solid rgba(94,255,235,.4); color: var(--neon-mint); }
+        #map-info-name { font-size: 1rem; line-height: 1.4; letter-spacing: .06em; }
+        #map-info-desc { border-left-color: rgba(255,94,94,.5); line-height: 1.8; font-size: 12px; }
+        .map-info-tag { justify-content: space-between; font-size: 10px; letter-spacing: .15em; padding: 7px 10px; }
+        #map-chips { flex-shrink: 0; display: flex; gap: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 10px 14px 12px; }
+        #map-chips::-webkit-scrollbar { display: none; }
+        .map-chip { flex: none; font: 700 10px 'Courier New', monospace; letter-spacing: .14em; padding: 9px 12px; color: rgba(94,255,235,.75); background: rgba(2,13,13,.7); border: 1px solid rgba(94,255,235,.3); cursor: pointer; transition: .25s; white-space: nowrap; }
+        .map-chip:hover, .map-chip.sel { color: #010809; background: var(--neon-mint); box-shadow: 0 0 14px rgba(94,255,235,.4); }
+        @media (max-width: 700px) { #map-info-panel { top: auto; width: 100%; height: 56%; border-left: 0; border-top: 1px solid rgba(94,255,235,.4); transform: translateY(102%); } .map-pin .map-pin-label { font-size: 8px; } }
+        /* ===== BROKEN MAIN RENEWAL ===== */
+        .fx-particles { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .fx-scan { position: fixed; inset: 0; pointer-events: none; z-index: 3; background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+        .b-rise { opacity: 0; transform: translateY(18px); filter: blur(6px); animation: bRise .7s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: var(--d, 0s); }
+        @keyframes bRise { to { opacity: 1; transform: none; filter: none; } }
+        .db-eyebrow-b { font-size: 10px; letter-spacing: .55em; color: rgba(255,94,94,.6); text-align: center; margin-bottom: 14px; }
+        .db-rule-b { height: 1px; margin: 20px auto 14px; width: min(420px, 80%); background: linear-gradient(90deg, transparent, var(--neon-pink), transparent); opacity: .55; }
+        .db-sub-b { font-size: 10px; letter-spacing: .3em; color: rgba(255,94,94,.75); text-align: center; margin-bottom: 22px; animation: bBlink 3.2s ease-in-out infinite; }
+        @keyframes bBlink { 50% { opacity: .45; } }
+        .db-label-b { width: 100%; max-width: 700px; display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: .4em; color: rgba(94,255,235,.55); margin: 6px 0 12px; }
+        .db-label-b::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(94,255,235,.4), transparent); }
+        body.broken-world .terminal { border: 0 !important; border-left: 2px solid rgba(255,94,94,.55) !important; background: linear-gradient(90deg, rgba(255,94,94,.06), transparent) !important; backdrop-filter: none; box-shadow: none !important; transform: none; padding: 12px 16px; max-width: 700px; }
+        .directory { max-width: 700px; }
+        .fcard { position: relative; margin-bottom: 10px; border: 1px solid rgba(94,255,235,.28); background: rgba(2,13,13,.55); backdrop-filter: blur(3px); transition: border-color .3s, box-shadow .3s, background .3s; }
+        .fcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; z-index: 2; background: var(--neon-mint); box-shadow: 0 0 10px var(--neon-mint); transform: scaleY(0); transform-origin: top; transition: transform .35s; }
+        .fcard:hover, .fcard.open { border-color: rgba(94,255,235,.7); background: rgba(94,255,235,.045); box-shadow: 0 0 20px rgba(94,255,235,.12); }
+        .fcard:hover::before, .fcard.open::before { transform: scaleY(1); }
+        body.broken-world .fcard > .folder, .fcard > .folder { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin: 0; border: 0 !important; user-select: none; }
+        .fcard .idx { font-size: 11px; letter-spacing: .2em; color: rgba(94,255,235,.4); transition: .3s; }
+        .fcard:hover .idx, .fcard.open .idx { color: var(--neon-pink); }
+        .fcard .fname { flex: 1; font-size: .98rem; letter-spacing: .12em; transition: transform .3s; }
+        .fcard:hover .fname { transform: translateX(4px); }
+        .fcard .cnt { font-size: 9px; letter-spacing: .2em; padding: 3px 8px; border: 1px solid rgba(94,255,235,.3); color: rgba(94,255,235,.7); }
+        .fcard .chev { width: 9px; height: 9px; border-right: 1.5px solid var(--neon-mint); border-bottom: 1.5px solid var(--neon-mint); transform: rotate(-45deg); transition: transform .35s; }
+        .fcard.open .chev { transform: rotate(45deg); }
+        .fcard .file { margin-left: 0; border-left: 0; padding: 10px 18px 10px 48px; font-size: 12px; animation: bFileIn .4s both; transition: background .2s; }
+        .fcard .file:hover { background: rgba(255,94,94,.09); }
+        .fcard .file:last-child { padding-bottom: 16px; }
+        @keyframes bFileIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+        /* ===== BROKEN FX ===== */
+        #broken-fx-cv { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9997; }
+        #screen-crack-layer, .shard { display: none !important; }
+        body.b-glitch .fcard { filter: drop-shadow(2px 0 rgba(255,0,0,.5)) drop-shadow(-2px 0 rgba(0,255,230,.5)); }
+        body.b-glitch #terminal-text { text-shadow: 2px 0 rgba(255,0,0,.6), -2px 0 rgba(0,255,230,.5); }
+        body.b-glitch h1 { filter: hue-rotate(40deg); }
+        .fcard .fname { animation: bNameFlick 7s infinite; }
+        @keyframes bNameFlick { 0%, 91%, 100% { text-shadow: none; } 92% { text-shadow: 2px 0 rgba(255,60,60,.7), -2px 0 rgba(60,255,230,.6); } 94% { text-shadow: -2px 0 rgba(255,60,60,.7), 2px 0 rgba(60,255,230,.6); } 96% { text-shadow: none; } }
 </style>
 </head>
 <body>
@@ -911,10 +998,15 @@ animation: micro-shake 4s infinite;
   </div>
 
   <div id="main-screen" class="screen hidden">
+<canvas id="b-fx" class="fx-particles"></canvas><div class="fx-scan"></div>
     <div id="database-view" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-      <div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
+      <div class="db-eyebrow-b b-rise" id="db-eyebrow-b" style="--d:.05s">// ARCHIVE NODE 03</div>
+<div class="header"><h1 id="ui-title-db">CENTRAL DATABASE</h1></div>
+<div class="db-rule-b b-rise" style="--d:.15s"></div>
+<div class="db-sub-b b-rise" id="db-sub-b" style="--d:.2s"></div>
       <div class="terminal"><div id="terminal-text"></div></div>
-      <div class="directory" id="directory"></div>
+      <div class="db-label-b b-rise" style="--d:.5s"><span id="db-label-b">DIRECTORY</span></div>
+<div class="directory" id="directory"></div>
 
       <!-- ⏳ PAST 박스 (미래에서 돌아가기) -->
       <div id="timeline-boxes" style="display:none;">
@@ -991,6 +1083,8 @@ animation: micro-shake 4s infinite;
     </div>
     <div id="map-canvas-area">
       <img id="map-bg-img" src="" alt="map" draggable="false"/>
+      <div class="map-gridl"></div><div class="map-sweep"></div>
+      <div id="map-xh"><i class="h"></i><i class="v"></i></div><div id="map-coord"></div>
       <div id="map-pins-layer"></div>
       <div id="map-info-panel">
         <button id="map-info-close" onclick="closeMapInfo()">✕</button>
@@ -1004,9 +1098,22 @@ animation: micro-shake 4s infinite;
         </div>
       </div>
     </div>
+  <nav id="map-chips"></nav>
   </div>
 
   <script>
+/* 저장소 접근이 막힌 환경(앱 내 미리보기, 일부 사생활 보호 모드)에서도 멈추지 않도록 메모리 저장소로 대체 */
+(function () {
+    ["sessionStorage", "localStorage"].forEach(function (n) {
+        try { window[n].getItem("__t"); } catch (e) {
+            var m = {};
+            var shim = { getItem: function (k) { return Object.prototype.hasOwnProperty.call(m, k) ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, removeItem: function (k) { delete m[k]; }, clear: function () { m = {}; }, key: function (i) { return Object.keys(m)[i] || null; }, get length() { return Object.keys(m).length; } };
+            try { Object.defineProperty(window, n, { value: shim, configurable: true }); } catch (e2) {}
+        }
+    });
+})();
+</script>
+<script>
 const PASSWORD = "1234";
 let isGlitchUnlocked = false; 
 let inputBuffer = ""; 
@@ -1057,7 +1164,7 @@ warningText: "시스템_경고: 접근_위반",
 // 🔥 메인 4캐릭터만 pages 배열, 나머지는 문자열 그대로 원본 유지
 const fileSystem = {
 en: {
-"The main character": {
+"Key Entities": {
 "Leay_Full_Archive.txt": { pages: ["[DATA CORRUPTED - TIMELINE ANNIHILATED]"] },
 "Curo_Half_Archive.txt": { pages: ["[DATA CORRUPTED - TIMELINE ANNIHILATED]"] },
 "Curo_REAL_Hidden_Content": "[DATA CORRUPTED - TIMELINE ANNIHILATED]",
@@ -1069,7 +1176,7 @@ en: {
 "Miro_Full_Archive.txt": "[DATA CORRUPTED - TIMELINE ANNIHILATED]",
 "Niro_Full_Archive.txt": "[DATA CORRUPTED - TIMELINE ANNIHILATED]"
 },
-"The enemy": {
+"Hostile Entities": {
 "enemies.txt": "All data has been annihilated. Only one name remains: Kisune Corden.",
 "Ekis_Full_Archive.txt": "[DATA CORRUPTED - TIMELINE ANNIHILATED]",
 "Aleph_Full_Archive.txt": "[DATA CORRUPTED - TIMELINE ANNIHILATED]",
@@ -1100,7 +1207,7 @@ en: {
 }
 },
 ko: {
-"The main character": {
+"주요 존재": {
 "Leay_Full_Archive.txt": { pages: ["[데이터 손상 - 타임라인 소멸]"] },
 "Curo_Half_Archive.txt": { pages: ["[데이터 손상 - 타임라인 소멸]"] },
 "Curo_REAL_Hidden_Content": "[데이터 손상 - 타임라인 소멸]",
@@ -1112,29 +1219,29 @@ ko: {
 "Miro_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]",
 "Niro_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"The enemy": {
+"적대적 존재": {
 "enemies.txt": "모든 데이터가 소멸되었습니다. 오직 하나의 이름만 남았습니다: 키스네 코든.",
 "Ekis_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]",
 "Aleph_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]",
 "Aiden_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"Demon": {
+"악마": {
 "demon.txt": "모든 악마가 소멸되었습니다.",
 "inferno_gate.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"Angel": {
+"천사": {
 "seraphim_law.txt": "모든 천사가 소멸되었습니다.",
 "heaven_protocol.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"Human": {
+"인간": {
 "survivor_list.txt": "남은 인구 수: 0\n모든 생명체가 소멸되었습니다.",
 "resistance_info.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"Principle": {
+"원리": {
 "Principle_Full_Archive.txt": "[데이터 손상 - 타임라인 소멸]",
 "Principle_legacy.txt": "[데이터 손상 - 타임라인 소멸]"
 },
-"World": {
+"월드": {
 "WORLD_MAP.exe": { type: "map" },
 "Corden.txt": "코든(Corden)\n\n현재로서 가장 위험하면서 어디서 어떻게 만날 수 있는지 미지수인 우주적 재해\n\n[능력]\n현재까지 밝혀진 능력으로는 자신에게 상호작용을 할 시 코든의 존재로 변모시켜버리며 자신의 의지와 상관없이 오로지 코든에게만 바치는 광신도적인 모습을 보인다.\n\n[피해자]\n코든에게 상호작용을 한 자로는 키스네 코든 한 명이 유일하며 이 이후에 상호작용을 한 존재는 알아내지 못한 것인지 아니면 코든이 흥미가 떨어진 것인지 더이상 코든에게 영향을 받은 존재는 알아내지 못했다.",
 "Reset.txt": "[데이터 손상 - 타임라인 소멸]",
@@ -1177,6 +1284,7 @@ isMusicPlaying = true;
 function setLang(lang) {
 currentLang = lang;
 sessionStorage.setItem("savedLang", lang); // 언어 저장
+paintBrokenLabels();
 document.getElementById("btn-en").classList.toggle("active", lang === "en");
 document.getElementById("btn-ko").classList.toggle("active", lang === "ko");
 const t = uiText[lang];
@@ -1273,20 +1381,41 @@ if(cIdx === lines[lIdx].length) { cIdx = 0; lIdx++; setTimeout(type, 600); } els
 }
 type();
 }
+function paintBrokenLabels() {
+    const ko = currentLang === "ko";
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    set("db-label-b", ko ? "디렉토리" : "DIRECTORY");
+    set("db-sub-b", ko ? "[ 기밀 데이터베이스 // 3064년 // 타임라인 손상 ]" : "[ CLASSIFIED DATABASE // YEAR 3064 // TIMELINE CORRUPTED ]");
+}
+let brokenParticlesOn = false;
+function startBrokenParticles() {
+    if (brokenParticlesOn) return; brokenParticlesOn = true;
+    const c = document.getElementById("b-fx"); if (!c) return; const x = c.getContext("2d"); let W, H;
+    const P = [...Array(70)].map(() => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.6 + .4, v: Math.random() * .00025 + .00008, p: Math.random() * 6, c: Math.random() < .5 ? "255,94,94" : "94,255,235" }));
+    function size() { const r = devicePixelRatio || 1; W = innerWidth; H = innerHeight; c.width = W * r; c.height = H * r; x.setTransform(r, 0, 0, r, 0, 0); }
+    size(); addEventListener("resize", size);
+    (function loop(t) {
+        x.clearRect(0, 0, W, H);
+        P.forEach(p => { p.y -= p.v; if (p.y < -.02) { p.y = 1.02; p.x = Math.random(); } x.fillStyle = `rgba(${p.c},${.25 + .35 * Math.sin(t / 900 + p.p)})`; x.beginPath(); x.arc(p.x * W + Math.sin(t / 2000 + p.p) * 8, p.y * H, p.s, 0, 6.283); x.fill(); });
+        requestAnimationFrame(loop);
+    })(0);
+}
 function buildDirectory() {
 const dir = document.getElementById("directory");
 dir.innerHTML = "";
 const fs = fileSystem[currentLang];
-Object.keys(fs).forEach(folder => {
-const fDiv = document.createElement("div"); fDiv.className = "folder"; fDiv.textContent = "📁 " + folder;
+Object.keys(fs).forEach((folder, fIdx) => {
+const fDiv = document.createElement("div"); fDiv.className = "folder";
+const fCount = Object.keys(fs[folder]).filter(f => f !== "Curo_REAL_Hidden_Content").length;
+fDiv.innerHTML = '<span class="idx">' + String(fIdx + 1).padStart(2, "0") + '</span><span class="fname">' + folder + '</span><span class="cnt">' + fCount + " " + (currentLang === "ko" ? "파일" : "FILES") + '</span><span class="chev"></span>';
 const list = document.createElement("div"); list.className = "hidden";
-fDiv.onclick = () => list.classList.toggle("hidden");
+fDiv.onclick = () => { list.classList.toggle("hidden"); card.classList.toggle("open", !list.classList.contains("hidden")); };
 Object.keys(fs[folder]).forEach(file => {
 if (file === "Curo_REAL_Hidden_Content") return;
 const fd = fs[folder][file];
 const isMap = fd && fd.type === "map";
 const isKisune = file === "Kisune_Full_Archive.txt";
-const fi = document.createElement("div"); fi.className = "file";
+const fi = document.createElement("div"); fi.className = "file"; fi.style.animationDelay = (120 + list.children.length * 60) + "ms";
 // WORLD_MAP.exe와 Kisune만 정상, 나머지는 💥 박살
 if (isMap) {
 // WORLD_MAP.exe
@@ -1315,7 +1444,9 @@ openFileWithNav(folder, file);
 };
 list.appendChild(fi);
 });
-dir.appendChild(fDiv); dir.appendChild(list);
+const card = document.createElement("div"); card.className = "fcard b-rise"; card.style.setProperty("--d", (0.5 + fIdx * 0.07) + "s");
+fDiv.querySelector(".fname").style.animationDelay = (Math.random() * 7).toFixed(2) + "s";
+card.appendChild(fDiv); card.appendChild(list); dir.appendChild(card);
 });
 }
 function openFileWithNav(folder, file) {
@@ -1333,6 +1464,16 @@ return;
 openFile(file, fd, 0);
 }
 // 🔥 지도 파일 열기 — 전체화면 오버레이
+function closeWorldMapOverlay() {
+    const o = document.getElementById("map-fullscreen-overlay"); if (o) o.remove();
+    currentOpenFile = null;
+    const fsEl = document.getElementById("file-screen"); if (fsEl) fsEl.classList.add("hidden");
+    const dbEl = document.getElementById("database-view"); if (dbEl) dbEl.classList.remove("hidden");
+}
+window.addEventListener("message", (e) => {
+    const d = e.data, k = typeof d === "string" ? d : (d && (d.type || d.action || d.cmd));
+    if (typeof k === "string" && /close|exit|back|quit/i.test(k)) closeWorldMapOverlay();
+});
 function openMapFile(name) {
 const old = document.getElementById("map-fullscreen-overlay");
 if (old) old.remove();
@@ -1809,7 +1950,7 @@ if (abyssBgm.currentTime >= 28.5 && !abyssLayer.dataset.cleared) { abyssLayer.da
 if (abyssBgm.currentTime >= 29.6 && !abyssLayer.dataset.ended) {
 abyssLayer.dataset.ended = "true"; clearInterval(warningInterval); createAbyssFlash("#fff", 3000); mainTextBox.innerHTML = "";
 setTimeout(() => {
-const rawData = fileSystem[currentLang]["The main character"]["Curo_REAL_Hidden_Content"];
+const rawData = fileSystem[currentLang][currentLang === "ko" ? "주요 존재" : "Key Entities"]["Curo_REAL_Hidden_Content"];
 const curoData = typeof rawData === "string" ? rawData : (rawData?.pages?.[0] ?? "DATA UNAVAILABLE");
 mainTextBox.innerHTML = `<div style="text-align:center; width:100%;"><h1 class="title-rgb-glitch" style="margin-bottom:40px;">CURO_THE_HALF_ARCHIVE</h1><p id="curo-typing-area" class="fast-glitch-typing" style="color:#5effeb; font-size:1.1rem; line-height:1.8; white-space:pre-wrap; font-weight:bold;"></p></div>`;
 const typingArea = document.getElementById("curo-typing-area");
@@ -1979,9 +2120,11 @@ document.getElementById("map-canvas-area").style.background =
 "radial-gradient(ellipse at 50% 50%, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%)";
 };
 // 핀 생성
-mapData[lang].locations.forEach(loc => {
+mapData[lang].locations.forEach((loc, idx) => {
 const pin = document.createElement("div");
-pin.className = "map-pin";
+pin.className = "map-pin " + loc.color + (loc.code.includes("?") ? " warn" : "");
+pin.style.setProperty("--i", idx);
+pin.dataset.code = loc.code;
 pin.style.left = loc.x + "%";
 pin.style.top = loc.y + "%";
 pin.innerHTML = `
@@ -1992,7 +2135,20 @@ pin.innerHTML = `
 pin.onclick = () => openMapInfo(loc, lang);
 pinsLayer.appendChild(pin);
 });
+
+const chips = document.getElementById("map-chips"); chips.innerHTML = "";
+mapData[lang].locations.forEach(loc => {
+    const b = document.createElement("button"); b.className = "map-chip"; b.dataset.code = loc.code;
+    b.textContent = loc.code + " · " + loc.name.split(" — ")[0]; b.onclick = () => openMapInfo(loc, lang); chips.appendChild(b);
+});
+const area = document.getElementById("map-canvas-area");
+area.onpointermove = (e) => {
+    const r = area.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, xh = document.getElementById("map-xh");
+    xh.children[0].style.top = y + "px"; xh.children[1].style.left = x + "px";
+    document.getElementById("map-coord").textContent = "X " + (x / r.width * 100).toFixed(1) + " · Y " + (y / r.height * 100).toFixed(1);
+};
 }
+function markMapSel(code) { document.querySelectorAll(".map-pin, .map-chip").forEach(el => el.classList.toggle("sel", el.dataset.code === code)); }
 function openMapInfo(loc, lang) {
 const panel = document.getElementById("map-info-panel");
 const headerImg = document.getElementById("map-info-header-img");
@@ -2021,9 +2177,11 @@ t.innerHTML = `${tag.label} <span>${tag.value}</span>`;
 tagsEl.appendChild(t);
 });
 panel.classList.add("visible");
+markMapSel(loc.code);
 }
 function closeMapInfo() {
 document.getElementById("map-info-panel").classList.remove("visible");
+markMapSel(null);
 }
 function closeMapViewer() {
 const mapWrap = document.getElementById("map-viewer-wrap");
@@ -2034,6 +2192,167 @@ setTimeout(() => { mapWrap.style.display = "none"; }, 700);
 // ⏳ FUTURE / PAST 시계 시스템
 // ============================================================
 // 시계 눈금 생성
+        // ============================================================
+        // ClockFX: 유리 깨짐 × 글리치 (타이밍은 아래 기존 시계 시스템의 값을 그대로 사용)
+        // ============================================================
+        window.ClockFX = (function () {
+            const cv = document.createElement("canvas"); cv.id = "clock-fx-cv";
+            const x = cv.getContext("2d");
+            let W, H, R, CX, CY, D, S = null, raf = 0, IMP = [.4, .38];
+            const rnd = (a, b) => a + Math.random() * (b - a), cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), eo = t => 1 - Math.pow(1 - t, 2.2);
+            const elastic = t => { if (t <= 0) return 0; if (t >= 1) return 1; const c = 2 * Math.PI / 4.5; return t < .5 ? -(Math.pow(2, 20 * t - 10) * Math.sin((20 * t - 11.125) * c)) / 2 : (Math.pow(2, -20 * t + 10) * Math.sin((20 * t - 11.125) * c)) / 2 + 1; };
+            const parts = [...Array(70)].map(() => ({ a: rnd(0, 6.283), r: rnd(.2, 1), s: rnd(.6, 2), v: rnd(.3, 1) }));
+
+            function size() {
+                D = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+                cv.width = W * D; cv.height = H * D; x.setTransform(D, 0, 0, D, 0, 0);
+                const r = document.getElementById("clock-svg-wrap").getBoundingClientRect();
+                CX = r.left + r.width / 2; CY = r.top + r.height / 2; R = Math.min(135, Math.min(W, H) * .3);
+            }
+            function hand(c, deg, len, tail, w, col, al) { c.save(); c.rotate(deg * Math.PI / 180); c.globalAlpha = al; c.strokeStyle = col; c.lineCap = "round"; c.lineWidth = w; c.shadowColor = col; c.shadowBlur = w * 2; c.beginPath(); c.moveTo(0, tail); c.lineTo(0, -len); c.stroke(); c.restore(); }
+            function clock(c, cx, cy, r, o) {
+                c.save(); c.translate(cx, cy);
+                let g = c.createRadialGradient(0, 0, r * .9, 0, 0, r * 1.8); g.addColorStop(0, `rgba(${o.a},${.38 * o.g})`); g.addColorStop(1, `rgba(${o.a},0)`);
+                c.fillStyle = g; c.beginPath(); c.arc(0, 0, r * 1.8, 0, 6.283); c.fill();
+                if (!o.fo) {
+                    g = c.createRadialGradient(0, 0, 0, 0, 0, r); g.addColorStop(0, "#0f1717"); g.addColorStop(1, "#000");
+                    c.fillStyle = g; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.fill();
+                    g = c.createLinearGradient(-r, -r, r, r); g.addColorStop(0, "#fff"); g.addColorStop(.5, "#707070"); g.addColorStop(1, "#eee");
+                    c.strokeStyle = g; c.lineWidth = r * .035; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.stroke();
+                    c.strokeStyle = `rgba(${o.a},.35)`; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, r * .9, 0, 6.283); c.stroke();
+                }
+                for (let i = 0; i < 60; i++) {
+                    const m = i % 5 === 0, an = i * Math.PI / 30, r1 = r * (m ? .78 : .85), r2 = r * .89, lit = o.lit >= 0 && i / 60 <= o.lit;
+                    if (o.fo && !lit) continue;
+                    c.strokeStyle = lit ? `rgb(${o.a})` : (m ? "#999" : "#555"); c.lineWidth = m ? r * .025 : r * .012;
+                    c.beginPath(); c.moveTo(Math.sin(an) * r1, -Math.cos(an) * r1); c.lineTo(Math.sin(an) * r2, -Math.cos(an) * r2); c.stroke();
+                }
+                if (!o.fo) { c.fillStyle = "#9aa"; c.font = `${r * .15}px 'Courier New'`; c.textAlign = "center"; c.textBaseline = "middle"; [["12", 0, -1], ["3", 1, 0], ["6", 0, 1], ["9", -1, 0]].forEach(([t, dx, dy]) => c.fillText(t, dx * r * .64, dy * r * .64)); }
+                if (!o.nh) {
+                    if (o.w > 150) for (let k = 12; k >= 1; k--) hand(c, o.sec - k * o.w * .0045, r * .8, r * .18, r * .012, "#ff4444", .2 * (1 - k / 13));
+                    hand(c, o.hr, r * .52, 0, r * .045, "#fff", 1); hand(c, o.min, r * .72, 0, r * .028, "#ccc", 1); hand(c, o.sec, r * .8, r * .18, r * .014, "#ff4444", 1);
+                    c.fillStyle = "#fff"; c.shadowColor = "#fff"; c.shadowBlur = 10; c.beginPath(); c.arc(0, 0, r * .05, 0, 6.283); c.fill(); c.shadowBlur = 0;
+                }
+                if (!o.fo) {
+                    c.strokeStyle = "rgba(255,255,255,.13)"; c.lineWidth = r * .02; c.beginPath(); c.arc(0, 0, r * .93, 3.5, 4.4); c.stroke();
+                    if (o.wh > 0) { c.fillStyle = `rgba(255,255,255,${o.wh * .55})`; c.beginPath(); c.arc(0, 0, r, 0, 6.283); c.fill(); }
+                }
+                c.restore();
+            }
+            function snap(o) { const sn = document.createElement("canvas"); sn.width = sn.height = Math.ceil(R * 2 * D); const c = sn.getContext("2d"); c.scale(D, D); clock(c, R, R, R, o); return sn; }
+            function tint(sn, col) { const t = document.createElement("canvas"); t.width = sn.width; t.height = sn.height; const c = t.getContext("2d"); c.drawImage(sn, 0, 0); c.globalCompositeOperation = "multiply"; c.fillStyle = col; c.fillRect(0, 0, t.width, t.height); c.globalCompositeOperation = "destination-in"; c.drawImage(sn, 0, 0); return t; }
+            function prepSnap(o) { S.snap = snap(o); S.snR = tint(S.snap, "#ff3030"); S.snC = tint(S.snap, "#30ffff"); }
+
+            /* 유리 파편: 충격점에서 거미줄처럼 갈라지는 불규칙 조각 */
+            function pieces() {
+                const P = [], ix = rnd(.32, .45), iy = rnd(.3, .45), RS = [0, .06, .13, .22, .34, .5, .72, 1.0, 1.45], K = RS.length - 1, n = 14; IMP = [ix, iy];
+                const V = RS.map((r, k) => [...Array(n)].map((_, j) => { const a = (j + rnd(-.22, .22)) / n * 6.283 + k * .04, rr = r * (1 + rnd(-.1, .1)); return k ? [ix + Math.cos(a) * rr, iy + Math.sin(a) * rr] : [ix, iy]; }));
+                for (let k = 0; k < K; k++) for (let j = 0; j < n; j++) {
+                    const q = [V[k][j], V[k][(j + 1) % n], V[k + 1][(j + 1) % n], V[k + 1][j]], cx = q.reduce((t, v) => t + v[0], 0) / 4, cy = q.reduce((t, v) => t + v[1], 0) / 4;
+                    if (Math.hypot(cx - .5, cy - .5) > .62) continue;
+                    const sd = Math.floor(rnd(0, 9)), lag = rnd(0, 1.2), fall = rnd(150, 340) * (.7 + k * .1), tilt = rnd(-28, 28), dr = rnd(-35, 35), tum = Math.random() < .45, spin = rnd(2, 5) * (Math.random() < .5 ? -1 : 1);
+                    P.push({ p: q, pv: [cx, cy], sh: rnd(0, 6.28), f: p => {
+                        const ea = cl(p / .3 * (K + 1) - k - lag), gl = p < .34 && (Math.floor(p * 40) + sd) % 6 === 0;
+                        if (p < .3) return { a: 1, ea, gl, dx: gl ? rnd(-9, 9) : 0, bk: 0 };
+                        const bk = cl((p - .3 - k * .03 - lag * .01) / .7);
+                        return { a: Math.max(0, 1 - Math.pow(bk, 1.5)) * (Math.random() < .1 ? .45 : 1), ea: 1, gl: Math.random() < .07, dx: dr * bk, dy: fall * bk * bk, r: tilt * bk, sx: (tum ? Math.cos(bk * spin) : 1) * (1 - .05 * bk), sy: 1 - .05 * bk, bk };
+                    } });
+                }
+                S.chips = [...Array(70)].map(() => ({ a: rnd(0, 6.283), sp: rnd(.4, 1.5), sz: rnd(.02, .06), rot: rnd(-6, 6), c: Math.random() < .25 ? "#5effeb" : "#fff" }));
+                return P;
+            }
+            function dp(s, p, al, wh) {
+                const k = R / 120, pv = s.pv, o = s.f(p), a = o.a == null ? al : o.a, sx = o.sx == null ? 1 : o.sx, sy = o.sy == null ? 1 : o.sy, ea = o.ea == null ? 1 : o.ea;
+                if (a <= 0 || Math.abs(sx) < .03) return;
+                x.save(); x.globalAlpha = a; x.translate(CX + (pv[0] - .5) * 2 * R + (o.dx || 0) * k, CY + (pv[1] - .5) * 2 * R + (o.dy || 0) * k); x.rotate((o.r || 0) * Math.PI / 180); x.scale(sx, sy); x.translate(-pv[0] * 2 * R, -pv[1] * 2 * R);
+                x.beginPath(); s.p.forEach(([u, v], j) => j ? x.lineTo(u * 2 * R, v * 2 * R) : x.moveTo(u * 2 * R, v * 2 * R)); x.closePath();
+                x.save(); x.clip(); x.drawImage(S.snap, 0, 0, 2 * R, 2 * R);
+                x.fillStyle = `rgba(170,235,255,${(.05 + .14 * Math.abs(Math.sin(s.sh + (o.bk || 0) * 6))) * ea})`; x.fill();
+                if (wh > 0) { x.fillStyle = `rgba(255,255,255,${wh})`; x.fill(); }
+                x.restore();
+                x.globalAlpha = a * ea;
+                if (o.gl) { x.lineWidth = 1.5; x.save(); x.translate(-4, 0); x.strokeStyle = "rgba(255,40,40,.75)"; x.stroke(); x.restore(); x.save(); x.translate(4, 0); x.strokeStyle = "rgba(40,255,255,.75)"; x.stroke(); x.restore(); }
+                else { x.strokeStyle = "rgba(94,255,235,.35)"; x.lineWidth = 3; x.stroke(); x.strokeStyle = "#fff"; x.lineWidth = 1.2; x.shadowColor = "#fff"; x.shadowBlur = 7; x.stroke(); }
+                x.restore();
+            }
+            /* 글리치 오버레이 + 충격 섬광 + 유리 조각(칩) + 메모리 주소 */
+            function fx(g) {
+                const px = CX + (IMP[0] - .5) * 2 * R, py = CY + (IMP[1] - .5) * 2 * R, k = R / 120;
+                if (g < .22) { const gr = x.createRadialGradient(px, py, 0, px, py, R * .7); gr.addColorStop(0, `rgba(255,255,255,${.95 * (1 - g / .22)})`); gr.addColorStop(1, "rgba(94,255,235,0)"); x.save(); x.globalCompositeOperation = "lighter"; x.fillStyle = gr; x.fillRect(px - R, py - R, 2 * R, 2 * R); x.restore(); }
+                if (g < .4 && S.snap) {
+                    x.save(); x.globalCompositeOperation = "lighter";
+                    if (Math.random() < .6) { x.globalAlpha = .5; x.drawImage(S.snR, CX - R - 5, CY - R, 2 * R, 2 * R); x.drawImage(S.snC, CX - R + 5, CY - R, 2 * R, 2 * R); }
+                    for (let i = 0; i < 3; i++) if (Math.random() < .6) { const sy = rnd(0, 1.8) * R, sh = rnd(.04, .12) * R, src = Math.random() < .5 ? S.snR : S.snC; x.globalAlpha = .8; x.drawImage(src, 0, sy * D, 2 * R * D, sh * D, CX - R + rnd(-24, 24), CY - R + sy, 2 * R, sh); }
+                    for (let i = 0; i < 5; i++) if (Math.random() < .5) { const w = rnd(.08, .2) * R, h = rnd(.04, .1) * R, u = rnd(0, 1.6) * R, v = rnd(0, 1.6) * R; x.globalAlpha = .7; x.drawImage(S.snap, u * D, v * D, w * D, h * D, px - R * .5 + rnd(-.8, .8) * R + u * .1, py - R * .5 + rnd(-.8, .8) * R + v * .1, w, h); }
+                    x.restore();
+                }
+                S.chips.forEach(c => { const d = eo(g) * c.sp * R * 1.9, al = 1 - Math.pow(g, 1.4); if (al <= 0) return; x.save(); x.globalAlpha = al; x.translate(px + Math.cos(c.a) * d, py + Math.sin(c.a) * d + g * g * R * .9); x.rotate(c.rot * g); const z = c.sz * R * 2; x.fillStyle = c.c; x.shadowColor = c.c; x.shadowBlur = 6; x.beginPath(); x.moveTo(0, -z); x.lineTo(z * .7, z * .6); x.lineTo(-z * .7, z * .6); x.closePath(); x.fill(); x.restore(); });
+                if (g < .5) {
+                    S.tg = S.tg || [...Array(10)].map(() => ({ a: rnd(0, 6.283), r: rnd(.1, .95) }));
+                    x.save(); x.font = `${R * .1}px 'Courier New'`; x.textAlign = "left";
+                    S.tg.forEach((t, i) => { if (Math.random() < .3) return; x.fillStyle = i % 4 ? "#5effeb" : "#ff5e5e"; x.globalAlpha = Math.min(1, (.5 - g) * 4); x.fillText("0x" + Math.floor(rnd(4096, 65535)).toString(16).toUpperCase(), CX + Math.cos(t.a) * t.r * R, CY + Math.sin(t.a) * t.r * R); });
+                    x.restore();
+                }
+            }
+            function drawBrk(ts) {
+                const bt = (ts - S.b0) / 1000;
+                x.save(); if (bt < .35) { const s = (1 - bt / .35) * 10; x.translate(rnd(-s, s), rnd(-s, s)); }
+                S.pcs.forEach(s => { const lt = cl(bt / .8); if (lt >= 1) return; dp(s, lt, 1 - lt, bt < .25 ? .85 * (1 - bt / .25) : 0); });
+                fx(cl(bt / .8));
+                if (bt < .6) { x.strokeStyle = `rgba(255,255,255,${1 - bt / .6})`; x.lineWidth = 3 * (1 - bt / .6) + 1; x.beginPath(); x.arc(CX + (IMP[0] - .5) * 2 * R, CY + (IMP[1] - .5) * 2 * R, R * (.2 + bt * 3.4), 0, 6.283); x.stroke(); }
+                x.restore();
+            }
+            function drawRe(e) {
+                const wh = Math.max(0, 1 - Math.min(e / S.opt.whiteT, 1)) * .55, p = 1 - cl(e / .8);
+                S.pcs.forEach(s => dp(s, p, 1 - p, wh));
+                fx(1 - Math.min(1, e / .85));
+            }
+            function drawRip(ts) {
+                const now = performance.now(), A = "94,255,235";
+                if (S.p0 && now - S.p0 < 500) { const l = (now - S.p0) / 500, g = x.createRadialGradient(CX, CY, 0, CX, CY, R * 2.2); g.addColorStop(0, `rgba(${A},${.45 * (1 - l)})`); g.addColorStop(1, `rgba(${A},0)`); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+                S.rip = S.rip.filter(t => now - t < S.opt.ripMs);
+                S.rip.forEach(t => { const l = (now - t) / S.opt.ripMs, p = eo(l); x.save(); x.strokeStyle = `rgba(${A},${.85 * (1 - l)})`; x.lineWidth = 3 - 2 * l; x.shadowColor = "#5effeb"; x.shadowBlur = 14; x.beginPath(); x.arc(CX, CY, R * (1 + 1.6 * p), 0, 6.283); x.stroke(); x.restore(); });
+            }
+            function bg(e, A, ts) {
+                const dt = S.pt ? Math.min((ts - S.pt) / 1000, .05) : .016; S.pt = ts; const f = S.m === "future";
+                const g = x.createRadialGradient(CX, CY, R * .5, CX, CY, Math.max(W, H) * .75);
+                g.addColorStop(0, `rgba(${A},${f ? Math.min(e / 1.7, 1) * .12 : .06})`); g.addColorStop(1, "rgba(0,0,0,.85)"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+                if (f && S.ph === "run") { const n = Math.floor(e * e * 24); for (let i = 0; i < n; i++) { const an = i * 2.399, r0 = R * (1.35 + (i % 5) * .12), l = R * (.3 + e * .8); x.strokeStyle = `rgba(${A},${.08 + e * .18})`; x.lineWidth = 1; x.beginPath(); x.moveTo(CX + Math.cos(an) * r0, CY + Math.sin(an) * r0); x.lineTo(CX + Math.cos(an) * (r0 + l), CY + Math.sin(an) * (r0 + l)); x.stroke(); } }
+                const mx = Math.max(W, H) * .6;
+                parts.forEach(p => { p.r += (f ? -1 : .15) * p.v * dt * (f ? .15 + e * e * .5 : .1); if (p.r < .12) p.r = 1; if (p.r > 1) p.r = .2; x.fillStyle = `rgba(${A},${.15 + .4 * p.v})`; x.fillRect(CX + Math.cos(p.a) * p.r * mx, CY + Math.sin(p.a) * p.r * mx, p.s, p.s); });
+            }
+            function frame(ts) {
+                if (!S) return; if (!S.t0) S.t0 = ts;
+                const e = (ts - S.t0) / 1000, f = S.m === "future", A = f ? "255,94,94" : "94,255,235";
+                x.clearRect(0, 0, W, H); bg(e, A, ts);
+                if (S.ph === "run" || S.ph === "hold") {
+                    let sec, w = 0, wh = 0, lit = -1, gl = .4, sx = 0, sy = 0;
+                    if (f) { sec = (e * e * 40 + e * 2) * 6; w = (e * 80 + 2) * 6; gl = .4 + Math.min(e / 1.7, 1) * 1.3; const s = e * e * 2.2; sx = rnd(-s, s); sy = rnd(-s, s); }
+                    else { const t = Math.min(e / 1.9, 1); sec = elastic(t) * 1080; lit = t; wh = 1 - Math.min(e / S.opt.whiteT, 1); gl = .3 + wh * .7; }
+                    const min = sec / 60, hr = min / 12, re = !f && S.ph === "run" && e < 1.2; S.last = { sec, min, hr, a: A, g: gl, wh, lit, w, fo: re };
+                    if (re) drawRe(e);
+                    if (f && e > 1) { x.globalAlpha = .35; x.strokeStyle = "#ff2222"; x.lineWidth = 2; x.beginPath(); x.arc(CX + sx - (e - 1) * 4, CY + sy, R, 0, 6.283); x.stroke(); x.strokeStyle = "#22ffff"; x.beginPath(); x.arc(CX + sx + (e - 1) * 4, CY + sy, R, 0, 6.283); x.stroke(); x.globalAlpha = 1; }
+                    clock(x, CX + sx, CY + sy, R, S.last);
+                }
+                if (S.ph === "brk") drawBrk(ts);
+                if (!f) drawRip(ts);
+                raf = requestAnimationFrame(frame);
+            }
+            return {
+                start(mode, opt) {
+                    const ov = document.getElementById("clock-overlay"); if (!cv.parentNode) ov.appendChild(cv);
+                    ov.classList.add("fx"); size();
+                    S = { m: mode, t0: 0, ph: "run", rip: [], pt: 0, opt: Object.assign({ whiteT: 1.5, ripN: 3, ripMs: 1200 }, opt || {}) };
+                    if (mode === "past") { S.pcs = pieces(); prepSnap({ a: "94,255,235", g: 0, wh: 0, lit: -1, w: 0, nh: true, sec: 0, min: 0, hr: 0 }); }
+                    cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
+                },
+                breakNow() { if (!S || !S.last) return; S.ph = "brk"; S.b0 = performance.now(); S.pcs = pieces(); prepSnap(S.last); },
+                stopPast() { if (!S) return; S.ph = "hold"; S.p0 = performance.now(); for (let i = 0; i < S.opt.ripN; i++) setTimeout(() => S && S.rip.push(performance.now()), i * 100); },
+                end() { cancelAnimationFrame(raf); raf = 0; S = null; const ov = document.getElementById("clock-overlay"); if (ov) ov.classList.remove("fx"); }
+            };
+        })();
+
+
 function buildClockTicks() {
 const face = document.getElementById("clock-face");
 for (let i = 0; i < 60; i++) {
@@ -2073,6 +2392,7 @@ clockMode = mode;
 clockStartTime = null;
 const overlay = document.getElementById("clock-overlay");
 overlay.classList.add("active");
+if (window.ClockFX) ClockFX.start(mode, mode === "past" ? { whiteT: 0.8, ripN: 1, ripMs: 1500 } : {});
 const statusText = document.getElementById("clock-status-text");
 statusText.textContent = mode === "future" ? "TIMELINE ACCELERATING..." : "RESTORING ARCHIVE...";
 statusText.style.color = mode === "future" ? "#ff5e5e" : "var(--neon-mint)";
@@ -2134,6 +2454,7 @@ if (t < 1) {
 clockRAF = requestAnimationFrame(animateClock);
 } else {
 // 🌊 정지 완료 - 물결 파동 1개 + 플래시
+if (window.ClockFX) ClockFX.stopPast();
 const overlay = document.getElementById("clock-overlay");
 // 💥 플래시 효과
 const flash = document.createElement("div");
@@ -2148,6 +2469,7 @@ animation: white-flash 0.4s ease-out forwards;
 document.body.appendChild(flash);
 setTimeout(() => flash.remove(), 400);
 // 🌊 파동 1개 (시계 테두리에서 시작)
+if (!window.ClockFX) {
 const ripple = document.createElement("div");
 ripple.className = "clock-ripple";
 ripple.style.cssText = `
@@ -2159,6 +2481,7 @@ transform: translate(-50%, -50%);
 ripple.style.animation = `ripple-wave 1.5s ease-out forwards`;
 overlay.appendChild(ripple);
 setTimeout(() => ripple.remove(), 1500);
+}
 // 색상 완전 복구
 face.style.filter = "";
 const statusText = document.getElementById("clock-status-text");
@@ -2179,7 +2502,7 @@ window.location.href = "index.html";
 function triggerClockBreak() {
 playShatterSound();
 // 균열 표시
-document.getElementById("clock-crack-layer").classList.add("visible");
+if (window.ClockFX) ClockFX.breakNow(); else document.getElementById("clock-crack-layer").classList.add("visible");
 // 시계 흔들림
 const face = document.getElementById("clock-face");
 face.style.animation = "clock-shatter 0.1s infinite";
@@ -2223,6 +2546,103 @@ playPastSound();
 setTimeout(() => startClock("past"), 200);
 }
 // ====== 🕸️ BROKEN WORLD 초기화 ======
+// ===== BrokenFX: 유리 균열 / 부유 파편 / 빛줄기 / 거미줄 반짝임 / 글리치 =====
+const BrokenFX = (function () {
+    const cv = document.createElement("canvas"); cv.id = "broken-fx-cv";
+    const x = cv.getContext("2d");
+    let W, H, D, t0 = 0, raf = 0, on = false, segs = [], facets = [], shards = [], glints = [], sparks = [], rays = [], cache = null, cached = false, nextG = 0, glEnd = 0, bars = [];
+    const rnd = (a, b) => a + Math.random() * (b - a), cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+    function size() {
+        D = devicePixelRatio || 1; W = innerWidth; H = innerHeight;
+        cv.width = W * D; cv.height = H * D; x.setTransform(D, 0, 0, D, 0, 0);
+        cache = null; cached = false;
+    }
+    function gen() {
+        segs = []; facets = []; sparks = []; rays = [];
+        const IMP = [[.5, .5, 1], [.16, .2, .6], [.84, .24, .6], [.18, .82, .55], [.84, .8, .55]];
+        IMP.forEach(([fx, fy, sz], ii) => {
+            const cx = fx * W, cy = fy * H, maxR = Math.max(W, H) * .55 * sz, n = ii ? 6 : 10, R = [], tb = ii * .25;
+            const branch = (px, py, a, L, w, t0b) => { let len = 0; while (len < L) { const st = rnd(14, 32); a += rnd(-.3, .3); const nx = px + Math.cos(a) * st, ny = py + Math.sin(a) * st; segs.push({ x1: px, y1: py, x2: nx, y2: ny, w: Math.max(.5, w * .5), t: t0b + len / maxR * 1.5 }); px = nx; py = ny; len += st; } };
+            for (let i = 0; i < n; i++) {
+                let a = i / n * 6.283 + rnd(-.2, .2), px = cx, py = cy, len = 0; const L = maxR * rnd(.5, 1), w = ii ? 1.2 : 1.7, pts = [[cx, cy]];
+                while (len < L) {
+                    const st = rnd(24, 56); a += rnd(-.22, .22); const nx = px + Math.cos(a) * st, ny = py + Math.sin(a) * st;
+                    segs.push({ x1: px, y1: py, x2: nx, y2: ny, w: Math.max(.6, w * (1 - len / L * .7)), t: tb + len / maxR * 1.5 });
+                    if (Math.random() < .08 && len > 40) branch(nx, ny, a + rnd(.5, 1) * (Math.random() < .5 ? -1 : 1), rnd(60, 160), w, tb + len / maxR * 1.5);
+                    px = nx; py = ny; len += st; pts.push([px, py]);
+                }
+                R.push(pts);
+            }
+            [.2, .5].forEach(f => {
+                const k = Math.max(1, Math.round(maxR * f / 40));
+                for (let i = 0; i < n; i++) if (Math.random() < .5) {
+                    const A = R[i], B = R[(i + 1) % n], a = A[Math.min(k, A.length - 1)], b = B[Math.min(k, B.length - 1)], m = [(a[0] + b[0]) / 2 + rnd(-8, 8), (a[1] + b[1]) / 2 + rnd(-8, 8)], t = tb + f * 1.5 * (maxR / maxR);
+                    segs.push({ x1: a[0], y1: a[1], x2: m[0], y2: m[1], w: .9, t }); segs.push({ x1: m[0], y1: m[1], x2: b[0], y2: b[1], w: .9, t: t + .05 });
+                }
+            });
+            if (ii < 2) for (let i = 0; i < n; i++) { const A = R[i], B = R[(i + 1) % n], k = Math.min(3 + Math.floor(rnd(0, 3)), A.length - 1, B.length - 1); facets.push({ p: [...A.slice(0, k + 1), ...B.slice(0, k + 1).reverse()], ph: rnd(0, 6.28), base: rnd(.008, .03) }); }
+            if (ii < 3) for (let i = 0; i < 4; i++) rays.push({ x: cx, y: cy, a: rnd(0, 6.283), w: rnd(.06, .14), v: rnd(-.03, .03), c: Math.random() < .5 ? "94,255,235" : "255,94,94", ph: rnd(0, 6.28), L: maxR * 1.6 });
+            for (let i = 0; i < 14; i++) { const r = R[Math.floor(rnd(0, n))], q = r[Math.floor(rnd(1, r.length))]; sparks.push({ x: q[0], y: q[1], ph: rnd(0, 6.28), s: rnd(.8, 2), v: rnd(.15, .5) }); }
+        });
+        shards = [...Array(6)].map(() => { const n = 5 + Math.floor(rnd(0, 2)), r = rnd(22, 62), pts = [...Array(n)].map((_, i) => { const a = i / n * 6.283 + rnd(-.3, .3), rr = r * rnd(.55, 1); return [Math.cos(a) * rr, Math.sin(a) * rr * rnd(.5, .9)]; }); return { bx: rnd(.04, .96) * W, by: rnd(.06, .94) * H, pts, rot: rnd(0, 6.28), vr: rnd(-.15, .15), ph: rnd(0, 6.28), amp: rnd(6, 16), gl: rnd(0, 6.28) }; });
+        glints = [];
+        const lines = document.querySelectorAll("#spiderweb-layer line"), sc = Math.max(W / 1920, H / 1080), ox = (W - 1920 * sc) / 2, oy = (H - 1080 * sc) / 2;
+        lines.forEach(l => { if (Math.random() < .35) { const u = Math.random(), X1 = +l.getAttribute("x1"), Y1 = +l.getAttribute("y1"), X2 = +l.getAttribute("x2"), Y2 = +l.getAttribute("y2"); glints.push({ x: ox + (X1 + (X2 - X1) * u) * sc, y: oy + (Y1 + (Y2 - Y1) * u) * sc, ph: rnd(0, 6.28), s: rnd(.8, 1.8) }); } });
+    }
+    function strokeSeg(c, s, k, full) {
+        const ex = s.x1 + (s.x2 - s.x1) * k, ey = s.y1 + (s.y2 - s.y1) * k;
+        c.beginPath(); c.moveTo(s.x1, s.y1); c.lineTo(ex, ey);
+        c.lineWidth = s.w + 2; c.strokeStyle = "rgba(0,0,0,.35)"; c.stroke();
+        c.lineWidth = s.w; c.strokeStyle = `rgba(255,255,255,${.22 + .26 * Math.min(1, s.w / 1.7)})`; c.stroke();
+        if (full) { c.save(); c.translate(-1, 0); c.strokeStyle = "rgba(94,255,235,.18)"; c.lineWidth = .8; c.stroke(); c.translate(2, 0); c.strokeStyle = "rgba(255,80,80,.14)"; c.stroke(); c.restore(); }
+    }
+    function drawCracks(e) {
+        if (e > 2.6) {
+            if (!cached) { cache = document.createElement("canvas"); cache.width = W * D; cache.height = H * D; const c = cache.getContext("2d"); c.scale(D, D); c.lineCap = "round"; segs.forEach(s => strokeSeg(c, s, 1, true)); cached = true; }
+            x.drawImage(cache, 0, 0, W, H); return;
+        }
+        x.save(); x.lineCap = "round"; segs.forEach(s => { if (s.t > e) return; strokeSeg(x, s, cl((e - s.t) / .12), false); }); x.restore();
+    }
+    function frame(ts) {
+        if (!on) return; if (!t0) t0 = ts; const e = (ts - t0) / 1000 + 3; // 처음부터 이미 깨져 있는 상태(균열 번짐 연출 생략)
+        x.clearRect(0, 0, W, H);
+        // 빛줄기
+        x.save(); x.globalCompositeOperation = "lighter";
+        rays.forEach(r => { const a = r.a + e * r.v, al = .035 * (.6 + .4 * Math.sin(e * .8 + r.ph)) * cl(e / 2); const g = x.createLinearGradient(r.x, r.y, r.x + Math.cos(a) * r.L, r.y + Math.sin(a) * r.L); g.addColorStop(0, `rgba(${r.c},${al * 2})`); g.addColorStop(1, `rgba(${r.c},0)`); x.fillStyle = g; x.beginPath(); x.moveTo(r.x, r.y); x.lineTo(r.x + Math.cos(a - r.w) * r.L, r.y + Math.sin(a - r.w) * r.L); x.lineTo(r.x + Math.cos(a + r.w) * r.L, r.y + Math.sin(a + r.w) * r.L); x.closePath(); x.fill(); });
+        x.restore();
+        // 유리 면 반사
+        facets.forEach(f => { const a = f.base + .07 * Math.max(0, Math.sin(e * .6 + f.ph)); if (e < .6) return; x.fillStyle = `rgba(190,235,255,${a * cl((e - .6) / 1.2)})`; x.beginPath(); f.p.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); x.closePath(); x.fill(); });
+        drawCracks(e);
+        // 부유 파편
+        shards.forEach(s => {
+            const px = s.bx + Math.sin(e * .35 + s.ph) * s.amp, py = s.by + Math.cos(e * .28 + s.ph) * s.amp * .7, rot = s.rot + e * s.vr, al = cl((e - .5) / 1.2);
+            x.save(); x.translate(px, py); x.rotate(rot); x.globalAlpha = al;
+            x.beginPath(); s.pts.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath();
+            const g = x.createLinearGradient(-30, -30, 30, 30); g.addColorStop(0, "rgba(255,255,255,.10)"); g.addColorStop(.5, "rgba(150,230,255,.03)"); g.addColorStop(1, "rgba(255,255,255,.08)"); x.fillStyle = g; x.fill();
+            x.strokeStyle = "rgba(255,255,255,.3)"; x.lineWidth = 1; x.shadowColor = "rgba(94,255,235,.5)"; x.shadowBlur = 6; x.stroke();
+            const gl = Math.max(0, Math.sin(e * .9 + s.gl)); if (gl > .85) { x.shadowBlur = 0; x.fillStyle = `rgba(255,255,255,${(gl - .85) * 6})`; const q = s.pts[0]; x.fillRect(q[0] - 5, q[1] - .5, 10, 1); x.fillRect(q[0] - .5, q[1] - 5, 1, 10); }
+            x.restore();
+        });
+        // 거미줄 이슬 반짝임 + 균열 불꽃
+        glints.forEach(g => { const v = Math.max(0, Math.sin(e * 1.1 + g.ph)); if (v < .7) return; x.fillStyle = `rgba(255,255,255,${(v - .7) * 2.4})`; x.fillRect(g.x - 3 * g.s, g.y - .4, 6 * g.s, .8); x.fillRect(g.x - .4, g.y - 3 * g.s, .8, 6 * g.s); });
+        sparks.forEach(p => { const v = .5 + .5 * Math.sin(e * 2 + p.ph); p.y += p.v * .15; x.fillStyle = `rgba(${p.ph > 3 ? "255,94,94" : "94,255,235"},${v * .8 * cl(e - 1)})`; x.fillRect(p.x, p.y, p.s, p.s); });
+        // 디지털 글리치 (주기적)
+        const now = performance.now();
+        if (!nextG) nextG = now + 2500;
+        if (now > nextG) { nextG = now + rnd(1500, 4200); glEnd = now + rnd(90, 170); bars = [...Array(Math.floor(rnd(3, 7)))].map(() => ({ y: rnd(0, H), h: rnd(2, 14), x: rnd(0, W * .6), w: rnd(.2, 1) * W, c: Math.random() < .5 ? "255,60,60" : "60,255,230" })); document.body.classList.add("b-glitch"); }
+        if (glEnd && now < glEnd) bars.forEach(b => { x.fillStyle = `rgba(${b.c},.13)`; x.fillRect(b.x, b.y, b.w, b.h); x.fillStyle = "rgba(255,255,255,.07)"; x.fillRect(b.x + rnd(-20, 20), b.y + b.h, b.w * .4, 1); });
+        else if (glEnd) { glEnd = 0; document.body.classList.remove("b-glitch"); }
+        raf = requestAnimationFrame(frame);
+    }
+    return {
+        start() { if (on) return; if (!cv.parentNode) document.body.appendChild(cv); on = true; size(); gen(); t0 = 0; addEventListener("resize", () => { if (on) { size(); gen(); } }); raf = requestAnimationFrame(frame); },
+        stop() { on = false; cancelAnimationFrame(raf); document.body.classList.remove("b-glitch"); }
+    };
+})();
+function brokenType(el, text) {
+    const G = "!<>-_\\/[]{}=+*^?#"; let i = 0; el.textContent = "";
+    (function step() { if (i > text.length) { el.textContent = text; return; } const g = Math.random() < .18 && i < text.length ? G[Math.floor(Math.random() * G.length)] : ""; el.textContent = text.slice(0, i) + g; i++; setTimeout(step, 16); })();
+}
 function initBrokenWorld() {
 // 인증화면 숨기고 메인화면 바로 표시
 document.getElementById("auth-screen").classList.add("hidden");
@@ -2230,6 +2650,10 @@ const mainScreen = document.getElementById("main-screen");
 mainScreen.classList.remove("hidden");
 // broken-world 클래스 적용
 document.body.classList.add("broken-world");
+// 처음부터 깨져 있는 상태: 거미줄/비네트/세로 균열을 페이드 없이 즉시 표시하고, 유리 균열도 바로 그린다
+["spiderweb-layer", "vignette-broken"].forEach(id => { const el = document.getElementById(id); if (el) { el.style.transition = "none"; el.classList.add("reveal"); } });
+document.querySelectorAll(".vertical-crack").forEach(el => { el.style.transition = "none"; el.style.opacity = "0.6"; });
+BrokenFX.start();
 // 🌐 언어 버튼 상태 초기화
 document.getElementById("btn-en").classList.toggle("active", currentLang === "en");
 document.getElementById("btn-ko").classList.toggle("active", currentLang === "ko");
@@ -2238,6 +2662,7 @@ document.getElementById("ui-title-db").textContent = currentLang === "ko" ? "중
 document.getElementById("music-info-box").style.display = "none";
 // 디렉토리 빌드
 buildDirectory();
+paintBrokenLabels(); startBrokenParticles();
 // 부서진 터미널 텍스트 표시
 const term = document.getElementById("terminal-text");
 term.innerHTML = "";
@@ -2250,9 +2675,11 @@ line2.textContent = currentLang === "ko" ? "> 데이터베이스 기록을 성�
 const line3 = document.createElement("p");
 line3.className = "broken-terminal-new";
 line3.textContent = currentLang === "ko" ? "> 경고: 타임라인 손상이 감지되었습니다." : "> WARNING: TIMELINE CORRUPTION DETECTED.";
-term.appendChild(line1);
-setTimeout(() => term.appendChild(line2), 600);
-setTimeout(() => term.appendChild(line3), 1400);
+const T1 = line1.textContent, T2 = line2.textContent, T3 = line3.textContent;
+line1.textContent = ""; line2.textContent = ""; line3.textContent = "";
+term.appendChild(line1); brokenType(line1, T1);
+setTimeout(() => { term.appendChild(line2); brokenType(line2, T2); }, 600);
+setTimeout(() => { term.appendChild(line3); brokenType(line3, T3); }, 1400);
 // timeline-boxes 즉시 표시 (broken 상태)
 const boxes = document.getElementById("timeline-boxes");
 boxes.style.display = "flex";
@@ -2285,6 +2712,7 @@ setTimeout(() => {
 document.getElementById("spiderweb-layer").classList.add("reveal");
 document.getElementById("screen-crack-layer").classList.add("reveal");
 document.getElementById("vignette-broken").classList.add("reveal");
+BrokenFX.start();
 }, 300);
 // 주기적 글리치 효과
 setInterval(() => {

@@ -1,686 +1,280 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>WORLD MAP</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Serif+KR:wght@400;700&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  :root{
-    --pink:#ff5e5e;
-    --mint:#5effeb;
-    --bg:#020d0d;
-    --gold:#c9a84c;
-  }
-  html,body{
-    width:100%;height:100%;
-    background:#000;
-    color:#fff;
-    font-family:'Share Tech Mono',monospace;
-    overflow:hidden;
-  }
-
-  /* ══════════════════════════════
-     부팅 오버레이
-  ══════════════════════════════ */
-  #boot-overlay{
-    position:fixed;inset:0;
-    background:#000;
-    z-index:9999;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    gap:0;
-  }
-  /* 옛날 TV 켜지는 효과 - 세로로 얇아지다가 수평선만 남고 사라짐 */
-  #boot-overlay.tv-off{
-    animation: tv-turn-on-reverse 0.6s cubic-bezier(0.23,1,0.32,1) forwards;
-  }
-  @keyframes tv-turn-on-reverse {
-    0%   { clip-path: inset(0 0 0 0);         opacity:1; }
-    40%  { clip-path: inset(49% 0 49% 0);     opacity:1; }
-    70%  { clip-path: inset(49.8% 0 49.8% 0); opacity:1; filter:brightness(3); }
-    100% { clip-path: inset(50% 0 50% 0);     opacity:0; filter:brightness(0); }
-  }
-
-  #boot-lines{
-    width:min(600px,85vw);
-    max-height:55vh;
-    overflow:hidden;
-    display:flex;flex-direction:column;
-    gap:6px;
-    font-size:clamp(11px,1.5vw,14px);
-    letter-spacing:1px;
-  }
-  .boot-line{
-    color:var(--mint);
-    opacity:0;
-    animation:bfade 0.03s forwards;
-    white-space:nowrap;
-  }
-  .boot-line-sub{
-    color:var(--mint);
-    opacity:0;
-    animation:bfade 0.03s forwards;
-    white-space:nowrap;
-    padding-left:20px;
-    font-size:0.9em;
-  }
-  @keyframes bfade{to{opacity:1;}}
-  .boot-warn{color:#ff5e5e !important;}
-  .boot-ok{color:#5eff8a !important;}
-
-  .boot-bar-wrap{
-    width:min(600px,85vw);
-    margin-top:20px;
-  }
-  .boot-bar-label{
-    font-size:11px;color:#2a2a2a;
-    margin-bottom:5px;letter-spacing:3px;
-  }
-  .boot-bar{height:2px;background:#0a0a0a;overflow:hidden;}
-  .boot-bar-fill{
-    height:100%;background:var(--mint);width:0%;
-    transition:width 0.1s linear;
-    box-shadow:0 0 8px var(--mint);
-  }
-
-  /* ══════════════════════════════
-     TV 켜지는 인트로 — 지도 등장
-  ══════════════════════════════ */
-  #map-wrapper{
-    position:fixed;inset:0;
-    display:flex;flex-direction:column;
-    background:#000;
-    /* 처음엔 가로로 완전히 찌그러진 상태 */
-    clip-path: inset(50% 0 50% 0);
-    opacity:0;
-  }
-  #map-wrapper.tv-on{
-    animation: tv-expand 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
-  }
-  @keyframes tv-expand {
-    0%   { clip-path: inset(50% 0 50% 0);  opacity:1; filter:brightness(3) saturate(0); }
-    20%  { clip-path: inset(49% 0 49% 0);  opacity:1; filter:brightness(2) saturate(0); }
-    50%  { clip-path: inset(20% 0 20% 0);  opacity:1; filter:brightness(1.3) saturate(0.5); }
-    80%  { clip-path: inset(2% 0 2% 0);    opacity:1; filter:brightness(1.1) saturate(0.9); }
-    100% { clip-path: inset(0% 0 0% 0);    opacity:1; filter:brightness(1) saturate(1); }
-  }
-
-  /* ══════════════════════════════
-     헤더
-  ══════════════════════════════ */
-  #map-header{
-    padding:10px 20px;
-    border-bottom:1px solid rgba(94,255,235,0.2);
-    display:flex;align-items:center;justify-content:space-between;
-    background:rgba(0,0,0,0.8);
-    backdrop-filter:blur(4px);
-    flex-shrink:0;
-    letter-spacing:3px;
-  }
-  .hdr-left{
-    display:flex;align-items:center;gap:12px;
-    font-size:clamp(11px,1.4vw,13px);
-    color:var(--mint);
-  }
-  .hdr-left span{color:#333;}
-  #map-header .close-btn{
-    font-size:11px;color:#333;
-    letter-spacing:2px;
-    border:1px solid #222;
-    padding:4px 10px;
-    cursor:default;
-  }
-
-  /* ══════════════════════════════
-     지도 영역 — 화면 꽉
-  ══════════════════════════════ */
-  #map-area{
-    flex:1;
-    position:relative;
-    overflow:hidden;
-    background:
-      radial-gradient(ellipse 70% 60% at 60% 45%, #0a1520 0%, #000 70%);
-  }
-
-  /* 지형 — 화면 꽉 채우되 비율 유지 */
-  #terrain{
-    position:absolute;
-    /* 가운데 정렬, 최대한 크게 */
-    top:50%; left:50%;
-    transform:translate(-50%, -50%);
-    width: min(90vw, calc(90vh * 1.15));
-    height: min(90vh, calc(90vw / 1.15));
-    aspect-ratio: 1.15 / 1;
-  }
-
-  /* ── 메인 대륙 ── */
-  #land-main{
-    position:absolute;
-    left:28%; top:5%;
-    width:68%; height:82%;
-    clip-path:polygon(
-      18% 0%, 40% 1%, 58% 0%, 74% 4%, 90% 8%,
-      99% 20%, 100% 38%, 96% 55%, 87% 68%,
-      75% 79%, 60% 86%, 44% 88%, 30% 83%,
-      18% 72%, 8% 55%, 2% 38%, 4% 20%, 10% 8%
-    );
-    background:linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 40%, #1a1a1a 100%);
-    box-shadow:
-      0 0 60px rgba(0,0,0,0.95),
-      0 0 120px rgba(0,0,0,0.7),
-      inset 0 0 30px rgba(0,0,0,0.3);
-  }
-  /* 대륙 가장자리 질감 */
-  #land-main::after{
-    content:'';
-    position:absolute;inset:0;
-    background:
-      radial-gradient(ellipse 40% 30% at 70% 30%, rgba(100,100,100,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 40% 60%, rgba(0,0,0,0.15) 0%, transparent 70%);
-  }
-
-  /* ── 지형 요소들 ── */
-  /* 요괴의 숲 */
-  #zone-forest{
-    position:absolute;
-    left:44%; top:12%;
-    width:24%; height:32%;
-    border-radius:45% 55% 50% 50% / 55% 45% 55% 45%;
-    background:radial-gradient(ellipse at 50% 40%,
-      rgba(60,60,60,0.9) 0%,
-      rgba(40,40,40,0.75) 50%,
-      rgba(25,25,25,0.4) 100%
-    );
-    box-shadow:inset 0 0 20px rgba(0,0,0,0.4), 0 0 15px rgba(50,50,50,0.15);
-  }
-  #zone-forest::before{
-    content:'';position:absolute;inset:5%;
-    border-radius:inherit;
-    background:radial-gradient(ellipse at 40% 35%, rgba(70,70,70,0.4) 0%, transparent 60%);
-  }
-
-  /* 친사의 땅 — 우상단 산 */
-  #zone-mountain{
-    position:absolute;
-    right:2%; top:2%;
-    width:24%; height:30%;
-  }
-  /* 산봉우리 1 */
-  #zone-mountain::before{
-    content:'';position:absolute;
-    left:20%; top:0%;
-    width:60%; height:100%;
-    clip-path:polygon(50% 0%, 95% 100%, 5% 100%);
-    background:linear-gradient(180deg, #888 0%, #666 40%, #444 100%);
-    box-shadow:0 0 20px rgba(0,0,0,0.5);
-  }
-  /* 눈 */
-  #zone-mountain::after{
-    content:'';position:absolute;
-    left:32%; top:0%;
-    width:36%; height:35%;
-    clip-path:polygon(50% 0%, 85% 100%, 15% 100%);
-    background:rgba(220,230,255,0.85);
-  }
-  /* 호수 */
-  #zone-lake{
-    position:absolute;
-    right:8%; top:28%;
-    width:14%; height:9%;
-    border-radius:50%;
-    background:radial-gradient(ellipse, rgba(80,80,80,0.7) 0%, rgba(50,50,50,0.5) 100%);
-    box-shadow:0 0 10px rgba(60,60,60,0.2);
-  }
-
-  /* 악마의 영역 — 우측 화산 */
-  #zone-volcano{
-    position:absolute;
-    right:3%; top:30%;
-    width:22%; height:30%;
-  }
-  #zone-volcano::before{
-    content:'';position:absolute;inset:0;
-    clip-path:polygon(50% 0%, 100% 100%, 0% 100%);
-    background:linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 40%, #1a1a1a 100%);
-  }
-  #zone-volcano::after{
-    content:'';position:absolute;
-    left:35%; top:0%;
-    width:30%; height:40%;
-    clip-path:polygon(50% 0%, 85% 100%, 15% 100%);
-    background:radial-gradient(ellipse at 50% 30%, rgba(100,100,100,0.4) 0%, rgba(60,60,60,0.2) 60%, transparent 100%);
-    animation:volcano-glow 2s ease-in-out infinite;
-  }
-  @keyframes volcano-glow{
-    0%,100%{opacity:0.7; filter:brightness(1);}
-    50%{opacity:1; filter:brightness(1.4);}
-  }
-
-  /* 변칙 구역 — 좌측 균열 */
-  #zone-anomaly{
-    position:absolute;
-    left:2%; top:30%;
-    width:22%; height:30%;
-    clip-path:polygon(8% 0%,92% 3%,100% 45%,88% 97%,12% 100%,0% 55%,3% 18%);
-    background:linear-gradient(135deg, #1a0820 0%, #100515 100%);
-    box-shadow:inset 0 0 20px rgba(100,0,150,0.3);
-    animation:anomaly-flicker 4s ease-in-out infinite;
-  }
-  @keyframes anomaly-flicker{
-    0%,100%{filter:none;}
-    94%{filter:none;}
-    95%{filter:hue-rotate(90deg) brightness(1.8) saturate(2);}
-    96%{filter:none;}
-    98%{filter:hue-rotate(180deg) brightness(0.6);}
-    99%{filter:none;}
-  }
-  /* 균열 라인들 */
-  #zone-anomaly::before{
-    content:'';position:absolute;inset:0;
-    background:
-      linear-gradient(125deg, transparent 45%, rgba(100,150,255,0.2) 46%, transparent 47%),
-      linear-gradient(145deg, transparent 30%, rgba(100,150,255,0.15) 31%, transparent 32%),
-      linear-gradient(100deg, transparent 55%, rgba(150,100,255,0.1) 56%, transparent 57%);
-  }
-
-  /* 게약의 도시 — 중앙 */
-  #zone-city{
-    position:absolute;
-    left:44%; top:45%;
-    width:18%; height:22%;
-    border-radius:40%;
-    background:radial-gradient(ellipse, rgba(70,70,70,0.5) 0%, rgba(40,40,40,0.3) 70%, transparent 100%);
-  }
-
-  /* ── 작은 섬들 ── */
-  #island-small{
-    position:absolute;
-    left:20%; top:72%;
-    width:8%; height:12%;
-    clip-path:polygon(20% 0%,80% 5%,100% 55%,65% 100%,10% 95%,0% 45%);
-    background:linear-gradient(145deg, #3a3a3a, #2a2a2a);
-    box-shadow:0 0 15px rgba(0,0,0,0.8);
-  }
-  #island-bottom{
-    position:absolute;
-    left:52%; top:88%;
-    width:16%; height:14%;
-    clip-path:polygon(20% 0%,80% 0%,100% 50%,80% 100%,20% 100%,0% 50%);
-    background:linear-gradient(145deg, #2a2a2a, #1a1a1a);
-    box-shadow:0 0 15px rgba(0,0,0,0.8);
-  }
-
-  /* 지형 텍스처 오버레이 */
-  #terrain-texture{
-    position:absolute;inset:0;
-    pointer-events:none;z-index:1;
-    background:
-      repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 60px,
-        rgba(0,0,0,0.015) 60px,
-        rgba(0,0,0,0.015) 61px
-      );
-  }
-
-  /* ══════════════════════════════
-     핀
-  ══════════════════════════════ */
-  .map-pin{
-    position:absolute;
-    transform:translate(-50%,-50%);
-    cursor:pointer;
-    z-index:30;
-  }
-  .pin-wrap{
-    display:flex;flex-direction:column;align-items:center;
-    gap:3px;
-  }
-  .pin-dot-wrap{
-    position:relative;
-    width:16px;height:16px;
-  }
-  .pin-outer{
-    position:absolute;inset:0;
-    border-radius:50%;
-    border:1.5px solid var(--gold);
-    background:rgba(5,5,10,0.85);
-    animation:pring 2.5s ease-in-out infinite;
-    transition:transform 0.2s, background 0.2s;
-  }
-  .pin-inner{
-    position:absolute;
-    top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    width:6px;height:6px;
-    border-radius:50%;
-    background:var(--gold);
-    box-shadow:0 0 5px var(--gold);
-  }
-  @keyframes pring{
-    0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.5);}
-    50%{box-shadow:0 0 0 6px rgba(201,168,76,0);}
-  }
-  .pin-code{
-    font-size:9px;color:#444;letter-spacing:1px;
-    white-space:nowrap;
-    transition:color 0.2s;
-  }
-  .map-pin:hover .pin-outer{transform:scale(1.5);background:rgba(201,168,76,0.25);}
-  .map-pin:hover .pin-inner{box-shadow:0 0 10px var(--gold);}
-  .map-pin:hover .pin-code{color:var(--gold);}
-
-  /* 글리치 핀 */
-  .pin-glitch .pin-outer{
-    border-color:var(--pink);
-    animation:pring-r 1.5s ease-in-out infinite;
-  }
-  .pin-glitch .pin-inner{
-    background:var(--pink);
-    box-shadow:0 0 5px var(--pink);
-    animation:gdot 0.2s infinite;
-  }
-  .pin-glitch .pin-code{color:#441010;}
-  @keyframes pring-r{
-    0%,100%{box-shadow:0 0 0 0 rgba(255,94,94,0.5);}
-    50%{box-shadow:0 0 0 6px rgba(255,94,94,0);}
-  }
-  @keyframes gdot{
-    0%{transform:translate(-50%,-50%);}
-    33%{transform:translate(-50%,-50%) translate(1.5px,-1px);}
-    66%{transform:translate(-50%,-50%) translate(-1px,1.5px);}
-  }
-
-  /* 민트 핀 (특수) */
-  .pin-mint .pin-outer{border-color:var(--mint);animation:pring-m 2s infinite;}
-  .pin-mint .pin-inner{background:var(--mint);box-shadow:0 0 5px var(--mint);}
-  .pin-mint .pin-code{color:#0a2a2a;}
-  @keyframes pring-m{
-    0%,100%{box-shadow:0 0 0 0 rgba(94,255,235,0.4);}
-    50%{box-shadow:0 0 0 6px rgba(94,255,235,0);}
-  }
-
-  /* ══════════════════════════════
-     팝업
-  ══════════════════════════════ */
-  #popup{
-    position:absolute;inset:0;z-index:100;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.7);
-    opacity:0;pointer-events:none;
-    transition:opacity 0.3s;
-    backdrop-filter:blur(4px);
-  }
-  #popup.open{opacity:1;pointer-events:all;}
-  #popup-card{
-    background:#050f0f;
-    border:1px solid rgba(94,255,235,0.2);
-    width:min(500px,88vw);
-    max-height:80vh;
-    overflow-y:auto;
-    position:relative;
-    transform:translateY(16px) scale(0.97);
-    transition:transform 0.35s cubic-bezier(0.34,1.5,0.64,1);
-    box-shadow:0 0 60px rgba(94,255,235,0.07), 0 24px 70px rgba(0,0,0,0.7);
-  }
-  #popup.open #popup-card{transform:translateY(0) scale(1);}
-
-  #popup-banner{
-    width:100%;height:130px;
-    position:relative;overflow:hidden;display:flex;align-items:flex-end;
-  }
-  #popup-banner-bg{position:absolute;inset:0;}
-  #popup-banner-grad{
-    position:absolute;inset:0;
-    background:linear-gradient(to top,#050f0f 0%,transparent 60%);
-  }
-  .banner-code{
-    position:relative;z-index:1;padding:0 18px 8px;
-    font-size:9px;color:var(--mint);letter-spacing:3px;
-    text-shadow:0 0 8px var(--mint);
-  }
-  #popup-body{padding:14px 18px 20px;}
-  #popup-name{
-    font-family:'Noto Serif KR',serif;
-    font-size:clamp(16px,2.3vw,22px);
-    color:#fff;margin-bottom:3px;
-  }
-  #popup-sub{font-size:10px;color:#444;letter-spacing:2px;margin-bottom:14px;font-style:italic;}
-  #popup-desc{
-    font-size:clamp(11px,1.4vw,13px);color:#999;line-height:1.9;
-    border-left:2px solid rgba(94,255,235,0.2);
-    padding-left:12px;margin-bottom:14px;
-    font-family:'Noto Serif KR',serif;
-  }
-  .pstat{
-    display:flex;align-items:center;gap:10px;
-    background:rgba(94,255,235,0.03);
-    border:1px solid rgba(94,255,235,0.08);
-    padding:9px 13px;margin-bottom:7px;
-  }
-  .pstat-ico{font-size:15px;flex-shrink:0;}
-  .pstat-lbl{font-size:9px;color:var(--mint);letter-spacing:2px;margin-bottom:2px;}
-  .pstat-val{font-size:13px;color:#bbb;font-family:'Noto Serif KR',serif;}
-  .d-low{color:#5eff8a;}.d-mid{color:#ffd75e;}.d-high{color:#ff5e5e;}.d-ex{color:#ff44ff;}.d-unk{color:#666;}
-  #popup-close{
-    position:absolute;top:8px;right:8px;
-    width:28px;height:28px;
-    background:rgba(0,0,0,0.8);
-    border:1px solid rgba(255,255,255,0.1);
-    color:#555;font-size:13px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;
-    z-index:200;transition:all 0.2s;
-  }
-  #popup-close:hover{background:rgba(255,94,94,0.2);color:#fff;}
-
-  /* 하단 정보 */
-  #info-bar{
-    position:absolute;bottom:8px;left:0;right:0;
-    display:flex;justify-content:space-between;
-    padding:0 16px;pointer-events:none;z-index:5;
-  }
-  .info-txt{font-size:9px;color:#1a1a1a;letter-spacing:1px;}
-
-  /* 스캔라인 */
-  #scanline{
-    position:fixed;inset:0;
-    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
-    z-index:8000;pointer-events:none;
-  }
-  ::-webkit-scrollbar{width:3px;}
-  ::-webkit-scrollbar-thumb{background:#1a1a1a;}
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+:root{--mint:#5effeb;--pink:#ff5e5e;--mono:'Share Tech Mono','Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:var(--mono);overflow:hidden}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:90;pointer-events:none}
+#scan{position:fixed;inset:0;z-index:95;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.08) 2px 4px)}
+/* 부팅 */
+#boot{position:fixed;inset:0;z-index:80;background:#020d0d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#boot.off{animation:tvoff .6s cubic-bezier(.23,1,.32,1) forwards}
+@keyframes tvoff{0%{clip-path:inset(0);opacity:1}40%{clip-path:inset(49% 0 49% 0);opacity:1}70%{clip-path:inset(49.8% 0 49.8% 0);opacity:1;filter:brightness(3)}100%{clip-path:inset(50% 0 50% 0);opacity:0;filter:brightness(0)}}
+#bl{width:min(600px,85vw);max-height:55vh;overflow:hidden;display:flex;flex-direction:column;gap:6px;font-size:clamp(11px,1.5vw,14px);letter-spacing:1px}
+#bl div{color:var(--mint);white-space:nowrap}#bl .s{padding-left:8px;opacity:.9}#bl .w{color:var(--pink)}
+.bw{width:min(600px,85vw)}.bwl{font-size:10px;letter-spacing:.4em;color:rgba(94,255,235,.55);margin-bottom:6px}
+.bb{height:2px;background:#0a1a1a}.bb i{display:block;height:100%;width:0;background:var(--mint);box-shadow:0 0 10px var(--mint)}
+/* 지도 */
+#wrap{position:fixed;inset:0;display:grid;grid-template-rows:54px 1fr auto;gap:10px;padding:0 14px 10px;opacity:0;clip-path:inset(50% 0 50% 0)}
+#wrap.on{animation:tvon .7s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes tvon{0%{clip-path:inset(50% 0 50% 0);opacity:1;filter:brightness(3) saturate(0)}20%{clip-path:inset(49% 0 49% 0);opacity:1;filter:brightness(2) saturate(0)}50%{clip-path:inset(20% 0 20% 0);opacity:1;filter:brightness(1.3) saturate(.5)}80%{clip-path:inset(2% 0 2% 0);opacity:1;filter:brightness(1.1) saturate(.9)}100%{clip-path:inset(0);opacity:1;filter:none}}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(94,255,235,.3);background:linear-gradient(90deg,rgba(94,255,235,.07),rgba(0,0,0,.85))}
+.t{font-size:clamp(.7rem,3vw,.95rem);letter-spacing:.2em;color:var(--mint);text-shadow:0 0 14px rgba(94,255,235,.4)}.t span{color:#777}
+#close{font:700 11px var(--mono);letter-spacing:.2em;padding:8px 14px;color:var(--pink);background:none;border:1px solid rgba(255,94,94,.55);cursor:pointer;transition:.25s}
+#close:hover{background:rgba(255,94,94,.14);box-shadow:0 0 14px rgba(255,94,94,.35)}
+#stage{position:relative;overflow:hidden;border:1px solid rgba(94,255,235,.28);background:#030606;cursor:crosshair}
+#stage::before,#stage::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--mint);z-index:6;pointer-events:none}
+#stage::before{top:-1px;left:-1px;border-right:0;border-bottom:0}#stage::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation}
+#tip{position:absolute;pointer-events:none;z-index:5;font-size:11px;letter-spacing:.15em;padding:4px 8px;background:rgba(1,8,9,.88);border:1px solid;opacity:0;transform:translate(-50%,-150%);transition:opacity .2s;white-space:nowrap}
+#foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;font-size:10px;letter-spacing:.2em;color:#8a9}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.chip{flex:none;font:700 10px var(--mono);letter-spacing:.12em;padding:8px 11px;background:rgba(2,13,13,.7);color:var(--c);border:1px solid var(--c);cursor:pointer;transition:.25s;white-space:nowrap}
+.chip:hover{background:var(--c);color:#010809;box-shadow:0 0 14px var(--c)}
+/* 팝업 */
+#popup{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .3s}
+#popup.open{opacity:1;pointer-events:auto}
+#card{position:relative;width:min(420px,92%);max-height:92%;overflow-y:auto;background:rgba(3,9,9,.95);border:1px solid var(--c,rgba(94,255,235,.4));box-shadow:0 0 40px color-mix(in srgb,var(--c) 25%,transparent);transform:translateY(16px) scale(.97);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+#popup.open #card{transform:none}
+#card::before,#card::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--c);z-index:3}
+#card::before{top:-1px;left:-1px;border-right:0;border-bottom:0}#card::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+#pc{position:absolute;top:8px;right:8px;z-index:4;width:28px;height:28px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font:12px var(--mono)}
+#banner{position:relative;height:96px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.12)}
+#banner .bg{position:absolute;inset:0}
+#banner .gr{position:absolute;inset:0;background:linear-gradient(to top,#030909,transparent 70%)}
+#banner .nz{position:absolute;inset:0;opacity:.5;mix-blend-mode:screen}
+#bc{position:absolute;left:16px;bottom:10px;font-size:10px;letter-spacing:.35em;color:var(--c)}
+#pbody{padding:16px 18px 22px;display:flex;flex-direction:column;gap:10px}
+#pn{font-size:1.05rem;line-height:1.4;letter-spacing:.06em;color:#fff}
+#psub{font-size:10px;letter-spacing:.25em;color:var(--c)}
+#pd{font-size:12px;line-height:1.85;color:#cde;border-left:2px solid var(--c);padding-left:12px}
+.st{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+.st .ic{font-size:1rem;opacity:.8}.st .l{font-size:9px;letter-spacing:.25em;color:#8a9}.st .v{font-size:13px;margin-top:3px;color:#fff}
+.st .v.d{color:var(--pink);text-shadow:0 0 10px rgba(255,94,94,.5)}
+.bar{height:3px;margin-top:8px;background:rgba(255,255,255,.08)}.bar i{display:block;height:100%;width:0;background:var(--pink);box-shadow:0 0 8px var(--pink);transition:width 1s cubic-bezier(.2,.8,.2,1) .3s}
+#boot.gl{animation:bGl .13s steps(2) 1}
+@keyframes bGl{0%{transform:translate(-7px,2px) skewX(3deg);filter:hue-rotate(45deg) saturate(2.2)}50%{transform:translate(6px,-2px) skewX(-2deg);filter:hue-rotate(-30deg)}100%{transform:none;filter:none}}
+#bl div.cr{color:var(--pink)!important;text-shadow:2px 0 rgba(255,60,60,.8),-2px 0 rgba(60,255,230,.8)}
+#bl div.tr{transform:translateX(var(--tx,0))}
+#bnz{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
+.bef{position:absolute;font-size:12px;letter-spacing:.2em;color:var(--pink);text-shadow:2px 0 rgba(60,255,230,.7);pointer-events:none;animation:befa .46s steps(3) forwards;z-index:2}
+@keyframes befa{0%{opacity:1}100%{opacity:0}}
+#boot.bad .bb i{background:var(--pink)!important;box-shadow:0 0 10px var(--pink)!important}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
 </style>
 </head>
 <body>
-<div id="scanline"></div>
-
-<!-- 부팅 -->
-<div id="boot-overlay">
-  <div id="boot-lines"></div>
-  <div class="boot-bar-wrap">
-    <div class="boot-bar-label">LOADING</div>
-    <div class="boot-bar"><div class="boot-bar-fill" id="bfill"></div></div>
+<div id="scan"></div>
+<canvas id="gl"></canvas>
+<div id="boot"><canvas id="bnz"></canvas><div id="bl"></div><div class="bw"><div class="bwl" id="bwl"></div><div class="bb"><i id="bf"></i></div></div></div>
+<div id="wrap">
+  <header><div class="t">◆ <span id="t1" style="color:var(--mint)"></span> <span>—</span> <span id="t2" style="color:#9aa"></span></div><button id="close"></button></header>
+  <div id="stage"><canvas id="cv"></canvas><div id="tip"></div>
+    <div id="popup"><div id="card"><button id="pc">✕</button>
+      <div id="banner"><div class="bg" id="pbg"></div><canvas class="nz" id="pnz" width="210" height="48"></canvas><div class="gr"></div><div id="bc">● <span id="pcode"></span></div></div>
+      <div id="pbody"><div id="pn"></div><div id="psub"></div><div id="pd"></div><div id="pst"></div></div></div></div>
   </div>
+  <div id="foot"><span id="coord"></span><div class="chips" id="chips"></div><span>WORLD_MAP.exe v1.0</span></div>
 </div>
-
-<!-- 메인 -->
-<div id="map-wrapper">
-  <div id="map-header">
-    <div class="hdr-left">
-      ◆ WORLD MAP <span>—</span> CONTINENTAL SECTOR
-    </div>
-    <div class="close-btn" onclick="if(window.parent&&window.parent.document.getElementById('map-fullscreen-overlay'))window.parent.document.getElementById('map-fullscreen-overlay').remove();" style="cursor:pointer;">✕ CLOSE</div>
-  </div>
-
-  <div id="map-area">
-    <div id="terrain">
-      <!-- 지형 레이어 -->
-      <div id="land-main"></div>
-      <div id="zone-forest"></div>
-      <div id="zone-mountain"></div>
-      <div id="zone-lake"></div>
-      <div id="zone-volcano"></div>
-      <div id="zone-anomaly"></div>
-      <div id="zone-city"></div>
-      <div id="island-small"></div>
-      <div id="island-bottom"></div>
-      <div id="terrain-texture"></div>
-      <!-- 핀은 JS -->
-    </div>
-
-    <div id="info-bar">
-      <span class="info-txt" id="coord-txt">LAT: —  LON: —</span>
-      <span class="info-txt">WORLD_MAP.exe  v1.0</span>
-    </div>
-
-    <!-- 팝업 -->
-    <div id="popup">
-      <div id="popup-card">
-        <button id="popup-close" onclick="closePopup()">✕</button>
-        <div id="popup-banner">
-          <div id="popup-banner-bg"></div>
-          <div id="popup-banner-grad"></div>
-          <div class="banner-code">● <span id="p-code">—</span></div>
-        </div>
-        <div id="popup-body">
-          <div id="popup-name">—</div>
-          <div id="popup-sub">—</div>
-          <div id="popup-desc">—</div>
-          <div id="popup-stats"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-const LOCS = [
-  {
-    code:"SECTOR-00", name:"Wasteland — The End",
-    sub:"Wasteland · Nothing Remains",
-    desc:"The entire continent has been annihilated by Kisune Corden. All civilizations, territories, and life have been erased. Only ash and silence remain.",
-    guardian:"None", danger:"Absolute", dc:"d-ex",
-    px:55, py:50, pinClass:"", bg:"linear-gradient(135deg,#1a0a0a,#0a0505)"
-  },
-  {
-    code:"SECTOR-04", name:"Anomaly Zone / Glitch District",
-    sub:"Glitch Zone · Anomaly District",
-    desc:"A region where glitch phenomena manifest at their most extreme. Space itself is unstable, and conventional physical laws do not apply. Severe glitch-infected entities are present in the surrounding area, and serious cognitive distortion has been reported upon approach.",
-    guardian:"Unidentified glitch entity", danger:"Extreme", dc:"d-ex",
-    px:13, py:45, pinClass:"pin-glitch", bg:"linear-gradient(135deg,#0d000d,#050005)"
+const L={"t1": "WORLD MAP", "t2": "CONTINENTAL SECTOR", "close": "✕ CLOSE", "loading": "LOADING", "lat": "LAT", "lon": "LON", "extinct": "EXTINCT", "guardLbl": "GUARDIAN / OBSERVED ENTITY", "dangerLbl": "DANGER LEVEL", "boot": [{"t": "> Initializing WORLD_MAP.exe..."}, {"t": "> Establishing satellite connection..."}, {"t": "> Loading continental terrain data..."}, {"t": "> Scanning sector database..."}, {"t": "  [SECTOR-01] Fox's Haunt..........EXTINCT", "w": true, "sub": true}, {"t": "  [SECTOR-02] Angel's Domain......EXTINCT", "w": true, "sub": true}, {"t": "  [SECTOR-03] Demon's Realm.......EXTINCT", "w": true, "sub": true}, {"t": "  [SECTOR-04] Anomaly Zone... WARNING", "w": true, "sub": true}, {"t": "  [SECTOR-05] City of Contracts...EXTINCT", "w": true, "sub": true}, {"t": "  [SECTOR-EX] Isle of Time........EXTINCT", "w": true, "sub": true}, {"t": "> CRITICAL: All sectors destroyed by Kisune Corden", "w": true}, {"t": "> Rendering remaining data...........OK"}, {"t": "> System ready."}], "locs": [{"code": "SECTOR-00", "name": "Wasteland — The End", "sub": "Wasteland · Nothing Remains", "desc": "The entire continent has been annihilated by Kisune Corden. All civilizations, territories, and life have been erased. Only ash and silence remain.", "guardian": "None", "danger": "Absolute", "px": 55, "py": 50, "bg": "linear-gradient(135deg,#1a0a0a,#0a0505)"}, {"code": "SECTOR-04", "name": "Anomaly Zone / Glitch District", "sub": "Glitch Zone · Anomaly District", "desc": "A region where glitch phenomena manifest at their most extreme. Space itself is unstable, and conventional physical laws do not apply. Severe glitch-infected entities are present in the surrounding area, and serious cognitive distortion has been reported upon approach.", "guardian": "Unidentified glitch entity", "danger": "Extreme", "px": 13, "py": 45, "bg": "linear-gradient(135deg,#0d000d,#050005)"}], "ghosts": [{"code": "SECTOR-01", "name": "Fox's Haunt", "px": 43, "py": 30}, {"code": "SECTOR-02", "name": "Angel's Domain", "px": 72, "py": 20}, {"code": "SECTOR-03", "name": "Demon's Realm", "px": 80, "py": 56}, {"code": "SECTOR-05", "name": "City of Contracts", "px": 45, "py": 64}, {"code": "SECTOR-EX", "name": "Isle of Time", "px": 57, "py": 86}]};
+const $=id=>document.getElementById(id),cv=$('cv'),x=cv.getContext('2d');
+let W,H,D,hov=null,t0=0,terr=null,open=false;
+const rnd=(a,b)=>a+Math.random()*(b-a),cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ACT=L.locs,GH=L.ghosts,COLS=['#ff5e5e','#d36bff'];
+function hash(a,b){const n=Math.sin(a*127.1+b*311.7)*43758.5453;return n-Math.floor(n)}
+function vn(a,b){const i=Math.floor(a),j=Math.floor(b),f=a-i,g=b-j,u=f*f*(3-2*f),v=g*g*(3-2*g),m=(p,q,t)=>p+(q-p)*t;return m(m(hash(i,j),hash(i+1,j),u),m(hash(i,j+1),hash(i+1,j+1),u),v)}
+function fbm(a,b){let s=0,A=.5;for(let o=0;o<4;o++){s+=A*vn(a,b);a*=2.1;b*=2.1;A/=2}return s}
+/* ───── 지형: 잿빛 대륙 조각 + 붉게 달궈진 균열 + 글리치 구역 정적 ───── */
+function terrain(){
+  const w=360,h=200,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d'),im=g.createImageData(w,h),d=im.data;
+  const seeds=[...Array(9)].map(()=>({x:rnd(.05,.95),y:rnd(.08,.92),ox:rnd(-6,6),oy:rnd(-4,4)}));
+  const P=[...ACT,...GH];
+  for(let py=0;py<h;py++)for(let px=0;px<w;px++){
+    const u=px/w,v=py/h;let d1=9,d2=9,id=0;
+    seeds.forEach((s,i)=>{const dx=(u-s.x)*1.8,dy=v-s.y,q=Math.hypot(dx,dy);if(q<d1){d2=d1;d1=q;id=i}else if(q<d2)d2=q});
+    const gap=(d2-d1)*w/9,S=seeds[id],k=(py*w+px)*4;
+    if(gap<1.2){const a=cl(1-gap/1.2);d[k]=255;d[k+1]=94+a*40;d[k+2]=70;d[k+3]=50+a*180;continue}
+    let e=fbm(u*5+S.ox,v*3+S.oy)*.8;
+    P.forEach(p=>{const dx=(u-p.px/100)*1.7,dy=v-p.py/100;e+=.45*Math.exp(-(dx*dx+dy*dy)/.06)});
+    e*=1-Math.pow(Math.abs(u*2-1),4)*.5-Math.pow(Math.abs(v*2-1),4)*.5;
+    if(e<.5){d[k]=140;d[k+1]=150;d[k+2]=160;d[k+3]=e>.47?26:0}
+    else{
+      const b=Math.min(4,Math.floor((e-.5)/.09)),r=(e-.5)%.09,sc=fbm(u*9+3,v*6+7);
+      if(e<.512){d[k]=170;d[k+1]=172;d[k+2]=180;d[k+3]=200}
+      else if(r<.007){d[k]=150;d[k+1]=150;d[k+2]=160;d[k+3]=70}
+      else if(sc>.62){d[k]=18;d[k+1]=14;d[k+2]=14;d[k+3]=190;if(Math.random()<.03){d[k]=255;d[k+1]=120;d[k+2]=60;d[k+3]=230}}
+      else{const bs=52+b*13;d[k]=bs;d[k+1]=bs;d[k+2]=bs+6;d[k+3]=70+b*24}
+    }
+    if(u<.27&&Math.random()<.07){const v2=100+Math.random()*155;d[k]=v2;d[k+1]=v2*.4;d[k+2]=v2;d[k+3]=140}
   }
-];
+  g.putImageData(im,0,0);return c;
+}
+/* ───── 화면 전체 유리 균열 (휴대폰 액정처럼, 로딩부터 지도까지 같은 금이 유지됨) ───── */
+const GlassFX=(function(){
+let W,H,D,x;
+/* ───── 유리 균열 / 파편 ───── */
+let segs=[],shards=[],sparks=[],cache=null,cached=false;
+function genGlass(){
+  segs=[];sparks=[];cache=null;cached=false;
+  [[.5,.5,1],[.16,.2,.6],[.84,.24,.6],[.18,.82,.55],[.84,.8,.55],[.5,.96,.45]].forEach(([fx,fy,sz],ii)=>{
+    const cx=fx*W,cy=fy*H,maxR=Math.max(W,H)*.5*sz,n=ii?6:9,tb=ii*.25;
+    for(let i=0;i<n;i++){
+      let a=i/n*6.283+rnd(-.2,.2),px=cx,py=cy,len=0;const Lm=maxR*rnd(.5,1),w=ii?1.1:1.6;
+      while(len<Lm){const st=rnd(22,52);a+=rnd(-.22,.22);const nx2=px+Math.cos(a)*st,ny=py+Math.sin(a)*st;
+        segs.push({x1:px,y1:py,x2:nx2,y2:ny,w:Math.max(.6,w*(1-len/Lm*.7)),t:tb+len/maxR*1.5});
+        if(Math.random()<.07&&len>40){let bx=nx2,by=ny,ba=a+rnd(.5,1)*(Math.random()<.5?-1:1),bl=0;const BL=rnd(50,140);while(bl<BL){const s2=rnd(14,30);ba+=rnd(-.3,.3);const qx=bx+Math.cos(ba)*s2,qy=by+Math.sin(ba)*s2;segs.push({x1:bx,y1:by,x2:qx,y2:qy,w:.7,t:tb+(len+bl)/maxR*1.5});bx=qx;by=qy;bl+=s2}}
+        px=nx2;py=ny;len+=st;if(Math.random()<.05)sparks.push({x:px,y:py,ph:rnd(0,6.28),v:rnd(.1,.4),s:rnd(.8,2)});
+      }
+    }
+  });
+  shards=[...Array(5)].map(()=>{const n=5+Math.floor(rnd(0,2)),r=rnd(20,56);return{bx:rnd(.05,.95)*W,by:rnd(.08,.92)*H,rot:rnd(0,6.28),vr:rnd(-.15,.15),ph:rnd(0,6.28),amp:rnd(6,14),
+    pts:[...Array(n)].map((_,i)=>{const a=i/n*6.283+rnd(-.3,.3),rr=r*rnd(.55,1);return[Math.cos(a)*rr,Math.sin(a)*rr*rnd(.5,.9)]})}});
+}
+function seg(c,s,k,full){const ex=s.x1+(s.x2-s.x1)*k,ey=s.y1+(s.y2-s.y1)*k;c.beginPath();c.moveTo(s.x1,s.y1);c.lineTo(ex,ey);
+  c.lineWidth=s.w+2;c.strokeStyle='rgba(0,0,0,.35)';c.stroke();c.lineWidth=s.w;c.strokeStyle=`rgba(255,255,255,${.2+.26*Math.min(1,s.w/1.6)})`;c.stroke();
+  if(full){c.save();c.translate(-1,0);c.strokeStyle='rgba(94,255,235,.18)';c.lineWidth=.8;c.stroke();c.translate(2,0);c.strokeStyle='rgba(255,80,80,.14)';c.stroke();c.restore()}}
+function drawGlass(e){
+  if(e>2.6){if(!cached){cache=document.createElement('canvas');cache.width=W*D;cache.height=H*D;const c=cache.getContext('2d');c.scale(D,D);c.lineCap='round';segs.forEach(s=>seg(c,s,1,true));cached=true}x.drawImage(cache,0,0,W,H)}
+  else{x.save();x.lineCap='round';segs.forEach(s=>{if(s.t<=e)seg(x,s,cl((e-s.t)/.12),false)});x.restore()}
+  shards.forEach(s=>{const px=s.bx+Math.sin(e*.35+s.ph)*s.amp,py=s.by+Math.cos(e*.28+s.ph)*s.amp*.7;x.save();x.translate(px,py);x.rotate(s.rot+e*s.vr);x.globalAlpha=cl((e-.5)/1.2);
+    x.beginPath();s.pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.closePath();const g=x.createLinearGradient(-30,-30,30,30);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(1,'rgba(150,230,255,.04)');x.fillStyle=g;x.fill();
+    x.strokeStyle='rgba(255,255,255,.3)';x.lineWidth=1;x.shadowColor='rgba(94,255,235,.5)';x.shadowBlur=6;x.stroke();x.restore()});
+  sparks.forEach(p=>{p.y+=p.v*.12;if(p.y>H)p.y=0;const v=.5+.5*Math.sin(e*2+p.ph);x.fillStyle=`rgba(${p.ph>3?'255,94,94':'94,255,235'},${v*.8*cl(e-1)})`;x.fillRect(p.x,p.y,p.s,p.s)});
+}
 
-const BOOT = [
-  {t:"> Initializing WORLD_MAP.exe...", w:false},
-  {t:"> Establishing satellite connection...", w:false},
-  {t:"> Loading continental terrain data...", w:false},
-  {t:"> Scanning sector database...", w:false},
-  {t:"  [SECTOR-01] Fox's Haunt..........EXTINCT", w:true, sub:true},
-  {t:"  [SECTOR-02] Angel's Domain......EXTINCT", w:true, sub:true},
-  {t:"  [SECTOR-03] Demon's Realm.......EXTINCT", w:true, sub:true},
-  {t:"  [SECTOR-04] Anomaly Zone... WARNING", w:true,  sub:true},
-  {t:"  [SECTOR-05] City of Contracts...EXTINCT", w:true, sub:true},
-  {t:"  [SECTOR-EX] Isle of Time........EXTINCT", w:true, sub:true},
-  {t:"> CRITICAL: All sectors destroyed by Kisune Corden", w:true},
-  {t:"> Rendering remaining data...........OK", w:false},
-  {t:"> System ready.", w:false},
-];
+function addLong(){
+  for(let k=0;k<6;k++){
+    const vert=k>=3,i=k%3;let px,py,a,Lm;
+    if(vert){px=rnd(.15,.85)*W;const top=i%2===0;py=top?0:H;a=(top?1:-1)*Math.PI/2+rnd(-.35,.35);Lm=H*rnd(.7,1.1)}
+    else{const left=i%2===0;px=left?0:W;py=rnd(.1,.9)*H;a=(left?0:Math.PI)+rnd(-.5,.5);Lm=W*rnd(.8,1.2)}
+    let len=0;const t=rnd(0,.5);
+    while(len<Lm){const st=rnd(26,60);a+=rnd(-.2,.2);const nx=px+Math.cos(a)*st,ny=py+Math.sin(a)*st;segs.push({x1:px,y1:py,x2:nx,y2:ny,w:Math.max(.6,1.4*(1-len/Lm*.6)),t});px=nx;py=ny;len+=st}
+  }
+}
+return{init(c,w,h,d){x=c;W=w;H=h;D=d},gen(){genGlass();addLong()},draw:drawGlass};
+})();
+/* ───── 재 / 불씨 / 안개 ───── */
+const ash=[...Array(110)].map(()=>({x:Math.random(),y:Math.random(),s:rnd(.6,2),v:rnd(.02,.08),d:rnd(-.02,.03),e:Math.random()<.12,ph:rnd(0,6.28)}));
+const fog=[...Array(3)].map(()=>({x:Math.random(),y:rnd(.2,.8),r:rnd(.25,.45),v:rnd(.004,.012),a:rnd(.04,.07)}));
+function drawAtmos(e,dt){
+  fog.forEach(f=>{f.x+=f.v*dt;if(f.x>1.4)f.x=-.4;const g=x.createRadialGradient(f.x*W,f.y*H,0,f.x*W,f.y*H,f.r*W);g.addColorStop(0,`rgba(150,150,160,${f.a})`);g.addColorStop(1,'rgba(150,150,160,0)');x.fillStyle=g;x.fillRect(0,0,W,H)});
+  ash.forEach(a=>{a.y+=(a.e?-a.v*.6:a.v)*dt;a.x+=a.d*dt;if(a.y>1.02)a.y=-.02;if(a.y<-.02)a.y=1.02;if(a.x<0)a.x=1;if(a.x>1)a.x=0;
+    const fl=.5+.5*Math.sin(e*3+a.ph);x.fillStyle=a.e?`rgba(255,${110+fl*60|0},60,${.35+.45*fl})`:`rgba(190,190,200,${.22+.25*fl})`;x.fillRect(a.x*W,a.y*H,a.s,a.s)});
+}
+/* ───── 핀 ───── */
+const pxy=p=>[W*p.px/100,H*p.py/100],ms=()=>Math.min(W,H)/520;
+function drawGhost(p,e){
+  const [px,py]=pxy(p),m=ms(),on=hov===p;
+  x.save();x.translate(px,py);x.globalAlpha=on?.9:.45;x.strokeStyle='#9aa';x.lineWidth=1.4;const r=7*m;
+  x.beginPath();x.moveTo(-r,-r);x.lineTo(r,r);x.moveTo(r,-r);x.lineTo(-r,r);x.stroke();
+  x.setLineDash([2,4]);x.beginPath();x.arc(0,0,r*2.2,e*.3,e*.3+6.28);x.stroke();x.setLineDash([]);
+  x.fillStyle='#9aa';x.font=`${Math.max(8,8*m)}px 'Share Tech Mono','Courier New',monospace`;x.textAlign='center';x.fillText(p.code,0,r*3.4);
+  x.beginPath();x.moveTo(-x.measureText(p.code).width/2,r*3.4-3);x.lineTo(x.measureText(p.code).width/2,r*3.4-3);x.stroke();
+  x.restore();
+}
+function drawZero(p,e){
+  const [px,py]=pxy(p),m=ms(),on=hov===p;
+  x.save();x.translate(px,py);
+  for(let i=0;i<4;i++){const q=(e*.25+i/4)%1,r=(14+q*110)*m;x.strokeStyle=`rgba(255,94,94,${(1-q)*.55})`;x.lineWidth=1.6*(1-q)+.4;x.beginPath();x.arc(0,0,r,0,6.283);x.stroke()}
+  const g=x.createRadialGradient(0,0,0,0,0,40*m);g.addColorStop(0,'rgba(0,0,0,.9)');g.addColorStop(.5,'rgba(60,10,10,.45)');g.addColorStop(1,'rgba(255,94,94,0)');x.fillStyle=g;x.beginPath();x.arc(0,0,40*m,0,6.283);x.fill();
+  for(let i=0;i<10;i++){const a=i/10*6.283+Math.sin(i*7)*.2,l=(24+Math.sin(i*3.1)*10)*m;x.strokeStyle='rgba(255,94,94,.45)';x.lineWidth=1;x.beginPath();x.moveTo(Math.cos(a)*14*m,Math.sin(a)*14*m);x.lineTo(Math.cos(a)*l*1.6,Math.sin(a)*l*1.6);x.stroke()}
+  const f=.5+.5*Math.sin(e*4);x.fillStyle=`rgba(255,${80+f*60|0},60,${.7+.3*f})`;x.shadowColor='#ff5e5e';x.shadowBlur=14+on*8;x.beginPath();x.arc(0,0,(4+on*1.5)*m,0,6.283);x.fill();x.shadowBlur=0;
+  x.restore();label(p,'#ff5e5e',px,py+30*m,on);
+}
+function drawGlitch(p,e){
+  const [px,py]=pxy(p),m=ms(),on=hov===p,gl=Math.random()<.12;
+  x.save();x.translate(px,py);
+  const r=22*m;
+  for(const [ox,col] of gl?[[-4,'rgba(94,255,235,.8)'],[4,'rgba(255,60,200,.8)']]:[[0,'rgba(211,107,255,.85)']]){x.strokeStyle=col;x.lineWidth=1.8;x.shadowColor='#d36bff';x.shadowBlur=gl?0:12;
+    for(let i=0;i<6;i++){const a0=i/6*6.283-e*.4,a1=a0+.7;x.beginPath();x.arc(ox,0,r*(1+(i%2)*.2),a0,a1);x.stroke()}}
+  x.shadowBlur=0;
+  for(let i=0;i<7;i++)if(Math.random()<.7){x.fillStyle=`rgba(${Math.random()<.5?'94,255,235':'255,60,200'},.${3+i%4})`;x.fillRect(rnd(-r*1.8,r*1.8),rnd(-r*1.5,r*1.5),rnd(4,26)*m,rnd(1,3))}
+  x.fillStyle=`rgba(211,107,255,${.6+.4*Math.random()})`;x.shadowColor='#d36bff';x.shadowBlur=12;x.beginPath();x.arc(0,0,(4+on*1.5)*m,0,6.283);x.fill();
+  x.restore();label(p,'#d36bff',px,py+30*m,on,Math.random()<.04);
+}
+function label(p,c,px,py,on,skip){if(skip)return;x.fillStyle=c;x.globalAlpha=on?1:.75;x.font=`${on?11:9}px 'Share Tech Mono','Courier New',monospace`;x.textAlign='center';x.fillText(p.code,px,py);x.globalAlpha=1}
 
+/* ───── 루프 ───── */
+let nextG=0,glEnd=0,bars=[],last=0;
+function frame(ts){
+  if(!t0)t0=ts;const e=(ts-t0)/1000,dt=Math.min((ts-last)/1000,.05)||.016;last=ts;
+  x.clearRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.7);g.addColorStop(0,'#0b0f10');g.addColorStop(1,'#030606');x.fillStyle=g;x.fillRect(0,0,W,H);
+  if(terr){x.save();x.globalAlpha=cl(e/1.2);x.drawImage(terr,0,0,W,H);x.restore()}
+  drawAtmos(e,dt);
+  GH.forEach(p=>drawGhost(p,e));
+  drawZero(ACT[0],e);drawGlitch(ACT[1],e);
+  
+  x.fillStyle='rgba(0,0,0,.06)';for(let i=0;i<H;i+=3)x.fillRect(0,i,W,1);
+  const now=performance.now();if(!nextG)nextG=now+2000;
+  if(now>nextG){nextG=now+rnd(1500,4200);glEnd=now+rnd(90,170);bars=[...Array(Math.floor(rnd(3,7)))].map(()=>({y:rnd(0,H),h:rnd(2,12),x:rnd(0,W*.6),w:rnd(.2,1)*W,c:Math.random()<.5?'255,60,60':'60,255,230'}))}
+  if(now<glEnd)bars.forEach(b=>{x.fillStyle=`rgba(${b.c},.13)`;x.fillRect(b.x,b.y,b.w,b.h)});
+  requestAnimationFrame(frame);
+}
+/* ───── 입력 ───── */
+function pick(mx,my){let f=null;[...ACT,...GH].forEach(p=>{const [px,py]=pxy(p);if(Math.hypot(mx-px,my-py)<Math.max(26,Math.min(W,H)*.06))f=p});return f}
+cv.addEventListener('pointermove',ev=>{const r=cv.getBoundingClientRect(),mx=ev.clientX-r.left,my=ev.clientY-r.top;
+  $('coord').textContent=`${L.lat}: ${(my/H*100).toFixed(1)}  ${L.lon}: ${(mx/W*100).toFixed(1)}`;
+  const f=pick(mx,my);if(f!==hov){hov=f;cv.style.cursor=f?'pointer':'crosshair';const t=$('tip');if(f){const [px,py]=pxy(f);t.textContent=f.guardian?f.name:f.code+' · '+L.extinct;t.style.left=px+'px';t.style.top=py+'px';t.style.color=t.style.borderColor=f.guardian?(ACT.indexOf(f)?COLS[1]:COLS[0]):'#9aa';t.style.opacity=1}else t.style.opacity=0}});
+cv.addEventListener('click',ev=>{const r=cv.getBoundingClientRect(),f=pick(ev.clientX-r.left,ev.clientY-r.top);if(f&&f.guardian)openPopup(f)});
+function openPopup(p){
+  const c=COLS[ACT.indexOf(p)];$('card').style.setProperty('--c',c);
+  $('pcode').textContent=p.code;$('pn').textContent=p.name;$('psub').textContent=p.sub;$('pd').textContent=p.desc;$('pbg').style.background=p.bg;
+  $('pst').innerHTML=`<div class="st"><div class="ic">👁</div><div><div class="l">${L.guardLbl}</div><div class="v">${p.guardian}</div></div></div><div class="st"><div class="ic">⚠</div><div style="flex:1"><div class="l">${L.dangerLbl}</div><div class="v d">${p.danger}</div><div class="bar"><i id="dbar"></i></div></div></div>`;
+  $('popup').classList.add('open');setTimeout(()=>{const b=$('dbar');if(b)b.style.width='100%'},30);
+  const n=$('pnz').getContext('2d'),im=n.createImageData(210,48);for(let i=0;i<im.data.length;i+=4){const v=Math.random()<.12?Math.random()*255:0;im.data[i]=v;im.data[i+1]=v*(ACT.indexOf(p)?.4:.5);im.data[i+2]=v;im.data[i+3]=v?160:0}n.putImageData(im,0,0);
+}
+function closePopup(){$('popup').classList.remove('open')}
+$('pc').onclick=closePopup;$('popup').addEventListener('click',e=>{if(e.target===$('popup'))closePopup()});
+$('close').onclick=()=>{try{if(window.parent&&window.parent!==window){if(typeof window.parent.closeWorldMapOverlay==='function'){window.parent.closeWorldMapOverlay();return}const o=window.parent.document.getElementById('map-fullscreen-overlay');if(o){o.remove();return}window.parent.postMessage('closeMap','*');return}}catch(e){}history.back()};
+function size(){D=devicePixelRatio||1;const r=$('stage').getBoundingClientRect();W=r.width;H=r.height;cv.width=W*D;cv.height=H*D;x.setTransform(D,0,0,D,0,0);terr=terrain()}
+addEventListener('resize',()=>{if(open)size()});
+/* ───── 부팅 → TV 꺼짐(0.6s) → TV 켜짐(0.7s) : 타이밍은 원본과 동일 ───── */
+const ERRS=document.documentElement.lang==='ko'?['신호 손실','메모리 오류 0x{h}','체크섬 불일치','세그먼트 오류','데이터 손상 0x{h}']:['SIGNAL LOST','ERR_MEM_FAULT 0x{h}','CHECKSUM FAIL','SEGFAULT','DATA CORRUPT 0x{h}'];
+const GL='!<>-_/[]{}=+*#%$@';
+function corrupt(t){const a=t.split('');for(let n=0;n<2+Math.floor(Math.random()*3);n++){const j=Math.floor(Math.random()*a.length);if(a[j]!==' ')a[j]=GL[Math.floor(Math.random()*GL.length)]}return a.join('')}
+function bnoise(){const c=$('bnz'),g=c.getContext('2d');c.width=innerWidth/2|0;c.height=innerHeight/2|0;const w=c.width,h=c.height;
+  for(let i=0;i<4+Math.floor(Math.random()*5);i++){g.fillStyle=Math.random()<.5?'rgba(255,60,60,.28)':'rgba(60,255,230,.25)';g.fillRect(Math.random()*w*.5,Math.random()*h,Math.random()*w,2+Math.random()*10)}
+  for(let i=0;i<70;i++){const v=Math.random()*255|0;g.fillStyle=`rgba(${v},${v},${v},.35)`;g.fillRect(Math.random()*w,Math.random()*h,2+Math.random()*10,1+Math.random()*2)}
+  setTimeout(()=>g.clearRect(0,0,w,h),110)}
+function berr(){const e=document.createElement('div');e.className='bef';e.textContent=ERRS[Math.floor(Math.random()*ERRS.length)].replace('{h}',Math.floor(Math.random()*65535).toString(16).toUpperCase().padStart(4,'0'));e.style.left=(5+Math.random()*60)+'%';e.style.top=(10+Math.random()*75)+'%';$('boot').appendChild(e);setTimeout(()=>e.remove(),470)}
+function bburst(big){const b=$('boot');b.classList.remove('gl');void b.offsetWidth;b.classList.add('gl');setTimeout(()=>b.classList.remove('gl'),140);bnoise();berr();
+  if(big){berr();b.style.opacity='.12';setTimeout(()=>b.style.opacity='',70);setTimeout(()=>b.style.opacity='.3',130);setTimeout(()=>b.style.opacity='',190)}}
 async function runBoot(){
-  const lines = document.getElementById("boot-lines");
-  const fill  = document.getElementById("bfill");
-  for(let i=0;i<BOOT.length;i++){
-    await sleep(70 + Math.random()*80);
-    const el = document.createElement("div");
-    el.className = (BOOT[i].sub ? "boot-line-sub" : "boot-line") + (BOOT[i].w ? " boot-warn" : "");
-    el.style.animationDelay = "0s";
-    el.textContent = BOOT[i].t;
-    lines.appendChild(el);
-    fill.style.width = ((i+1)/BOOT.length*100)+"%";
+  const bl=$('bl'),bf=$('bf'),wl=$('bwl'),lab=L.loading,N=L.boot.length;
+  for(let i=0;i<N;i++){
+    await sleep(70+Math.random()*80);
+    const el=document.createElement('div'),b=L.boot[i];el.className=(b.sub?'s':'')+(b.w?' w':'');bl.appendChild(el);
+    const txt=b.t;let k=0;(function sc(){el.textContent=txt.split('').map((ch,j)=>j<k||ch===' '?ch:GL[Math.floor(Math.random()*GL.length)]).join('');k+=Math.ceil(txt.length/4);if(k<txt.length+Math.ceil(txt.length/4))setTimeout(sc,18);else el.textContent=txt})();
+    /* 고장 연출: 글자 깨짐 / 가로 찢김 / 진행 바 역행 / 라벨 오류 / 화면 글리치 (시간 흐름은 그대로) */
+    if(b.w||Math.random()<.3)setTimeout(()=>{el.classList.add('cr');el.textContent=corrupt(txt);setTimeout(()=>{el.classList.remove('cr');el.textContent=txt},150)},170);
+    if(Math.random()<.25){el.style.setProperty('--tx',(Math.random()*12-6)+'px');el.classList.add('tr');setTimeout(()=>el.classList.remove('tr'),100)}
+    const target=(i+1)/N*100;bf.style.width=target+'%';
+    if(i<N-1&&Math.random()<.32){setTimeout(()=>{bf.style.width=Math.max(0,target-8-Math.random()*20)+'%';$('boot').classList.add('bad')},60);setTimeout(()=>{bf.style.width=target+'%';$('boot').classList.remove('bad')},210)}
+    if(Math.random()<.25){wl.textContent=document.documentElement.lang==='ko'?'오류':'ERROR';wl.style.color='var(--pink)';setTimeout(()=>{wl.textContent=lab;wl.style.color=''},150)}
+    if(i===3||i===7||i===10)bburst(false);
   }
-  await sleep(400);
-
-  // TV 꺼지는 효과로 부팅 화면 사라짐
-  document.getElementById("boot-overlay").classList.add("tv-off");
-  await sleep(300);
-
-  // TV 켜지는 효과로 지도 등장
-  const mw = document.getElementById("map-wrapper");
-  mw.style.opacity = "1";
-  mw.classList.add("tv-on");
-
-  await sleep(700);
-  document.getElementById("boot-overlay").style.display = "none";
-  initMap();
+  bburst(true);
+  await sleep(400);$('boot').classList.add('off');
+  await sleep(300);const w=$('wrap');w.style.opacity='1';w.classList.add('on');
+  size();open=true;requestAnimationFrame(frame);
+  await sleep(700);$('boot').style.display='none';
 }
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
-
-function initMap(){
-  const terrain = document.getElementById("terrain");
-  LOCS.forEach(loc=>{
-    const pin = document.createElement("div");
-    pin.className = "map-pin";
-    pin.style.left = loc.px + "%";
-    pin.style.top  = loc.py + "%";
-    pin.innerHTML = `
-      <div class="pin-wrap">
-        <div class="pin-dot-wrap ${loc.pinClass}">
-          <div class="pin-outer"></div>
-          <div class="pin-inner"></div>
-        </div>
-        <div class="pin-code">${loc.code}</div>
-      </div>
-    `;
-    // pinClass를 pin-dot-wrap 대신 pin 자체에 적용
-    pin.querySelector(".pin-dot-wrap").className = "pin-dot-wrap";
-    if(loc.pinClass) pin.classList.add(loc.pinClass);
-    pin.addEventListener("click", ()=>openPopup(loc));
-    terrain.appendChild(pin);
-  });
-
-  terrain.addEventListener("mousemove", e=>{
-    const r = terrain.getBoundingClientRect();
-    const rx = ((e.clientX-r.left)/r.width*100).toFixed(1);
-    const ry = ((e.clientY-r.top)/r.height*100).toFixed(1);
-    document.getElementById("coord-txt").textContent = "LAT: "+ry+"  LON: "+rx;
-  });
-}
-
-function openPopup(loc){
-  document.getElementById("p-code").textContent = loc.code;
-  document.getElementById("popup-name").textContent = loc.name;
-  document.getElementById("popup-sub").textContent = loc.sub;
-  document.getElementById("popup-desc").textContent = loc.desc;
-  document.getElementById("popup-banner-bg").style.background = loc.bg;
-  document.getElementById("popup-stats").innerHTML = `
-    <div class="pstat">
-      <div class="pstat-ico">👁</div>
-      <div>
-        <div class="pstat-lbl">GUARDIAN / OBSERVED ENTITY</div>
-        <div class="pstat-val">${loc.guardian}</div>
-      </div>
-    </div>
-    <div class="pstat">
-      <div class="pstat-ico">⚠</div>
-      <div>
-        <div class="pstat-lbl">DANGER LEVEL</div>
-        <div class="pstat-val ${loc.dc}">${loc.danger}</div>
-      </div>
-    </div>
-  `;
-  document.getElementById("popup").classList.add("open");
-}
-function closePopup(){
-  document.getElementById("popup").classList.remove("open");
-}
-document.getElementById("popup").addEventListener("click", e=>{
-  if(e.target===document.getElementById("popup")) closePopup();
-});
-
+$('t1').textContent=L.t1;$('t2').textContent=L.t2;$('close').textContent=L.close;$('bwl').textContent=L.loading;$('coord').textContent=`${L.lat}: —  ${L.lon}: —`;
+$('chips').innerHTML=ACT.map((p,i)=>`<button class="chip" data-i="${i}" style="--c:${COLS[i]}">${p.code}</button>`).join('');
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>openPopup(ACT[+b.dataset.i]));
+(function(){const c=$('gl'),g=c.getContext('2d');let t=0;
+  function fit(){const D=devicePixelRatio||1,w=innerWidth,h=innerHeight;c.width=w*D;c.height=h*D;g.setTransform(D,0,0,D,0,0);GlassFX.init(g,w,h,D);GlassFX.gen()}
+  fit();addEventListener('resize',fit);
+  (function lp(ts){if(!t)t=ts;g.clearRect(0,0,innerWidth,innerHeight);GlassFX.draw((ts-t)/1000+3);requestAnimationFrame(lp)})(0);
+})();
 runBoot();
 </script>
 </body>

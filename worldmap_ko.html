@@ -53,6 +53,11 @@ h2{font-size:clamp(.72rem,3vw,1rem);letter-spacing:.22em;color:var(--mint);text-
 .pin:hover .pl,.pin.sel .pl{background:var(--c);color:#010809;box-shadow:0 0 16px var(--c)}
 .pin.sel .pd{transform:scale(1.5)}
 .pin.warn .pl{animation:flk 2.6s steps(1) infinite}
+.pin.glitch .pd{animation:pglt 2.8s steps(1) infinite}
+@keyframes pglt{0%,86%,100%{transform:none}88%{transform:translate(-3px,1px);box-shadow:3px 0 #5effeb,-3px 0 #d36bff}91%{transform:translate(3px,-1px);box-shadow:-3px 0 #5effeb,3px 0 #d36bff}94%{transform:translateX(-2px);box-shadow:2px 0 #ff3cc8}}
+.pin.glitch .pl{animation:plglt 2.8s steps(1) infinite}
+@keyframes plglt{0%,86%,100%{transform:none;text-shadow:none}88%{transform:translateX(-4px);text-shadow:2px 0 #5effeb,-2px 0 #d36bff}92%{transform:translateX(4px);text-shadow:-2px 0 #5effeb,2px 0 #d36bff}95%{transform:none;text-shadow:none}}
+.pin .gfx{position:absolute;left:50%;bottom:-65px;width:140px;height:140px;margin-left:-70px;pointer-events:none;z-index:-1}
 @keyframes flk{0%,90%,100%{opacity:1}92%{opacity:.2;transform:translateX(-3px)}95%{opacity:.8;transform:translateX(3px)}}
 
 /* 정보 패널 */
@@ -136,9 +141,25 @@ function render(){
   $("chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>sel(+b.dataset.i));
   panel();
 }
+/* 글리치 구역 핀: 링이 갈라지며 깜빡이고, 주변에 보라색 입자가 떠다님 */
+let gfxOn=false;
+function glitchFX(){
+  if(gfxOn)return;gfxOn=true;
+  const P=[...Array(26)].map(()=>({a:Math.random()*6.283,r:18+Math.random()*44,v:(Math.random()<.5?-1:1)*(.3+Math.random()*.7),s:1+Math.random()*2,ph:Math.random()*6.28}));
+  (function f(t){
+    document.querySelectorAll(".pin .gfx").forEach(c=>{
+      const g=c.getContext("2d");g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,140,140);const cx=70,cy=70,gl=Math.random()<.12;
+      for(const [ox,col] of gl?[[-3,"rgba(94,255,235,.8)"],[3,"rgba(255,60,200,.8)"]]:[[0,"rgba(211,107,255,.85)"]]){g.strokeStyle=col;g.lineWidth=1.6;for(let i=0;i<6;i++){const a0=i/6*6.283-t/2500,a1=a0+.7;g.beginPath();g.arc(cx+ox,cy,16*(1+(i%2)*.2),a0,a1);g.stroke()}}
+      P.forEach(p=>{const a=p.a+t/1000*p.v,rr=p.r+Math.sin(t/700+p.ph)*5,al=.25+.6*Math.max(0,Math.sin(t/500+p.ph));g.fillStyle="rgba(211,107,255,"+al+")";g.fillRect(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.8,p.s,p.s)});
+      for(let i=0;i<3;i++)if(Math.random()<.4){g.fillStyle="rgba("+(Math.random()<.5?"94,255,235":"255,60,200")+",.5)";g.fillRect(cx+(Math.random()-.5)*50,cy+(Math.random()-.5)*40,4+Math.random()*16,1+Math.random()*2)}
+    });
+    requestAnimationFrame(f);
+  })(0);
+}
 function pins(){
-  $("pins").innerHTML=L().map((o,i)=>`<button class="pin ${o.color}${o.code.includes("?")?" warn":""}" style="left:${o.x}%;top:${o.y}%;--i:${i}" data-i="${i}"><span class="pl">${o.code}</span><span class="pn"></span><span class="pd"></span></button>`).join("");
+  $("pins").innerHTML=L().map((o,i)=>`<button class="pin ${o.color}${o.code.includes("?")?" warn glitch":""}" style="left:${o.x}%;top:${o.y}%;--i:${i}" data-i="${i}"><span class="pl">${o.code}</span><span class="pn"></span><span class="pd"></span>${o.code.includes("?")?'<canvas class="gfx" width="280" height="280"></canvas>':""}</button>`).join("");
   $("pins").querySelectorAll(".pin").forEach(b=>b.onclick=e=>{e.stopPropagation();sel(+b.dataset.i)});
+  glitchFX();
 }
 function panel(){
   const p=$("panel");if(cur<0){p.classList.remove("open");return}
